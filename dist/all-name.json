@@ -567,20 +567,22 @@
         "version": 2,
         "arguments": {
           "name": "咕咕番",
-          "description": "直连，来自咕咕番，导航：https://fb.gugufan.top/",
-          "iconUrl": "https://www.gugu3.com/upload/site/20240809-1/7128d3562abaed14571d6227e1240aab.png",
+          "description": "直连，来自咕咕番，导航：https://www.gugu3.com/",
+          "iconUrl": "https://www.gugu3.com/upload/site/20260506-1/a0799f74e4bced939fbbc0b79cb27671.png",
           "searchConfig": {
             "searchUrl": "https://www.gugu3.com/index.php/vod/search.html?wd={keyword}",
             "searchUseOnlyFirstWord": true,
-            "subjectFormatId": "a",
-            "selectorSubjectFormatA": {
-              "selectLists": "div > div > div > div > div.detail-info > a",
+            "rawBaseUrl": "",
+            "subjectFormatId": "indexed",
+            "selectorSubjectFormatIndexed": {
+              "selectNames": ".thumb-content > .thumb-txt",
+              "selectLinks": ".search-box > div > a",
               "preferShorterName": true
             },
             "channelFormatId": "index-grouped",
             "selectorChannelFormatFlattened": {
-              "selectChannelNames": ".anthology-tab  .swiper-wrapper a",
-              "matchChannelName": "^(?!.*失效)()?(?<ch>.+?)(\\d+)?$",
+              "selectChannelNames": ".anthology-tab > .swiper-wrapper a",
+              "matchChannelName": "^(?!咕咕A线)(?<ch>.+?)(\\d+)?$",
               "selectEpisodeLists": ".anthology-list-box",
               "selectEpisodesFromList": "a",
               "selectEpisodeLinksFromList": "",
@@ -717,12 +719,12 @@
         "version": 2,
         "arguments": {
           "name": "稀饭动漫",
-          "description": "直连，来自稀饭动漫，导航：https://xn--6fr867dwnhpu5a.com/",
-          "iconUrl": "https://framerusercontent.com/images/W1MG1BV7WVdnQhHtdeYVtBvTk.png",
+          "description": "有验证，来自稀饭动漫，导航：https://xn--6fr867dwnhpu5a.com/",
+          "iconUrl": "https://anime.xifanacg.com/template/dsn2/static/img/fav.png",
           "searchConfig": {
-            "searchUrl": "https://dm.xifanacg.com/search.html?wd={keyword}",
+            "searchUrl": "https://anime.xifanacg.com/search.html?wd={keyword}",
             "searchUseOnlyFirstWord": true,
-            "searchRemoveSpecial": true,
+            "rawBaseUrl": "",
             "subjectFormatId": "indexed",
             "selectorSubjectFormatIndexed": {
               "selectNames": ".slide-info-title",
@@ -732,7 +734,7 @@
             "channelFormatId": "index-grouped",
             "selectorChannelFormatFlattened": {
               "selectChannelNames": ".anthology-tab > .swiper-wrapper a",
-              "matchChannelName": "(?<ch>.*?-\\d)",
+              "matchChannelName": "(?<ch>稀饭新番主线-1|稀饭新番主线-2|稀饭旧番主线-1|稀饭备用-1)(\\d+)?$",
               "selectEpisodeLists": ".anthology-list-box",
               "selectEpisodesFromList": "a",
               "selectEpisodeLinksFromList": "",
