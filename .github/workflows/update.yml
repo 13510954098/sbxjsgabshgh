@@ -6,7 +6,7 @@ on:
     - cron: "0 */4 * * *"
   workflow_dispatch: # 也可在 Actions 页面手动点击运行
 
-concurrency: # [清单-35] 避免定时与手动任务并发推送
+concurrency: # 避免定时与手动任务并发推送
   group: update-sources
   cancel-in-progress: false
 
@@ -16,31 +16,29 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # [清单-35] 整体超时
+    timeout-minutes: 15
     steps:
-      # [清单-37] 固定到 commit SHA（由 Dependabot 升级）
+      # 固定 commit SHA；persist-credentials 默认 true：
+      # checkout 自动把 GITHUB_TOKEN 写入 git 凭据，push 直接复用
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false # [清单-41] checkout 阶段不保留凭据
 
-      # actions/setup-python v5.4.0
       - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
         with:
           python-version: "3.12"
 
-      - name: Install dependencies # [清单-36] 固定依赖版本（版本检查已内嵌脚本）
+      - name: Install dependencies
         run: pip install "requests==2.32.5"
 
-      - name: Run selftests # [清单-46] 内嵌 41 项自动测试
+      - name: Run selftests
         run: python update_sources.py --test
 
       - name: Run update
         run: python update_sources.py
 
-      - name: Validate outputs # [清单-39] 提交前校验（含 Java Pattern 正则校验）
+      - name: Validate outputs
         run: python update_sources.py --validate
 
-      - name: Upload report as artifact # [2] 报告不提交进仓库，作为 artifact
+      - name: Upload report as artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -50,18 +48,14 @@ jobs:
 
       - name: Commit and push
         run: |
-          # [清单-41] 推送前显式注入 token 到 remote
-          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # [修复] checkout 后处于 detached HEAD，git pull 会报 "not on a branch"；
-          # 改用 fetch + rebase origin/main + push HEAD:main，兼容游离头
           git add dist/ log update_sources.py all_animeko_links.txt .gitignore
           if ! git diff --cached --quiet; then
             git commit -m "Update sources $(date -u +'%Y-%m-%d %H:%M UTC')"
             git fetch origin
-            git rebase origin/main # [清单-40] 推送前先合远端变化
-            git push origin HEAD:main
+            git rebase origin/main
+            git push
             echo "已提交更新"
           else
             echo "无变化，跳过提交"
