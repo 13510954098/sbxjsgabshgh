@@ -46,14 +46,17 @@ jobs:
         if: always()
         with:
           name: latest-report
-          path: reports/latest.json
+          path: |
+            reports/latest.json
+            log                                      # [优1] 日志走 artifact
           if-no-files-found: ignore
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dist/ log update_sources.py all_animeko_links.txt .gitignore
+          rm -f log                                   # [优1] artifact 已留档，删除即不入库，首次运行自动清历史
+          git add -A                                  # [优3] 自动收全交付物
           if ! git diff --cached --quiet; then
             git commit -m "Update sources $(date -u +'%Y-%m-%d %H:%M UTC')"
             git fetch origin
