@@ -1,0 +1,5 @@
+cache/
+reports/
+dist/.tmp-*
+__pycache__/
+*.pyc
