@@ -16,7 +16,7 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30  # [修6] 最坏抓取 ~21 分钟，15 分钟不够
     steps:
       # 固定 commit SHA；persist-credentials 默认 true：
       # checkout 自动把 GITHUB_TOKEN 写入 git 凭据，push 直接复用
@@ -34,12 +34,15 @@ jobs:
 
       - name: Run update
         run: python update_sources.py
+        env: # [修4] 显式传入 token：脚本用它对 GitHub API 解析 commit SHA 快照
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate outputs
         run: python update_sources.py --validate
 
       - name: Upload report as artifact
-        uses: actions/upload-artifact@v4
+        # [修9] 固定 commit SHA（v4.4.3）
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
         if: always()
         with:
           name: latest-report
