@@ -1264,50 +1264,6 @@
         "factoryId": "web-selector",
         "version": 2,
         "arguments": {
-          "name": "girigiri 愛動漫",
-          "description": "一個專注於動畫與番劇的彈幕視頻網站，提供高清、流暢的動畫線上觀看體驗，涵蓋日本動畫、熱門番劇與二次元內容",
-          "iconUrl": "https://bgm.girigirilove.com/upload/anime.girigirilove.com_.png",
-          "searchConfig": {
-            "searchUrl": "https://bgm.girigirilove.com/search/-------------/?wd={keyword}",
-            "searchUseOnlyFirstWord": true,
-            "searchRemoveSpecial": true,
-            "searchUseSubjectNamesCount": 1,
-            "requestInterval": 3000,
-            "subjectFormatId": "indexed",
-            "selectorSubjectFormatIndexed": {
-              "selectNames": ".slide-info-title",
-              "selectLinks": ".detail-info > a",
-              "preferShorterName": true
-            },
-            "channelFormatId": "index-grouped",
-            "selectorChannelFormatFlattened": {
-              "selectChannelNames": ".anthology-tab > .swiper-wrapper > .swiper-slide",
-              "matchChannelName": "^(?<ch>.+?)(\\d+)?$",
-              "selectEpisodeLists": ".anthology-list-play",
-              "selectEpisodesFromList": "a",
-              "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
-            },
-            "defaultResolution": "1080P",
-            "defaultSubtitleLanguage": "CHS",
-            "filterByEpisodeSort": true,
-            "filterBySubjectName": true,
-            "selectMedia": {
-              "distinguishSubjectName": true,
-              "distinguishChannelName": true
-            },
-            "matchVideo": {
-              "enableNestedUrl": true,
-              "matchNestedUrl": "^.+(vip|index\\.php).+\\?",
-              "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http(s)?:\\/\\/).+((m3u8)).*(\\?.+)?)|(akamaized)|(bilivideo.com)|(url=(?<v>.+playlist.m3u8))"
-            }
-          },
-          "tier": 0
-        }
-      },
-      {
-        "factoryId": "web-selector",
-        "version": 2,
-        "arguments": {
           "name": "嘀嗒影视",
           "description": "直连，来自嘀嗒影视，导航：https://www.didahd.pro/",
           "iconUrl": "https://www.didahd.pro/template/mytheme/statics/img/favicon.ico",
