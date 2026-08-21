@@ -1,44 +1,37 @@
-# Animeko 聚合源自动更新（与 update_sources.py v8 配套）
 name: Update Animeko Sources
 
 on:
   schedule:
-    - cron: "17 3 * * *"      # 每天 UTC 03:17（= 北京时间 11:17），错开整点撞 GitHub 限流
-  workflow_dispatch: {}        # 支持手动触发
-  push:                        # 改了脚本或链接文件本身时也顺手跑一次
+    - cron: "17 3 * * *"
+  workflow_dispatch: {}
+  push:
     paths:
       - update_sources.py
       - all_animeko_links.txt
 
-# [修7] 手动触发 + 定时撞车时，两个 run 同时 commit 会因 non-fast-forward 失败。
-#       同组只允许一个 run，后到的直接取消（cancel-in-progress）。
 concurrency:
   group: update-animeko
   cancel-in-progress: true
 
 permissions:
-  contents: write              # ★ 没有这行，git push 一定 403，这是最常见的"怎么改都错"的原因之一
+  contents: write
   actions: read
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 40        # [修8] 原 20 偏紧：理论最坏情况（每组 90s deadline × 162 链接 ÷ 12 并发
-                               #        ≈ 20 分钟）+ resolve_commit_shas 串行 API 调用，GitHub 慢/429
-                               #        重试的坏日子可能顶到上限被 kill。放宽到 40 分钟。
+    timeout-minutes: 40
 
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"      # ★ 必须 ≥ 3.10，脚本用了 PEP 604 类型写法
+          python-version: "3.12"
 
       - name: Install deps
         run: pip install "requests==2.32.5"
 
-      # ★ 恢复上次的 cache/ —— 没有这一步，脚本的 stale 兜底和 304/ETag 跨 run 完全失效，
-      #    每次都等于冷启动全量抓取（脚本本身不会报错，但防御能力少一半）
       - name: Restore fetch cache
         uses: actions/cache/restore@v6
         with:
@@ -49,8 +42,7 @@ jobs:
 
       - name: Run updater
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # ★ 供 resolve_commit_shas 用，
-          # 不传也能跑（会 graceful 降级为 "api-rate-limited"），传了快照解析成功率高得多
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python update_sources.py
 
       - name: Save fetch cache
@@ -60,8 +52,6 @@ jobs:
           path: cache/
           key: fetch-cache-${{ github.run_id }}
 
-      # ★ "git commit 报错"是第二个重灾区：产物没变化时 commit 会 exit 1。
-      #    脚本无变化时根本不写 dist/，所以必须用 git diff 判断过再提交。
       - name: Commit dist/
         run: |
           git config user.name  "github-actions[bot]"
@@ -71,8 +61,6 @@ jobs:
           else
             git add dist/
             git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
-            # [v10] push 失败时拉取远端重试（cancel-in-progress 已基本避免并发提交，
-            #       此处兜底 checkout 与 push 之间分支被他人改动导致的 non-fast-forward）
             for i in 1 2 3; do
               if git push; then break; fi
               echo "push 失败，拉取远端后重试 ($i/3)"
@@ -80,8 +68,6 @@ jobs:
             done
           fi
 
-      # 脚本自己生成的 .gitignore 会忽略 cache/ 和 reports/，
-      # 所以报告文件【不能】commit，只能用 artifact 留档
       - name: Upload report
         uses: actions/upload-artifact@v7
         if: always()
@@ -89,7 +75,5 @@ jobs:
           name: update-report
           path: reports/latest.json
           if-no-files-found: ignore
-          # [v10] upload-artifact@v4+ 不允许同 run 同名 artifact；re-run 时上一 attempt 的
-          #       update-report 仍残留 → 409 Conflict。本 job 单线程无并发竞态，overwrite 安全。
           overwrite: true
           retention-days: 30
