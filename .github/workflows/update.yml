@@ -3,8 +3,8 @@ name: Update Animeko Sources
 on:
   workflow_dispatch:
   schedule:
-    # 每天 UTC 18:00 运行；北京时间约次日 02:00
-    - cron: "0 18 * * *"
+    # 每 6 小时运行一次，时间为 UTC
+    - cron: "0 */6 * * *"
 
 permissions:
   contents: write
@@ -17,22 +17,31 @@ jobs:
   update:
     runs-on: ubuntu-latest
 
+    env:
+      PYTHONUNBUFFERED: "1"
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Set up Java for regex validation
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests==2.32.5 packaging
 
       - name: Restore script cache
         uses: actions/cache/restore@v4
@@ -42,31 +51,17 @@ jobs:
           restore-keys: |
             animeko-cache-${{ runner.os }}-
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install "requests==2.32.5" packaging
-
       - name: Run self tests
         run: |
           python update_sources.py --test
 
       - name: Update sources
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python update_sources.py
 
-      - name: Validate outputs
+      - name: Validate dist outputs
         run: |
           python update_sources.py --validate
-
-      - name: Save script cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: cache
-          key: animeko-cache-${{ runner.os }}-${{ github.run_id }}
 
       - name: Commit and push changes
         run: |
@@ -77,8 +72,24 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
-            exit 0
+          else
+            git commit -m "chore: update Animeko sources"
+            git pull --rebase
+            git push
           fi
 
-          git commit -m "chore: update Animeko sources"
-          git push
+      - name: Save script cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: cache
+          key: animeko-cache-${{ runner.os }}-${{ github.run_id }}
+
+      - name: Upload reports artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: animeko-update-reports
+          path: reports
+          if-no-files-found: ignore
+          retention-days: 7
