@@ -1,4 +1,4 @@
-
+# Animeko 聚合源自动更新（与 update_sources.py v8 配套）
 name: Update Animeko Sources
 
 on:
