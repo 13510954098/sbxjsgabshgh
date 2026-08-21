@@ -1,95 +1,78 @@
+# Animeko 聚合源自动更新（与 update_sources.py v8 配套）
 name: Update Animeko Sources
 
 on:
-  workflow_dispatch:
   schedule:
-    # 每 6 小时运行一次，时间为 UTC
-    - cron: "0 */6 * * *"
+    - cron: "17 3 * * *"      # 每天 UTC 03:17（= 北京时间 11:17），错开整点撞 GitHub 限流
+  workflow_dispatch: {}        # 支持手动触发
+  push:                        # 改了脚本或链接文件本身时也顺手跑一次
+    paths:
+      - update_sources.py
+      - all_animeko_links.txt
 
 permissions:
-  contents: write
-
-concurrency:
-  group: update-animeko-sources
-  cancel-in-progress: false
+  contents: write              # ★ 没有这行，git push 一定 403，这是最常见的"怎么改都错"原因之一
+  actions: read
 
 jobs:
   update:
     runs-on: ubuntu-latest
-
-    env:
-      PYTHONUNBUFFERED: "1"
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    timeout-minutes: 20
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
+          python-version: "3.12"      # ★ 必须 ≥ 3.10，脚本用了 PEP 604 类型写法
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Install deps
+        run: pip install "requests==2.32.5"
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests==2.32.5 packaging
-
-      - name: Restore script cache
+      # ★ 恢复上次的 cache/ —— 没有这一步，脚本的 stale 兜底和 304/ETag 跨 run 完全失效，
+      #    每次都等于冷启动全量抓取（脚本本身不会报错，但防御能力少一半）
+      - name: Restore fetch cache
         uses: actions/cache/restore@v4
         with:
-          path: cache
-          key: animeko-cache-${{ runner.os }}-${{ github.run_id }}
+          path: cache/
+          key: fetch-cache-${{ github.run_id }}
           restore-keys: |
-            animeko-cache-${{ runner.os }}-
+            fetch-cache-
 
-      - name: Run self tests
-        run: |
-          python update_sources.py --test
+      - name: Run updater
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # ★ 供 resolve_commit_shas 用，
+          # 不传也能跑（会 graceful 降级为 "api-rate-limited"），传了快照解析成功率高得多
+        run: python update_sources.py
 
-      - name: Update sources
-        run: |
-          python update_sources.py
+      - name: Save fetch cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: cache/
+          key: fetch-cache-${{ github.run_id }}
 
-      - name: Validate dist outputs
+      # ★ "git commit 报错"是第二个重灾区：产物没变化时 commit 会 exit 1。
+      #    脚本无变化时根本不写 dist/，所以必须用 git diff 判断过再提交。
+      - name: Commit dist/
         run: |
-          python update_sources.py --validate
-
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add dist .gitignore
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
+          if git diff --quiet -- dist/ && git diff --quiet --cached -- dist/; then
+            echo "dist/ 无变化，跳过提交"
           else
-            git commit -m "chore: update Animeko sources"
-            git pull --rebase
+            git add dist/
+            git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
             git push
           fi
 
-      - name: Save script cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: cache
-          key: animeko-cache-${{ runner.os }}-${{ github.run_id }}
-
-      - name: Upload reports artifact
-        if: always()
+      # 脚本自己生成的 .gitignore 会忽略 cache/ 和 reports/，
+      # 所以报告文件【不能】commit，只能用 artifact 留档
+      - name: Upload report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: animeko-update-reports
-          path: reports
+          name: update-report
+          path: reports/latest.json
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 30
