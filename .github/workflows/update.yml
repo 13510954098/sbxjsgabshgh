@@ -16,9 +16,9 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # [修6] 最坏抓取 ~21 分钟，15 分钟不够
+    timeout-minutes: 30  # 最坏抓取 ~21 分钟
     steps:
-      # [升1] checkout v5.0.1（Node 24）
+      # [升1] checkout v5.0.1（Node 24）；persist-credentials 默认 true
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
       # [升2] setup-python v6.0.0（Node 24）
@@ -34,34 +34,32 @@ jobs:
 
       - name: Run update
         run: python update_sources.py
-        env: # [修4] 显式传入 token：脚本用它对 GitHub API 解析 commit SHA 快照
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate outputs
         run: python update_sources.py --validate
 
       - name: Upload report as artifact
-        # [升3] upload-artifact v6.0.0（Node 24，需 runner ≥2.327.1）
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
           name: latest-report
           path: |
             reports/latest.json
-            log                                      # [优1] 日志走 artifact，不留库
+            log
           if-no-files-found: ignore
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          rm -f log                                   # [优1] artifact 已留档，删除不入库
+          rm -f log
           git add dist/ log update_sources.py all_animeko_links.txt .gitignore
           if ! git diff --cached --quiet; then
             git commit -m "Update sources $(date -u +'%Y-%m-%d %H:%M UTC')"
             git fetch origin
-            git rebase --strategy-option=theirs origin/main  # 冲突时自动采用 CI 版本
-            git push
+            git rebase --strategy-option=theirs origin/main            git push
             echo "已提交更新"
           else
             echo "无变化，跳过提交"
