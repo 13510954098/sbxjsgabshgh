@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Animeko 聚合源自动更新脚本 v8（链接已外置）
+Animeko 聚合源自动更新脚本 v9（修复 v8 复审发现的问题）
 ============================================
 版本历史（代码含 v5~v8 全部修复，本注释已同步）：
 
@@ -67,6 +67,22 @@ v8（按《v7 上传前复审》7 项）：
 v8 附加（拆分）：
   - 抓取链接已外置到 all_animeko_links.txt（162 条），脚本优先读它；
     缺失时明确报错。加源/删源只改 txt，不用动脚本。
+
+v9（修复 v8 复审）：
+  1  加速链补识别 '/https://raw.githubusercontent.com/' 前缀（原只认 '/raw.githubusercontent.com/'，
+     漏一种常见写法导致同一上游裂成两个 canon 组：重复抓取、有效率统计失真、缓存分裂）
+  2  meta["error"] 粘滞：重试循环每轮开头重置——重试后成功的源不再被报告误标为失败
+  3  自测离线化：fetch 相关用例统一 mock check_url_safety（不再依赖真实 DNS）；
+     links 用例改为临时目录里的合成文件（不再依赖部署数据 all_animeko_links.txt）
+  4  parse_jsdelivr 删除 v8 的"显式拒绝"死代码（守卫写在 split 之后永不可达），如实说明
+     jsdelivr 语法无法消歧含斜杠的 branch/tag，此类链接请改用 40 位 commit sha
+  5  normalize 两重修正：嵌套剥壳上限真实生效（peeled 计数）；兜底分支要求可解析出
+     http(s) scheme + hostname（垃圾行/无 scheme 行不再被收编为独立 group、污染有效率分母）
+  6  parse_github_raw / parse_github_com：refs 但缺 path 段时返回 None（不再静默误切）
+  7  304 not_modified 时 touch_cache 刷新 ts——长期 304 不再导致 stale 兜底 7 天后过期失效
+  8  url_shallow_ok 收窄 '[' 豁免：仅放行"方括号占位符开头"，其余畸形串照旧结构校验
+  9  Timeout/ConnectionError 重试与 429 分支一致：sleep 前预检 deadline
+  10 报告 http_sources 同时检查 rssUrl（RSS 源的 http:// 不再漏报）
 
 配套文件（部署只需 3 个）：update_sources.py + all_animeko_links.txt + .github/workflows/update.yml。
 说明：requirements 依赖检查与 .gitignore 自动生成已内嵌脚本；README/LICENSE 为可选附加，非必需。
@@ -316,7 +332,10 @@ def url_shallow_ok(u) -> tuple[bool, str | None]:
     if not u:
         return False, "empty"
     if u.startswith("["):
-        return True, None
+        # [v9:8] 仅放行"方括号占位符开头"的模板（如 [keyword]...）；任意 '[' 开头串不再放行
+        if re.match(r"^\[[^\[\]/]{1,32}\]", u):
+            return True, None
+        return False, "bad-bracket"
     try:
         p = urlsplit(u)
     except (ValueError, TypeError, AttributeError):
@@ -357,6 +376,8 @@ def parse_github_raw(url: str):
     if parts[2] == "refs" and len(parts) >= 6:
         ref = "/".join(parts[2:5])
         path = "/".join(parts[5:])
+    elif parts[2] == "refs":
+        return None  # [v9:6] refs 但缺 path 段 → 不误切（ref 会是 "refs" 这种垃圾）
     else:
         ref = parts[2]
         path = "/".join(parts[3:])
@@ -376,6 +397,8 @@ def parse_github_com(url: str):
         if parts[3] == "refs" and len(parts) >= 7 and parts[4] in ("heads", "tags"):
             ref = "/".join(parts[3:6])   # refs/heads/main
             path = "/".join(parts[6:])   # dist/all.json
+        elif parts[3] == "refs":
+            return None  # [v9:6] refs 但结构不合法 → 不误切
         else:
             ref = parts[3]
             path = "/".join(parts[4:])
@@ -385,6 +408,8 @@ def parse_github_com(url: str):
         if parts[3] == "refs" and len(parts) >= 7 and parts[4] in ("heads", "tags"):
             ref = "/".join(parts[3:6])
             path = "/".join(parts[6:])
+        elif parts[3] == "refs":
+            return None  # [v9:6] 同上
         else:
             ref = parts[3]
             path = "/".join(parts[4:])
@@ -394,8 +419,8 @@ def parse_github_com(url: str):
 
 def parse_jsdelivr(url: str):
     """[4] 处理 @main、@refs/heads/<branch>/<path>、@refs/tags/<tag>/<path>。
-    [修] 含斜杠的非 refs/ branch/tag（如 @feature/x/...）无法可靠切分 → 显式拒绝，
-    不静默错切。"""
+    [v9:4] 如实测述：含斜杠的非 refs/ branch/tag（如 @feature/x/...）jsdelivr 语法本身无法消歧，
+    按"第一个 / 前为 ref"切分（可能错切）——此类上游请改用 40 位 commit sha。"""
     u = urlsplit(url)
     if u.hostname != "cdn.jsdelivr.net":
         return None
@@ -409,9 +434,10 @@ def parse_jsdelivr(url: str):
             return GitHubRef(owner, repo, fold_ref(rm.group(1)), rm.group(2))
         return None  # refs/ 但结构不合法
     if "/" in rest:
+        # [v9:4] 含斜杠的 branch/tag（如 @feature/x/path）在 jsdelivr 语法中无法消歧，
+        #        v8 原打算"显式拒绝"但守卫写在 split 之后是死代码——如实说明：
+        #        按"第一个 / 前为 ref"切分，可能与预期不符 → 此类链接应改用 40 位 commit sha。
         ref, path = rest.split("/", 1)
-        if "/" in ref:
-            return None  # [修] 含斜杠的 branch/tag 无法可靠切分，显式拒绝
         return GitHubRef(owner, repo, fold_ref(ref), path)
     return GitHubRef(owner, repo, fold_ref(rest), "")
 
@@ -420,26 +446,37 @@ MAX_PROXY_NESTING = 2  # [修] 代理嵌套剥壳深度上限
 
 
 def normalize(url: str) -> str:
-    """[修] 迭代剥壳（最多 MAX_PROXY_NESTING 层），替代递归，避免嵌套代理不可预期。"""
+    """[v9:5] 迭代剥壳，嵌套上限真实生效（peeled 计数，替代 v8 的不可达 ValueError）。
+    [v9:1] 加速链同时识别 '/raw.githubusercontent.com/' 与 '/https://raw.githubusercontent.com/'。
+    [v9:5] 兜底分支要求可解析出 http(s) scheme + hostname——垃圾行不再被收编为独立 group。"""
     u = url.strip()
     if is_bad_protocol(u):
         raise ValueError(f"非法协议: {u}")
-    for _ in range(MAX_PROXY_NESTING + 1):
+    peeled = 0
+    while True:
         for p in (parse_jsdelivr, parse_github_com, parse_github_raw):
             gr = p(u)
             if gr:
                 return gr.raw_url()
         up = urlsplit(u)
-        if up.hostname in ACCEL_HOSTS and up.path.startswith("/raw.githubusercontent.com/"):
-            rest = up.path[len("/raw.githubusercontent.com/"):]
-            if rest:
-                return f"https://raw.githubusercontent.com/{rest}"
-        if up.hostname in ACCEL_HOSTS and up.path.startswith("/https://github.com/"):
-            rest = up.path[len("/https://github.com/"):]
-            u = f"https://github.com/{rest}"
-            continue
-        return u
-    raise ValueError(f"代理嵌套过深（> {MAX_PROXY_NESTING} 层）: {url[:60]}")
+        host = (up.hostname or "").lower()
+        if host in ACCEL_HOSTS:
+            for prefix in ("/raw.githubusercontent.com/", "/https://raw.githubusercontent.com/"):
+                if up.path.startswith(prefix):
+                    rest = up.path[len(prefix):]
+                    if rest:
+                        return f"https://raw.githubusercontent.com/{rest}"
+            if up.path.startswith("/https://github.com/"):
+                peeled += 1
+                if peeled > MAX_PROXY_NESTING:
+                    raise ValueError(f"代理嵌套过深（> {MAX_PROXY_NESTING} 层）: {url[:60]}")
+                u = "https://github.com/" + up.path[len("/https://github.com/"):]
+                continue
+        break
+    # [v9:5] 兜底线：必须是个能解析的 http(s) URL
+    if up.scheme not in ("http", "https") or not up.hostname:
+        raise ValueError(f"非 http(s) 链接: {u[:60]}")
+    return u
 
 
 def is_bad_protocol(url: str) -> bool:
@@ -734,6 +771,22 @@ def save_cache(canon: str, data: bytes, meta: dict, url: str):
             pass
 
 
+def touch_cache(canon: str):
+    """[v9:7] 304 not_modified 时只刷新缓存时间戳（数据/校验器不动）。
+    避免上游长期 304 时 stale 兜底因 ts 超过 STALE_MAX_AGE_DAYS 而过期失效。"""
+    p = cache_path(canon)
+    try:
+        with open(p, encoding="utf-8") as f:
+            c = json.load(f)
+        c["ts"] = time.time()
+        tmp = p + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(c, f)
+        os.replace(tmp, p)
+    except Exception:
+        pass
+
+
 # ---------------- 抓取（[1][6][8][9][12]） ----------------
 _tls = threading.local()
 
@@ -1003,6 +1056,8 @@ def single_hop(current: str, cache_meta, deadline: float):
             if time.monotonic() > deadline:
                 meta["error"] = "deadline"
                 return None, meta, None
+            meta["error"] = None  # [v9:2] 重试迭代开头重置上一轮的错误，防止 error 粘滞
+            #                      #      （成功后 report 的 error_categories 不再误报）
             # [3] 每跳重构条件头：validator_url 必须等于当前 URL
             headers = {"User-Agent": ua}
             if cache_meta and cache_meta.get("validator_url") == current:
@@ -1095,7 +1150,7 @@ def single_hop(current: str, cache_meta, deadline: float):
                 meta["error"] = f"timeout:{type(e).__name__}"
                 host_fail(host)
                 retry_attempt += 1
-                if time.monotonic() > deadline:
+                if time.monotonic() + 1.0 > deadline:  # [v9:9] 与 429 分支一致，预检再睡
                     return None, meta, None
                 time.sleep(1.0)
                 continue
@@ -1107,7 +1162,7 @@ def single_hop(current: str, cache_meta, deadline: float):
                 meta["error"] = "dns-or-conn"
                 host_fail(host)
                 retry_attempt += 1
-                if time.monotonic() > deadline:
+                if time.monotonic() + 1.0 > deadline:  # [v9:9] 同上
                     return None, meta, None
                 time.sleep(1.0)
                 continue
@@ -1340,6 +1395,8 @@ def main():
                 fresh_valid_canons.add(canon)
                 if not meta.get("not_modified"):
                     save_cache(canon, data, meta, meta.get("final_url") or meta.get("url"))
+                else:
+                    touch_cache(canon)  # [v9:7] 304 命中也刷新 ts，保住 stale 兜底时效
             elif chosen == "stale":
                 candidates.extend(seg)
                 stale_valid_canons.add(canon)
@@ -1516,7 +1573,7 @@ def main():
         sc = a.get("searchConfig") or {}
         if m.get("factoryId") == "web-selector" and m.get("version") == 1:
             legacy_v1.append(a.get("name"))
-        u = sc.get("searchUrl") or ""
+        u = sc.get("searchUrl") or sc.get("rssUrl") or a.get("rssUrl") or ""  # [v9:10] 含 RSS
         if u.startswith("http://"):
             http_sources.append(a.get("name"))
     report = {
@@ -1811,6 +1868,22 @@ def run_selftests():
     from unittest import mock
 
     class T(unittest.TestCase):
+        # [v9:3] 自测离线化：所有用例统一 mock check_url_safety——fetch 链路不再依赖真实 DNS；
+        #        快照 host 熔断/并发全局状态，避免用例间污染
+        def setUp(self):
+            self._safety_patcher = mock.patch(
+                __name__ + ".check_url_safety", return_value=(None, "93.184.216.34"))
+            self._safety_patcher.start()
+            self._fail_snapshot = dict(_host_fail)
+            self._sems_snapshot = dict(_host_sems)
+
+        def tearDown(self):
+            self._safety_patcher.stop()
+            _host_fail.clear()
+            _host_fail.update(self._fail_snapshot)
+            _host_sems.clear()
+            _host_sems.update(self._sems_snapshot)
+
         # --- [1] tier ---
         def test_tier0_not_99(self):
             self.assertEqual(tier_rank_of(0), 0)
@@ -2045,10 +2118,23 @@ def run_selftests():
             b = {"n": "中文", "x": [1, 2]}
             self.assertEqual(sha256_json(a), sha256_json(b))
 
-        def test_default_links_embedded(self):
-            # [修3] 链接已外置且允许增删：只断言存在且数量合理（不再硬编码 162）
-            self.assertTrue(os.path.exists("all_animeko_links.txt"))
-            self.assertGreaterEqual(len(clean_links(open("all_animeko_links.txt", encoding="utf-8"))), 100)
+        def test_read_links_from_txt(self):
+            # [v9:3] 用临时目录里的合成链接文件验证加载逻辑，不依赖部署数据文件
+            import tempfile
+            d = tempfile.mkdtemp()
+            cwd = os.getcwd()
+            try:
+                os.chdir(d)
+                with open("all_animeko_links.txt", "w", encoding="utf-8") as f:
+                    f.write("\n".join(f"https://raw.githubusercontent.com/o{i}/r{i}/main/x.json"
+                                      for i in range(120)))
+                    f.write("\n# 注释行\n\n")  # 顺带验证 clean_links 过滤
+                links = read_links()
+                self.assertEqual(len(links), 120)
+                self.assertTrue(all(l.startswith("https://") for l in links))
+            finally:
+                os.chdir(cwd)
+                shutil.rmtree(d, ignore_errors=True)
 
         def test_read_links_missing_file_raises(self):
             with mock.patch.object(os.path, "exists", return_value=False):
@@ -2161,9 +2247,8 @@ def run_selftests():
                 fresh_valid.add(canon)
             self.assertFalse(any(is_core_official(c) for c in fresh_valid))
 
-        @mock.patch(__name__ + ".check_url_safety", return_value=(None, "93.184.216.34"))
         @mock.patch.object(requests.Session, "get")
-        def test_body_deadline_during_read(self, mget, _safety):  # [15] body 期间 deadline
+        def test_body_deadline_during_read(self, mget):  # [15] body 期间 deadline（safety 已由 setUp mock）
             def slow_iter(*_args):  # iter_content(chunk_size) 会把参数传给 side_effect
                 yield b"chunk1"
                 time.sleep(0.05)
@@ -2193,6 +2278,64 @@ def run_selftests():
             mget.return_value = ctx
             fetch_url("https://raw.githubusercontent.com/a/b/main/x.json", None, time.monotonic() + 30)
             ctx.__exit__.assert_called_once()
+
+        # ---------------- v9 回归用例 ----------------
+        def test_proxy_https_raw_prefix(self):  # [v9:1] 带 https:// 前缀的代理 raw 链接
+            self.assertEqual(
+                normalize("https://gh-proxy.com/https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"),
+                "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json")
+            self.assertEqual(
+                normalize("https://ghfast.top/https://raw.githubusercontent.com/o/r/main/x.json"),
+                "https://raw.githubusercontent.com/o/r/main/x.json")
+
+        def test_garbage_line_rejected(self):  # [v9:5] 垃圾行/无 scheme 行不再成 group
+            for bad in ("这不是一个链接", "//example.com/x", "ftp://bad/x", "x.com/noscheme"):
+                with self.assertRaises(ValueError, msg=repr(bad)):
+                    normalize(bad)
+
+        def test_proxy_nesting_limit_real(self):  # [v9:5] 嵌套上限真实生效
+            with mock.patch(__name__ + ".MAX_PROXY_NESTING", 0):
+                with self.assertRaises(ValueError):
+                    normalize("https://gh-proxy.com/https://github.com/o/r/raw/main/dist/all.json")
+
+        @mock.patch.object(requests.Session, "get")
+        def test_error_cleared_after_retry_success(self, mget):  # [v9:2] error 不粘滞
+            body = b'{"exportedMediaSourceDataList":{"mediaSources":[]}}'
+            mget.side_effect = [requests.exceptions.ConnectionError("flap"), self._resp(200, body)]
+            with mock.patch.object(time, "sleep"):
+                data, meta, _ = single_hop("https://raw.githubusercontent.com/a/b/main/x.json",
+                                           None, time.monotonic() + 10)
+            self.assertIsNotNone(data)
+            self.assertIsNone(meta["error"])
+
+        def test_touch_cache_refreshes_ts(self):  # [v9:7] 304 路径刷 ts，过期缓存复活
+            import tempfile
+            td = tempfile.mkdtemp()
+            old = CACHE_DIR
+            globals()["CACHE_DIR"] = td
+            try:
+                canon = "https://raw.githubusercontent.com/a/b/main/x.json"
+                save_cache(canon, b'{"a":1}', {"etag": "x"}, canon)
+                p = cache_path(canon)
+                with open(p, encoding="utf-8") as f:
+                    c = json.load(f)
+                c["ts"] = time.time() - (STALE_MAX_AGE_DAYS + 1) * 86400  # 人为拨到过期
+                with open(p, "w", encoding="utf-8") as f:
+                    json.dump(c, f)
+                self.assertIsNone(load_cache(canon))
+                touch_cache(canon)
+                c2 = load_cache(canon)
+                self.assertIsNotNone(c2)
+                self.assertEqual(c2["data"], b'{"a":1}')
+                self.assertEqual(c2["etag"], "x")  # 数据/校验器原样保留
+            finally:
+                globals()["CACHE_DIR"] = old
+                shutil.rmtree(td, ignore_errors=True)
+
+        def test_refs_without_path_rejected(self):  # [v9:6] refs 缺 path 段不误切
+            self.assertIsNone(parse_github_raw("https://raw.githubusercontent.com/o/r/refs/heads/main"))
+            self.assertIsNone(parse_github_com("https://github.com/o/r/raw/refs/heads/main"))
+            self.assertIsNone(parse_github_com("https://github.com/o/r/blob/refs/tags/v1"))
 
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(T)
     print(f"selftests: {suite.countTestCases()}")  # [14] 数量以运行结果为准
