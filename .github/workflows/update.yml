@@ -71,6 +71,62 @@ jobs:
           else
             git add dist/
             git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
+            # [v10] push 失败时拉取远端重试（cancel-in-progress 已基本避免并发提交，
+            #       此处兜底 checkout 与 push 之间分支被他人改动导致的 non-fast-forward）
+            for i in 1 2 3; do
+              if git push; then break; fi
+              echo "push 失败，拉取远端后重试 ($i/3)"
+              git pull --rebase || true
+            done
+          fi
+
+      # 脚本自己生成的 .gitignore 会忽略 cache/ 和 reports/，
+      # 所以报告文件【不能】commit，只能用 artifact 留档
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: update-report
+          path: reports/latest.json
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Install deps
+        run: pip install "requests==2.32.5"
+
+      # ★ 恢复上次的 cache/ —— 没有这一步，脚本的 stale 兜底和 304/ETag 跨 run 完全失效，
+      #    每次都等于冷启动全量抓取（脚本本身不会报错，但防御能力少一半）
+      - name: Restore fetch cache
+        uses: actions/cache/restore@v6
+        with:
+          path: cache/
+          key: fetch-cache-${{ github.run_id }}
+          restore-keys: |
+            fetch-cache-
+
+      - name: Run updater
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # ★ 供 resolve_commit_shas 用，
+          # 不传也能跑（会 graceful 降级为 "api-rate-limited"），传了快照解析成功率高得多
+        run: python update_sources.py
+
+      - name: Save fetch cache
+        uses: actions/cache/save@v6
+        if: always()
+        with:
+          path: cache/
+          key: fetch-cache-${{ github.run_id }}
+
+      # ★ "git commit 报错"是第二个重灾区：产物没变化时 commit 会 exit 1。
+      #    脚本无变化时根本不写 dist/，所以必须用 git diff 判断过再提交。
+      - name: Commit dist/
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- dist/ && git diff --quiet --cached -- dist/; then
+            echo "dist/ 无变化，跳过提交"
+          else
+            git add dist/
+            git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
             git push
           fi
 
