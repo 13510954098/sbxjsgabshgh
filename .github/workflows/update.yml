@@ -52,9 +52,13 @@ jobs:
           if-no-files-found: ignore
 
       - name: Commit and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # [修128] 认证写入远程，避免 git fetch/rebase/push 报 exit code 128
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           rm -f log                                   # [优1] artifact 已留档，删除不入库
           git add dist/ log update_sources.py all_animeko_links.txt .gitignore
           if ! git diff --cached --quiet; then
