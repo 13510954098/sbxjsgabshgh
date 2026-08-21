@@ -10,6 +10,12 @@ on:
       - update_sources.py
       - all_animeko_links.txt
 
+# [修7] 手动触发 + 定时撞车时，两个 run 同时 commit 会因 non-fast-forward 失败。
+#       同组只允许一个 run，后到的直接取消（cancel-in-progress）。
+concurrency:
+  group: update-animeko
+  cancel-in-progress: true
+
 permissions:
   contents: write              # ★ 没有这行，git push 一定 403，这是最常见的"怎么改都错"原因之一
   actions: read
@@ -17,7 +23,9 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40        # [修8] 原 20 偏紧：理论最坏情况（每组 90s deadline × 162 链接 ÷ 12 并发
+                               #        ≈ 20 分钟）+ resolve_commit_shas 串行 API 调用，GitHub 慢/429
+                               #        重试的坏日子可能顶到上限被 kill。放宽到 40 分钟。
 
     steps:
       - uses: actions/checkout@v7
