@@ -1338,7 +1338,14 @@
               }
             }
           },
-          "tier": 1
+          "tier": 1,
+          "channelTiers": {
+            "超清A": 0,
+            "超清C": 0,
+            "超清G": 5,
+            "超清E": 6,
+            "超清K": 6
+          }
         }
       },
       {
@@ -1688,7 +1695,10 @@
               }
             }
           },
-          "tier": 1
+          "tier": 1,
+          "channelTiers": {
+            "HD": 5
+          }
         }
       },
       {
@@ -2469,6 +2479,13 @@
                 "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
               }
             }
+          },
+          "channelTiers": {
+            "第一线路": 1,
+            "云播①号": 6,
+            "备用线路": 6,
+            "最新可用线路": 6,
+            "非凡资源M3U": 6
           }
         }
       },
@@ -3606,6 +3623,19 @@
                 "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
               }
             }
+          },
+          "channelTiers": {
+            "线路10": 1,
+            "线路6": 1,
+            "5线": 2,
+            "线路1": 2,
+            "线路12": 5,
+            "线路2": 5,
+            "线路3": 5,
+            "线路8": 5,
+            "主线": 6,
+            "线路4": 6,
+            "线路9": 6
           }
         }
       },
@@ -3736,6 +3766,14 @@
                 "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
               }
             }
+          },
+          "channelTiers": {
+            "播放Ⅱ": 1,
+            "播放Ⅲ": 1,
+            "播放Ⅳ": 5,
+            "播放Ⅵ": 5,
+            "播放Ⅰ": 6,
+            "播放Ⅴ": 6
           }
         }
       },
@@ -3925,6 +3963,14 @@
                 "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
               }
             }
+          },
+          "channelTiers": {
+            "4K蓝光": 6,
+            "蓝光A": 6,
+            "蓝光C": 6,
+            "蓝光E": 6,
+            "蓝光G": 6,
+            "蓝光K": 6
           }
         }
       },
