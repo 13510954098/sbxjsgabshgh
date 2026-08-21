@@ -20,9 +20,9 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"      # ★ 必须 ≥ 3.10，脚本用了 PEP 604 类型写法
 
@@ -32,7 +32,7 @@ jobs:
       # ★ 恢复上次的 cache/ —— 没有这一步，脚本的 stale 兜底和 304/ETag 跨 run 完全失效，
       #    每次都等于冷启动全量抓取（脚本本身不会报错，但防御能力少一半）
       - name: Restore fetch cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: cache/
           key: fetch-cache-${{ github.run_id }}
@@ -46,7 +46,7 @@ jobs:
         run: python update_sources.py
 
       - name: Save fetch cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         if: always()
         with:
           path: cache/
@@ -69,7 +69,7 @@ jobs:
       # 脚本自己生成的 .gitignore 会忽略 cache/ 和 reports/，
       # 所以报告文件【不能】commit，只能用 artifact 留档
       - name: Upload report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: update-report
