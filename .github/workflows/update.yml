@@ -46,11 +46,11 @@ jobs:
       - name: Install pinned dependencies
         run: |
           set -euo pipefail
-          python -m pip install --disable-pip-version-check "requests==2.33.0" "urllib3==2.7.0"
+          python -m pip install --disable-pip-version-check "requests==2.34.2" "urllib3==2.7.0"
           python - <<'PY'
           import requests
           import urllib3
-          assert requests.__version__ == "2.33.0", requests.__version__
+          assert requests.__version__ == "2.34.2", requests.__version__
           assert urllib3.__version__ == "2.7.0", urllib3.__version__
           PY
 
