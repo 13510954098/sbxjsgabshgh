@@ -22,82 +22,139 @@ permissions:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 1
+          persist-credentials: true
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.12"
 
-      - name: Install deps
-        run: pip install "requests==2.33.0" "urllib3==2.7.0"
+      - name: Set up Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: "17"
 
-      - name: Syntax check
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check "requests==2.33.0" "urllib3==2.7.0"
+          python - <<'PY'
+          import requests
+          import urllib3
+          assert requests.__version__ == "2.33.0", requests.__version__
+          assert urllib3.__version__ == "2.7.0", urllib3.__version__
+          PY
+
+      - name: Compile updater
         run: python -m py_compile update_sources.py
 
-      - name: Java runtime check
+      - name: Verify Java runtime
         run: java -version
 
-      - name: Run selftests
+      - name: Run updater selftests
         run: python update_sources.py --test
 
-      - name: Restore fetch cache
+      - name: Restore cache bound to checked-out dist
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         continue-on-error: true
         with:
           path: cache/
-          key: fetch-cache-${{ github.run_id }}
+          key: animeko-fetch-v4-${{ hashFiles('dist/latest.json') }}-${{ github.run_id }}
           restore-keys: |
-            fetch-cache-
+            animeko-fetch-v4-${{ hashFiles('dist/latest.json') }}-
 
       - name: Run updater
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python update_sources.py
 
-      - name: Validate outputs
+      - name: Validate generated outputs
         run: python update_sources.py --validate
 
-      - name: Save fetch cache
+      - name: Enforce integrity and transaction result
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import pathlib
+          import subprocess
+          import sys
+
+          report_path = pathlib.Path("reports/latest.json")
+          if not report_path.is_file():
+              raise SystemExit("reports/latest.json 缺失")
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          level = report.get("integrity_level")
+          changed = report.get("changed")
+          if level not in {"strict", "degraded"}:
+              raise SystemExit(f"完整性等级非法: {level!r}")
+          if level == "degraded" and changed is not False:
+              raise SystemExit("degraded 运行不得标记 changed=true")
+          diff = subprocess.run(["git", "diff", "--quiet", "--", "dist/"], check=False)
+          if level == "degraded" and diff.returncode != 0:
+              raise SystemExit("degraded 运行修改了 dist/")
+          if pathlib.Path("dist/.txn-pending").exists():
+              raise SystemExit("检测到未完成事务 dist/.txn-pending")
+          leftovers = list(pathlib.Path(".").glob("dist.new-*")) + list(pathlib.Path(".").glob("dist.bak-*"))
+          if leftovers:
+              raise SystemExit(f"检测到事务残留: {leftovers}")
+          print(f"integrity={level}, changed={changed}, dist_diff={diff.returncode != 0}")
+          PY
+
+      - name: Save accepted fetch cache
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        if: always()
         continue-on-error: true
         with:
           path: cache/
-          key: fetch-cache-${{ github.run_id }}
+          key: animeko-fetch-v4-${{ hashFiles('dist/latest.json') }}-${{ github.run_id }}
 
-      - name: Commit dist
+      - name: Commit strict dist transaction
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git diff --quiet -- dist/ && git diff --quiet --cached -- dist/; then
             echo "dist/ 无变化，跳过提交"
-          else
-            git add dist/
-            git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
-            pushed=false
-            for i in 1 2 3; do
-              if git push; then
-                pushed=true
-                break
-              fi
-              echo "push 失败，等待后重试 ($i/3)"
-              sleep $((i * 2))
-            done
-            if [ "$pushed" != "true" ]; then
-              echo "连续三次 push 失败；远端可能已有新提交，交由下一次工作流重新生成"
-              exit 1
+            exit 0
+          fi
+          python - <<'PY'
+          import json
+          report = json.load(open("reports/latest.json", encoding="utf-8"))
+          if report.get("integrity_level") != "strict":
+              raise SystemExit("只有 strict 运行可以提交 dist/")
+          if report.get("changed") is not True:
+              raise SystemExit("dist/ 有变化但报告 changed 不是 true")
+          PY
+          git add -- dist/
+          git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
+          pushed=false
+          for i in 1 2 3; do
+            if git push; then
+              pushed=true
+              break
             fi
+            echo "push 失败，等待后重试 ($i/3)"
+            sleep $((i * 2))
+          done
+          if [ "$pushed" != "true" ]; then
+            echo "连续三次 push 失败；不 rebase、不提交旧产物，交由下一次工作流重新生成"
+            exit 1
           fi
 
-      - name: Upload report
+      - name: Upload updater report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
-          name: update-report
+          name: update-report-${{ github.run_id }}
           path: reports/latest.json
           if-no-files-found: ignore
           overwrite: true
