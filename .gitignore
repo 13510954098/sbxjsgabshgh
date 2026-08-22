@@ -1,0 +1,8 @@
+cache/
+reports/
+dist/.tmp-*
+dist.new-*
+dist.bak-*
+.update_sources.lock
+__pycache__/
+*.pyc
