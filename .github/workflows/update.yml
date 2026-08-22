@@ -2,15 +2,18 @@ name: Update Animeko Sources
 
 on:
   schedule:
-    - cron: "17 3 * * *"
+    - cron: "17 */4 * * *"
   workflow_dispatch: {}
   push:
     paths:
       - update_sources.py
       - all_animeko_links.txt
+      - canonical_links.json
+      - .github/workflows/update.yml
+      - .gitignore
 
 concurrency:
-  group: update-animeko
+  group: update-animeko-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -23,17 +26,27 @@ jobs:
     timeout-minutes: 40
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install "requests==2.32.5"
+        run: pip install "requests==2.33.0" "urllib3==2.7.0"
+
+      - name: Syntax check
+        run: python -m py_compile update_sources.py
+
+      - name: Java runtime check
+        run: java -version
+
+      - name: Run selftests
+        run: python update_sources.py --test
 
       - name: Restore fetch cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        continue-on-error: true
         with:
           path: cache/
           key: fetch-cache-${{ github.run_id }}
@@ -45,31 +58,43 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python update_sources.py
 
+      - name: Validate outputs
+        run: python update_sources.py --validate
+
       - name: Save fetch cache
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         if: always()
+        continue-on-error: true
         with:
           path: cache/
           key: fetch-cache-${{ github.run_id }}
 
-      - name: Commit dist/
+      - name: Commit dist
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git diff --quiet -- dist/ && git diff --quiet --cached -- dist/; then
             echo "dist/ 无变化，跳过提交"
           else
             git add dist/
             git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
+            pushed=false
             for i in 1 2 3; do
-              if git push; then break; fi
-              echo "push 失败，拉取远端后重试 ($i/3)"
-              git pull --rebase || true
+              if git push; then
+                pushed=true
+                break
+              fi
+              echo "push 失败，等待后重试 ($i/3)"
+              sleep $((i * 2))
             done
+            if [ "$pushed" != "true" ]; then
+              echo "连续三次 push 失败；远端可能已有新提交，交由下一次工作流重新生成"
+              exit 1
+            fi
           fi
 
       - name: Upload report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
           name: update-report
