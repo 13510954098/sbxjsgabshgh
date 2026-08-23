@@ -1,7 +1,7 @@
 {
- "updated": "2026-08-22 09:41:24 UTC",
- "source_base_commit": "ae95876ee99ca4d6e26c4a93457cd5ce05427b42",
- "output_sha256": "a1395b0275de599526df3042febdb4e83405e7247aa5a5c7f8bfb436b58dd410",
+ "updated": "2026-08-23 01:09:05 UTC",
+ "source_base_commit": "b0ff0428126957a6a71c0560b970ff1e4d445186",
+ "output_sha256": "44926f5924cbb6850c511e820d16d61437545766a784213500f86fc5417c608d",
  "counts": {
   "all.json": 208,
   "online.json": 190,
@@ -224,16 +224,16 @@
   ]
  },
  "source_snapshots": {
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/online.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/bt.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/ani-yuan.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/css.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/animeko-prime.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/animeko-prime-bt.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/H.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/H.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/anibt.json": "f7194f1a31cd351b44d4c1e14d7b050c0aeaca52",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/online.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/bt.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/ani-yuan.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/css.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/animeko-prime.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/animeko-prime-bt.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/H.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/H.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/anibt.json": "ca6f5f87ba2f9d48613ad351cd1c917f97f9f964",
   "https://raw.githubusercontent.com/CrazyBunQnQ/animeko-sources/main/animeko.json": "89975afc0f15dc68e6be22dd3029746cd5d1093d",
   "https://raw.githubusercontent.com/cxay666/ani-yuan/main/ani-yuan.json": "886f1180d7cb33328618143cf073977691d80246",
   "https://raw.githubusercontent.com/DragonheartLX/ani-subs/main/subs/css1.json": "e3e9e81b3c6617434fc647ab1bd22882483bcda3",
@@ -286,7 +286,7 @@
   "https://raw.githubusercontent.com/2016YYy/animeko-source/main/dist/bt.json": "b4667409ea2c53ec6bf504ee33ae912a69ea8831",
   "https://raw.githubusercontent.com/becausemadoka/animeko-source/main/dist/bt.json": "93457b9dfd1a0558e59203875f225bb1c368b3ce"
  },
- "source_snapshots_created": 1787391684,
+ "source_snapshots_created": 1787447345,
  "source_snapshot_methods": {
   "https://sub.creamycake.org/v1/css1.json": "not-github",
   "https://sub.creamycake.org/v1/bt1.json": "not-github",
