@@ -1,0 +1,2303 @@
+{
+  "programs": [
+    {
+      "categories": [
+        "generator",
+        "subscription"
+      ],
+      "commit": "b46ebefa98eb2ca669f5c1d47d2fdc24ebaf3d25",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "css.json",
+          "score": 10
+        }
+      ],
+      "extracted_url_count": 1,
+      "files_scanned": 1,
+      "generated_source_files": [
+        {
+          "items": 5,
+          "path": "css.json",
+          "url": "https://codeberg.org/caelumix/animeko-rules/raw/branch/main/css.json"
+        }
+      ],
+      "platform": "codeberg",
+      "repository": "caelumix/animeko-rules",
+      "score": 10,
+      "signals": [
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://codeberg.org/caelumix/animeko-rules"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "generator",
+        "mirror-sync",
+        "subscription"
+      ],
+      "commit": "beb74207a560821e8cb9603481ee1e42ac6457fd",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 5
+        },
+        {
+          "path": "bt1.json",
+          "score": 10
+        },
+        {
+          "path": "css1.json",
+          "score": 12
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 3,
+      "generated_source_files": [
+        {
+          "items": 2,
+          "path": "bt1.json",
+          "url": "https://raw.githubusercontent.com/ashurajo/Animeko/main/bt1.json"
+        },
+        {
+          "items": 6,
+          "path": "css1.json",
+          "url": "https://raw.githubusercontent.com/ashurajo/Animeko/main/css1.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "ashurajo/Animeko",
+      "score": 27,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/ashurajo/Animeko"
+    },
+    {
+      "categories": [
+        "generator",
+        "mirror-sync",
+        "workflow-bot"
+      ],
+      "commit": "6f7dcca95ab83fa2333c5d79f9a0eeee7f7caa92",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/build.yml",
+          "score": 3
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "config/sources.json",
+          "score": 3
+        },
+        {
+          "path": "dist/hosts-raw.txt",
+          "score": 1
+        },
+        {
+          "path": "dist/report.json",
+          "score": 3
+        },
+        {
+          "path": "scripts/build_plugin.py",
+          "score": 8
+        }
+      ],
+      "extracted_url_count": 9,
+      "files_scanned": 6,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "beckyeeky/animeko-loon",
+      "score": 21,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "mediasources"
+      ],
+      "url": "https://github.com/beckyeeky/animeko-loon"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "subscription",
+        "workflow-bot"
+      ],
+      "commit": "d8131c7f43bf8f99916a8b327daee8110eea3308",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/sync-animeko-sources.yml",
+          "score": 3
+        },
+        {
+          "path": "CLAUDE.md",
+          "score": 8
+        },
+        {
+          "path": "README.md",
+          "score": 7
+        },
+        {
+          "path": "animeko.json",
+          "score": 12
+        },
+        {
+          "path": "animeko_sources/__init__.py",
+          "score": 3
+        },
+        {
+          "path": "animeko_sources/merge.py",
+          "score": 10
+        },
+        {
+          "path": "animeko_sources/sync.py",
+          "score": 7
+        },
+        {
+          "path": "sync-summary.json",
+          "score": 7
+        },
+        {
+          "path": "tests/test_merge.py",
+          "score": 10
+        },
+        {
+          "path": "tests/test_sync.py",
+          "score": 7
+        },
+        {
+          "path": "tests/test_workflow_contract.py",
+          "score": 3
+        }
+      ],
+      "extracted_url_count": 7,
+      "files_scanned": 11,
+      "generated_source_files": [
+        {
+          "items": 86,
+          "path": "animeko.json",
+          "url": "https://raw.githubusercontent.com/CrazyBunQnQ/animeko-sources/main/animeko.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "CrazyBunQnQ/animeko-sources",
+      "score": 77,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/CrazyBunQnQ/animeko-sources"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "editor-or-service",
+        "generator",
+        "mirror-sync"
+      ],
+      "commit": "f37cbdbee58f41e3dd065c8353ef263e62c7d74f",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".agents/skills/datasource-eval/SKILL.md",
+          "score": 9
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/deep_sample.py",
+          "score": 3
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/gen_report.py",
+          "score": 5
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/lib.py",
+          "score": 5
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/run_eval.py",
+          "score": 5
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/sync_channel_tiers.py",
+          "score": 6
+        },
+        {
+          "path": ".github/workflows/build.yml",
+          "score": 3
+        },
+        {
+          "path": "README.md",
+          "score": 5
+        },
+        {
+          "path": "docs/数据源评测规范.md",
+          "score": 9
+        },
+        {
+          "path": "scripts/build-subs.js",
+          "score": 9
+        },
+        {
+          "path": "subs/bt/AnimeGarden.json",
+          "score": 5
+        },
+        {
+          "path": "subs/bt/nyaa.land.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t0/girigiri愛動漫.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t0/稀饭动漫.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t1/嘀嗒影视.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t3/E-ACG.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t3/去看吧.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t3/叽哔动漫.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t3/森之屋动漫.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t3/风车影视.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/h1080.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/h720.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/wedm.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/嘀哩嘀哩.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/影视森林.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/新优酷.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/樱花动漫.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/海星动漫.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/热播之家.json",
+          "score": 7
+        },
+        {
+          "path": "subs/web/t4/番茄动漫.json",
+          "score": 7
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 31,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "creamycake-anime/ani-subs",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "selectormediasourcearguments",
+        "web-selector"
+      ],
+      "url": "https://github.com/creamycake-anime/ani-subs"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "generator",
+        "subscription"
+      ],
+      "commit": "12308314e73f6670eba28cdd643c37a3da1f30b7",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "BT/AnimeGarden.json",
+          "score": 5
+        },
+        {
+          "path": "BT/nyaa.json",
+          "score": 5
+        },
+        {
+          "path": "README.md",
+          "score": 4
+        },
+        {
+          "path": "Web/1anime.json",
+          "score": 7
+        },
+        {
+          "path": "Web/7sefun.json",
+          "score": 7
+        },
+        {
+          "path": "Web/AGE.json",
+          "score": 7
+        },
+        {
+          "path": "Web/MXdm.json",
+          "score": 7
+        },
+        {
+          "path": "Web/NT.json",
+          "score": 7
+        },
+        {
+          "path": "Web/aafun.json",
+          "score": 7
+        },
+        {
+          "path": "Web/girigirilove.json",
+          "score": 7
+        },
+        {
+          "path": "Web/gugu3.json",
+          "score": 7
+        },
+        {
+          "path": "Web/mitaodm.json",
+          "score": 7
+        },
+        {
+          "path": "Web/xfdm.json",
+          "score": 7
+        },
+        {
+          "path": "Web/yinghua.json",
+          "score": 7
+        },
+        {
+          "path": "Web/yishijie.json",
+          "score": 7
+        },
+        {
+          "path": "build.py",
+          "score": 7
+        }
+      ],
+      "extracted_url_count": 13,
+      "files_scanned": 16,
+      "generated_source_files": [
+        {
+          "items": 1,
+          "path": "BT/AnimeGarden.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/BT/AnimeGarden.json"
+        },
+        {
+          "items": 1,
+          "path": "BT/nyaa.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/BT/nyaa.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/1anime.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/1anime.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/7sefun.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/7sefun.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/AGE.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/AGE.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/MXdm.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/MXdm.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/NT.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/NT.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/aafun.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/aafun.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/girigirilove.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/girigirilove.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/gugu3.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/gugu3.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/mitaodm.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/mitaodm.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/yinghua.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
+        },
+        {
+          "items": 1,
+          "path": "Web/yishijie.json",
+          "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yishijie.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "DragonheartLX/Animeko-Subs",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/DragonheartLX/Animeko-Subs"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "validator",
+        "workflow-bot"
+      ],
+      "commit": "25d9e0e682128354ca2bd5f6ebf1c05a38554d9a",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/rolling-release.yml",
+          "score": 3
+        },
+        {
+          "path": "LICENSE.txt",
+          "score": 3
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "README_en.md",
+          "score": 3
+        },
+        {
+          "path": "analysis_options.yaml",
+          "score": 3
+        },
+        {
+          "path": "android/app/build.gradle.kts",
+          "score": 3
+        },
+        {
+          "path": "android/app/src/main/kotlin/com/edicl/mikan_player/RustlsVerifier.kt",
+          "score": 3
+        },
+        {
+          "path": "android/app/src/main/kotlin/com/example/mikan_player/DownloadForegroundService.kt",
+          "score": 3
+        },
+        {
+          "path": "android/app/src/main/kotlin/com/example/mikan_player/MainActivity.kt",
+          "score": 3
+        },
+        {
+          "path": "android/build.gradle.kts",
+          "score": 3
+        },
+        {
+          "path": "android/settings.gradle.kts",
+          "score": 3
+        },
+        {
+          "path": "assets/ocr/common_beta_charset.json",
+          "score": 3
+        },
+        {
+          "path": "build.yaml",
+          "score": 3
+        },
+        {
+          "path": "build_apk.ps1",
+          "score": 3
+        },
+        {
+          "path": "build_libtorrent_android.ps1",
+          "score": 3
+        },
+        {
+          "path": "build_libtorrent_windows.ps1",
+          "score": 3
+        },
+        {
+          "path": "docs/bangumi-integration.md",
+          "score": 5
+        },
+        {
+          "path": "docs/i18n_classification_baseline.json",
+          "score": 4
+        },
+        {
+          "path": "docs/i18n_classification_baseline.md",
+          "score": 4
+        },
+        {
+          "path": "docs/source_split_plan.md",
+          "score": 4
+        },
+        {
+          "path": "rust/src/api/generic_scraper/episode_table.rs",
+          "score": 7
+        },
+        {
+          "path": "rust/src/api/generic_scraper/matching.rs",
+          "score": 7
+        },
+        {
+          "path": "rust/src/api/generic_scraper/region.rs",
+          "score": 7
+        },
+        {
+          "path": "rust/src/api/generic_scraper/search_channels.rs",
+          "score": 7
+        },
+        {
+          "path": "rust/src/api/generic_scraper/search_play.rs",
+          "score": 7
+        },
+        {
+          "path": "rust/src/api/generic_scraper/search_progress.rs",
+          "score": 7
+        },
+        {
+          "path": "rust/src/api/generic_scraper/source_config.rs",
+          "score": 12
+        },
+        {
+          "path": "rust/src/api/generic_scraper/types.rs",
+          "score": 10
+        },
+        {
+          "path": "rust/src/frb_generated.rs",
+          "score": 4
+        },
+        {
+          "path": "tool/analyze.py",
+          "score": 5
+        }
+      ],
+      "extracted_url_count": 4,
+      "files_scanned": 240,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "Edicl-514/mikan_player",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/Edicl-514/mikan_player"
+    },
+    {
+      "categories": [
+        "generator",
+        "subscription"
+      ],
+      "commit": "a6e30c4b0ca980a40b71416ca54d7f674034e3da",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "dataSource.json",
+          "score": 13
+        }
+      ],
+      "extracted_url_count": 1,
+      "files_scanned": 1,
+      "generated_source_files": [
+        {
+          "items": 1,
+          "path": "dataSource.json",
+          "url": "https://raw.githubusercontent.com/GoToThePast/AnimekoDataSource/main/dataSource.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "GoToThePast/AnimekoDataSource",
+      "score": 13,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/GoToThePast/AnimekoDataSource"
+    },
+    {
+      "categories": [
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync"
+      ],
+      "commit": "759722ed8b87bf247868f5a7314279d3e006be3e",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 1
+        },
+        {
+          "path": "backend/MediaCacheManager.py",
+          "score": 1
+        },
+        {
+          "path": "backend/TgFileSystemClient.py",
+          "score": 1
+        },
+        {
+          "path": "backend/TgFileSystemClientManager.py",
+          "score": 1
+        },
+        {
+          "path": "backend/UserManager.py",
+          "score": 1
+        },
+        {
+          "path": "backend/__init__.py",
+          "score": 1
+        },
+        {
+          "path": "backend/api.py",
+          "score": 12
+        },
+        {
+          "path": "backend/api_implement.py",
+          "score": 1
+        },
+        {
+          "path": "backend/apiutils.py",
+          "score": 1
+        },
+        {
+          "path": "backend/script/__init__.py",
+          "score": 1
+        },
+        {
+          "path": "backend/script/check_fts.py",
+          "score": 1
+        },
+        {
+          "path": "backend/script/migrate_msg_js.py",
+          "score": 1
+        },
+        {
+          "path": "backend/script/storage_stats.py",
+          "score": 1
+        },
+        {
+          "path": "backend/templates.py",
+          "score": 1
+        },
+        {
+          "path": "configParse.py",
+          "score": 1
+        },
+        {
+          "path": "frontend/home.py",
+          "score": 1
+        },
+        {
+          "path": "frontend/link_convert.py",
+          "score": 1
+        },
+        {
+          "path": "frontend/login.py",
+          "score": 1
+        },
+        {
+          "path": "frontend/remote_api.py",
+          "score": 1
+        },
+        {
+          "path": "frontend/search.py",
+          "score": 1
+        },
+        {
+          "path": "frontend/utils.py",
+          "score": 1
+        },
+        {
+          "path": "logging_config.yaml",
+          "score": 1
+        },
+        {
+          "path": "pyproject.toml",
+          "score": 1
+        },
+        {
+          "path": "requirements.txt",
+          "score": 1
+        },
+        {
+          "path": "run.sh",
+          "score": 1
+        },
+        {
+          "path": "start.py",
+          "score": 1
+        }
+      ],
+      "extracted_url_count": 0,
+      "files_scanned": 26,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "Hehesheng/TgToFileSystem",
+      "score": 37,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/Hehesheng/TgToFileSystem"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "validator",
+        "workflow-bot"
+      ],
+      "commit": "5a8a3567ae54412cd624e2e9cd1cd721a5602160",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/build.yml",
+          "score": 5
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "score": 5
+        },
+        {
+          "path": ".github/workflows/src.main.kts",
+          "score": 5
+        },
+        {
+          "path": "README.md",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Assets.xcassets/AccentColor.colorset/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Assets.xcassets/AppIcon.appiconset/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Assets.xcassets/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Info.plist.template.txt",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Preview Content/Preview Assets.xcassets/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/data/repository/media/MediaSourceSubscriptionRepository.kt",
+          "score": 4
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/media/fetch/MediaSourceManager.kt",
+          "score": 5
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/codec/MediaSourceCodec.kt",
+          "score": 4
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/rss/RssMediaSource.kt",
+          "score": 9
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/rss/RssMediaSourceEngine.kt",
+          "score": 4
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/subscription/MediaSourceSubscription.kt",
+          "score": 4
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/subscription/MediaSourceSubscriptionRequester.kt",
+          "score": 4
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/subscription/MediaSourceSubscriptionUpdater.kt",
+          "score": 11
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/subscription/SubscriptionUpdateData.kt",
+          "score": 8
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/test/rss/RssItemInfo.kt",
+          "score": 4
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/SelectorMediaSource.kt",
+          "score": 11
+        },
+        {
+          "path": "app/shared/ui-foundation/src/commonMain/kotlin/ui/foundation/icons/AnimekoIcon.kt",
+          "score": 5
+        },
+        {
+          "path": "app/shared/ui-settings/src/androidMain/kotlin/ui/settings/mediasource/selector/edit/SelectorChannelConfigurationColumn.android.kt",
+          "score": 7
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/rss/SaveableStorage.kt",
+          "score": 7
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/selector/SelectorMediaSourceConfigurationPage.kt",
+          "score": 8
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/selector/edit/SelectorConfigDefaults.kt",
+          "score": 7
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/selector/edit/SelectorConfigState.kt",
+          "score": 8
+        },
+        {
+          "path": "datasource/api/src/commonMain/kotlin/source/MediaSourceFactory.kt",
+          "score": 5
+        },
+        {
+          "path": "docs/contributing/README.md",
+          "score": 5
+        },
+        {
+          "path": "docs/contributing/code/media/media-source.md",
+          "score": 5
+        },
+        {
+          "path": "translate_animeko.py",
+          "score": 5
+        }
+      ],
+      "extracted_url_count": 4,
+      "files_scanned": 240,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "kevin930321/animeko",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "rssmediasourcearguments",
+        "searchconfig",
+        "selectormediasourcearguments",
+        "web-selector"
+      ],
+      "url": "https://github.com/kevin930321/animeko"
+    },
+    {
+      "categories": [
+        "converter",
+        "generator",
+        "subscription"
+      ],
+      "commit": "c3e8f4bff1650f4efd9667961d3efe731e73e6e0",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 4
+        },
+        {
+          "path": "sources1.json",
+          "score": 11
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 2,
+      "generated_source_files": [
+        {
+          "items": 3,
+          "path": "sources1.json",
+          "url": "https://raw.githubusercontent.com/LGD0221/ani_sources/main/sources1.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "LGD0221/ani_sources",
+      "score": 15,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/LGD0221/ani_sources"
+    },
+    {
+      "categories": [
+        "generator",
+        "subscription"
+      ],
+      "commit": "8c2b52855965de127b792cb3976b25b2b5918763",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 4
+        },
+        {
+          "path": "favorites.json",
+          "score": 11
+        },
+        {
+          "path": "index.json",
+          "score": 11
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 3,
+      "generated_source_files": [
+        {
+          "items": 8,
+          "path": "favorites.json",
+          "url": "https://raw.githubusercontent.com/LuckyRabbitFeet/animeko-source/main/favorites.json"
+        },
+        {
+          "items": 33,
+          "path": "index.json",
+          "url": "https://raw.githubusercontent.com/LuckyRabbitFeet/animeko-source/main/index.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "LuckyRabbitFeet/animeko-source",
+      "score": 26,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/LuckyRabbitFeet/animeko-source"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "generator",
+        "mirror-sync",
+        "subscription",
+        "workflow-bot"
+      ],
+      "commit": "96e37044dd30706d17f04abee4b75a471a65e04b",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/delete.yml",
+          "score": 3
+        },
+        {
+          "path": ".github/workflows/update-readme.yml",
+          "score": 3
+        },
+        {
+          "path": ".github/workflows/update.yml",
+          "score": 3
+        },
+        {
+          "path": "README.md",
+          "score": 7
+        },
+        {
+          "path": "dist/all.json",
+          "score": 16
+        },
+        {
+          "path": "dist/bt.json",
+          "score": 12
+        },
+        {
+          "path": "dist/online.json",
+          "score": 12
+        },
+        {
+          "path": "scripts/config.js",
+          "score": 5
+        },
+        {
+          "path": "scripts/main.js",
+          "score": 3
+        },
+        {
+          "path": "scripts/process-sources.js",
+          "score": 9
+        },
+        {
+          "path": "scripts/update-readme.js",
+          "score": 5
+        },
+        {
+          "path": "scripts/utils.js",
+          "score": 3
+        },
+        {
+          "path": "source/bt/H.json",
+          "score": 12
+        },
+        {
+          "path": "source/bt/anibt.json",
+          "score": 10
+        },
+        {
+          "path": "source/bt/animeko-prime-bt.json",
+          "score": 12
+        },
+        {
+          "path": "source/online/H.json",
+          "score": 12
+        },
+        {
+          "path": "source/online/ani-yuan.json",
+          "score": 12
+        },
+        {
+          "path": "source/online/animeko-prime.json",
+          "score": 14
+        },
+        {
+          "path": "source/online/css.json",
+          "score": 12
+        }
+      ],
+      "extracted_url_count": 30,
+      "files_scanned": 19,
+      "generated_source_files": [
+        {
+          "items": 70,
+          "path": "dist/all.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"
+        },
+        {
+          "items": 7,
+          "path": "dist/bt.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/bt.json"
+        },
+        {
+          "items": 63,
+          "path": "dist/online.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/online.json"
+        },
+        {
+          "items": 4,
+          "path": "source/bt/H.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/H.json"
+        },
+        {
+          "items": 3,
+          "path": "source/bt/anibt.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/anibt.json"
+        },
+        {
+          "items": 6,
+          "path": "source/bt/animeko-prime-bt.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/animeko-prime-bt.json"
+        },
+        {
+          "items": 4,
+          "path": "source/online/H.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/H.json"
+        },
+        {
+          "items": 39,
+          "path": "source/online/ani-yuan.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/ani-yuan.json"
+        },
+        {
+          "items": 13,
+          "path": "source/online/animeko-prime.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/animeko-prime.json"
+        },
+        {
+          "items": 15,
+          "path": "source/online/css.json",
+          "url": "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/css.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "MajoSissi/animeko-source",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "dist/all.json",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/MajoSissi/animeko-source"
+    },
+    {
+      "categories": [],
+      "commit": "991da4b29fa72eff639522d7f0a58cec780e2b18",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 5
+        }
+      ],
+      "extracted_url_count": 1,
+      "files_scanned": 1,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "MasoFod/AniDataSource",
+      "score": 5,
+      "signals": [
+        "animeko"
+      ],
+      "url": "https://github.com/MasoFod/AniDataSource"
+    },
+    {
+      "categories": [
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "workflow-bot"
+      ],
+      "commit": "f134784e96b264913bff6a85f440562b3a8c5ad0",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "score": 1
+        },
+        {
+          "path": ".github/workflows/update-generated.yml",
+          "score": 1
+        },
+        {
+          "path": ".vscode/extensions.json",
+          "score": 1
+        },
+        {
+          "path": ".vscode/settings.json",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "biome.json",
+          "score": 1
+        },
+        {
+          "path": "generated/apps-old.json",
+          "score": 3
+        },
+        {
+          "path": "generated/apps.json",
+          "score": 3
+        },
+        {
+          "path": "package.json",
+          "score": 3
+        },
+        {
+          "path": "src/api.ts",
+          "score": 1
+        },
+        {
+          "path": "src/generator.ts",
+          "score": 3
+        },
+        {
+          "path": "src/index.ts",
+          "score": 3
+        },
+        {
+          "path": "src/types.ts",
+          "score": 1
+        },
+        {
+          "path": "src/utils.ts",
+          "score": 1
+        },
+        {
+          "path": "tsconfig.json",
+          "score": 1
+        }
+      ],
+      "extracted_url_count": 4,
+      "files_scanned": 15,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "maxchang3/ani-altstore-source",
+      "score": 27,
+      "signals": [
+        "animeko"
+      ],
+      "url": "https://github.com/maxchang3/ani-altstore-source"
+    },
+    {
+      "categories": [
+        "converter",
+        "editor-or-service"
+      ],
+      "commit": "3f95ecdc729b16a604487ff1b4b4d65c3ef6165c",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".vscode/settings.json",
+          "score": 3
+        },
+        {
+          "path": "Documents/MediaSelector/readme.md",
+          "score": 8
+        },
+        {
+          "path": "README.md",
+          "score": 5
+        },
+        {
+          "path": "buildServer.json",
+          "score": 3
+        },
+        {
+          "path": "scripts/build-user-signable-tvos-ipa.sh",
+          "score": 3
+        },
+        {
+          "path": "scripts/generate_secrets.py",
+          "score": 3
+        }
+      ],
+      "extracted_url_count": 0,
+      "files_scanned": 6,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "moyuwangP/AniTV",
+      "score": 25,
+      "signals": [
+        "animeko",
+        "searchconfig",
+        "selectormediasourcearguments"
+      ],
+      "url": "https://github.com/moyuwangP/AniTV"
+    },
+    {
+      "categories": [
+        "converter",
+        "generator"
+      ],
+      "commit": "0cc4748ae57252388cc3131002f4e02c5aa23ce9",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "AGENTS.md",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 5
+        },
+        {
+          "path": "package.json",
+          "score": 1
+        },
+        {
+          "path": "scripts/build-index.mjs",
+          "score": 3
+        },
+        {
+          "path": "scripts/merge-index.mjs",
+          "score": 1
+        },
+        {
+          "path": "scripts/upload-index.mjs",
+          "score": 1
+        },
+        {
+          "path": "scripts/verify-index.mjs",
+          "score": 1
+        },
+        {
+          "path": "worker.mjs",
+          "score": 12
+        }
+      ],
+      "extracted_url_count": 0,
+      "files_scanned": 8,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "NihilDigit/ani-open-adapter-worker",
+      "score": 25,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/NihilDigit/ani-open-adapter-worker"
+    },
+    {
+      "categories": [
+        "generator",
+        "mirror-sync",
+        "subscription"
+      ],
+      "commit": "cf97bc7bfcca684ebe321eb427889aadff2f5aa7",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 5
+        },
+        {
+          "path": "ani.json",
+          "score": 12
+        }
+      ],
+      "extracted_url_count": 1,
+      "files_scanned": 2,
+      "generated_source_files": [
+        {
+          "items": 13,
+          "path": "ani.json",
+          "url": "https://raw.githubusercontent.com/OomikuoO/Ani-source/main/ani.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "OomikuoO/Ani-source",
+      "score": 17,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/OomikuoO/Ani-source"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "validator"
+      ],
+      "commit": "59df2d81fc6107d614db0e55ac70472244ef9965",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".agents/skills/datasource-test/SKILL.md",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/build.yml",
+          "score": 5
+        },
+        {
+          "path": ".github/workflows/codex-agent.yml",
+          "score": 5
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "score": 5
+        },
+        {
+          "path": ".github/workflows/src.main.kts",
+          "score": 5
+        },
+        {
+          "path": "README.md",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Assets.xcassets/AccentColor.colorset/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Assets.xcassets/AppIcon.appiconset/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Assets.xcassets/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Info.plist.template.txt",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/Preview Content/Preview Assets.xcassets/Contents.json",
+          "score": 5
+        },
+        {
+          "path": "app/ios/Animeko/exportOptions.plist.template.txt",
+          "score": 5
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/media/fetch/MediaSourceManager.kt",
+          "score": 5
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/rss/RssMediaSource.kt",
+          "score": 9
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/subscription/MediaSourceSubscriptionUpdater.kt",
+          "score": 11
+        },
+        {
+          "path": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/subscription/SubscriptionUpdateData.kt",
+          "score": 8
+        },
+        {
+          "path": "app/shared/src/commonMain/composeResources/files/additional_libraries.json",
+          "score": 5
+        },
+        {
+          "path": "app/shared/ui-foundation/src/commonMain/kotlin/ui/foundation/icons/AnimekoIcon.kt",
+          "score": 5
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/selector/SelectorMediaSourceConfigurationPage.kt",
+          "score": 8
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/selector/edit/SelectorConfigDefaults.kt",
+          "score": 7
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/selector/edit/SelectorConfigPane.kt",
+          "score": 7
+        },
+        {
+          "path": "app/shared/ui-settings/src/commonMain/kotlin/ui/settings/mediasource/selector/edit/SelectorConfigState.kt",
+          "score": 8
+        },
+        {
+          "path": "client/src/commonMain/gen/me/him188/ani/client/models/AniEpisodeCommentSource.kt",
+          "score": 5
+        },
+        {
+          "path": "client/src/commonMain/gen/me/him188/ani/client/models/AniSubjectReviewSource.kt",
+          "score": 5
+        },
+        {
+          "path": "datasource/jellyfin/src/commonMain/kotlin/JellyfinMediaSource.kt",
+          "score": 6
+        },
+        {
+          "path": "docs/contributing/code/media/media-source.md",
+          "score": 9
+        },
+        {
+          "path": "tools/datasource-test-mcp/README.md",
+          "score": 6
+        },
+        {
+          "path": "tools/datasource-test-mcp/src/main/kotlin/me/him188/ani/tools/datasourcetestmcp/selector/SelectorConfigSupport.kt",
+          "score": 12
+        },
+        {
+          "path": "tools/datasource-test-mcp/src/main/resources/selector-engine-docs.md",
+          "score": 10
+        },
+        {
+          "path": "tools/datasource-test-mcp/src/test/kotlin/me/him188/ani/tools/datasourcetestmcp/selector/SelectorConfigSupportTest.kt",
+          "score": 8
+        }
+      ],
+      "extracted_url_count": 6,
+      "files_scanned": 240,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "open-ani/animeko",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "rssmediasourcearguments",
+        "searchconfig",
+        "selectormediasourcearguments",
+        "web-selector"
+      ],
+      "url": "https://github.com/open-ani/animeko"
+    },
+    {
+      "categories": [
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "workflow-bot"
+      ],
+      "commit": "ed2bf4e55b641b3b34a943d8575efa876ff269f2",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/ISSUE_TEMPLATE/bug.yml",
+          "score": 1
+        },
+        {
+          "path": ".github/ISSUE_TEMPLATE/other.yml",
+          "score": 1
+        },
+        {
+          "path": ".github/actions/flutter-arm64-setup/action.yml",
+          "score": 1
+        },
+        {
+          "path": ".github/workflows/pr.yaml",
+          "score": 1
+        },
+        {
+          "path": ".github/workflows/publish.yaml",
+          "score": 1
+        },
+        {
+          "path": ".github/workflows/release.yaml",
+          "score": 1
+        },
+        {
+          "path": ".vscode/launch.json",
+          "score": 1
+        },
+        {
+          "path": ".vscode/settings.json",
+          "score": 1
+        },
+        {
+          "path": "ADAPT_FLUTTER_347.md",
+          "score": 1
+        },
+        {
+          "path": "CHANGELOG.md",
+          "score": 3
+        },
+        {
+          "path": "README_ANIMEKO_ADAPTATION.md",
+          "score": 10
+        },
+        {
+          "path": "analysis_options.yaml",
+          "score": 1
+        },
+        {
+          "path": "android/app/src/main/kotlin/com/predidit/YHDM/MainActivity.kt",
+          "score": 1
+        },
+        {
+          "path": "assets/plugins/7sefun.json",
+          "score": 1
+        },
+        {
+          "path": "assets/plugins/DM84.json",
+          "score": 1
+        },
+        {
+          "path": "assets/plugins/LMM.json",
+          "score": 1
+        },
+        {
+          "path": "assets/plugins/ciyuancheng.json",
+          "score": 1
+        },
+        {
+          "path": "assets/statements/statements.txt",
+          "score": 1
+        },
+        {
+          "path": "devtools_options.yaml",
+          "score": 1
+        },
+        {
+          "path": "fastlane/metadata/android/en-US/full_description.txt",
+          "score": 1
+        },
+        {
+          "path": "fastlane/metadata/android/en-US/short_description.txt",
+          "score": 1
+        },
+        {
+          "path": "fastlane/metadata/android/en-US/title.txt",
+          "score": 1
+        },
+        {
+          "path": "fastlane/metadata/android/zh-CN/full_description.txt",
+          "score": 1
+        },
+        {
+          "path": "fastlane/metadata/android/zh-CN/short_description.txt",
+          "score": 1
+        },
+        {
+          "path": "fastlane/metadata/android/zh-CN/title.txt",
+          "score": 1
+        },
+        {
+          "path": "ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "ios/Runner/Assets.xcassets/LaunchBackground.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md",
+          "score": 1
+        },
+        {
+          "path": "lib/bbcode/README.md",
+          "score": 1
+        }
+      ],
+      "extracted_url_count": 0,
+      "files_scanned": 39,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "qldwj/my",
+      "score": 50,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "web-selector"
+      ],
+      "url": "https://github.com/qldwj/my"
+    },
+    {
+      "categories": [
+        "generator",
+        "mirror-sync",
+        "subscription"
+      ],
+      "commit": "f7ed7852839985bd0b09f8bfac927f97cef647cb",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "Animeko-SourceWeb.json",
+          "score": 12
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "ceshi.json",
+          "score": 10
+        }
+      ],
+      "extracted_url_count": 5,
+      "files_scanned": 3,
+      "generated_source_files": [
+        {
+          "items": 23,
+          "path": "Animeko-SourceWeb.json",
+          "url": "https://raw.githubusercontent.com/saber-yz/Animeko-Source/main/Animeko-SourceWeb.json"
+        },
+        {
+          "items": 11,
+          "path": "ceshi.json",
+          "url": "https://raw.githubusercontent.com/saber-yz/Animeko-Source/main/ceshi.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "saber-yz/Animeko-Source",
+      "score": 25,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/saber-yz/Animeko-Source"
+    },
+    {
+      "categories": [
+        "generator",
+        "subscription"
+      ],
+      "commit": "66a9a120a41179286360d4d78293528ca9b125ff",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "ds.json",
+          "score": 11
+        },
+        {
+          "path": "my_bt.json",
+          "score": 9
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 2,
+      "generated_source_files": [
+        {
+          "items": 2,
+          "path": "ds.json",
+          "url": "https://raw.githubusercontent.com/SAKURA862/AnimekoDataSource/main/ds.json"
+        },
+        {
+          "items": 1,
+          "path": "my_bt.json",
+          "url": "https://raw.githubusercontent.com/SAKURA862/AnimekoDataSource/main/my_bt.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "SAKURA862/AnimekoDataSource",
+      "score": 20,
+      "signals": [
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/SAKURA862/AnimekoDataSource"
+    },
+    {
+      "categories": [
+        "generator",
+        "subscription"
+      ],
+      "commit": "97360d2cc502a17ad12ece9d7a5ced72369bbad7",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "bt.json",
+          "score": 8
+        },
+        {
+          "path": "test123.json",
+          "score": 10
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 3,
+      "generated_source_files": [
+        {
+          "items": 1,
+          "path": "bt.json",
+          "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/bt.json"
+        },
+        {
+          "items": 1,
+          "path": "test123.json",
+          "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "SakuraGauthier/SakuraGauthier.io",
+      "score": 21,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/SakuraGauthier/SakuraGauthier.io"
+    },
+    {
+      "categories": [
+        "converter",
+        "mirror-sync"
+      ],
+      "commit": "b2ff96a98aa3771f6dd085db7eee3154a44b75de",
+      "default_branch": "master",
+      "evidence_files": [
+        {
+          "path": "README.en.md",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 1
+        },
+        {
+          "path": "image/EmbyTubiao@Elegy233.json",
+          "score": 1
+        },
+        {
+          "path": "image/do_docker.sh",
+          "score": 1
+        },
+        {
+          "path": "image/update_danmu_api.sh",
+          "score": 1
+        },
+        {
+          "path": "image/update_service.sh",
+          "score": 1
+        },
+        {
+          "path": "index.html",
+          "score": 1
+        }
+      ],
+      "extracted_url_count": 5,
+      "files_scanned": 7,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "wan0ge/Extract-pure-links",
+      "score": 7,
+      "signals": [],
+      "url": "https://github.com/wan0ge/Extract-pure-links"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "validator"
+      ],
+      "commit": "e6f5d297a09ed8b27bae50852878617b0e41fd14",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "AGENTS.md",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "docs/release-notes-v0.5.0.md",
+          "score": 1
+        },
+        {
+          "path": "docs/superpowers/plans/2026-05-15-electron-video-extractor.md",
+          "score": 2
+        },
+        {
+          "path": "docs/superpowers/specs/2026-05-15-electron-video-extractor-design.md",
+          "score": 5
+        },
+        {
+          "path": "electron.vite.config.ts",
+          "score": 1
+        },
+        {
+          "path": "package-lock.json",
+          "score": 1
+        },
+        {
+          "path": "package.json",
+          "score": 1
+        },
+        {
+          "path": "src/main/index.ts",
+          "score": 2
+        },
+        {
+          "path": "src/main/lib/config.ts",
+          "score": 2
+        },
+        {
+          "path": "src/main/lib/cookie-store.ts",
+          "score": 1
+        },
+        {
+          "path": "src/main/lib/episode-parser.ts",
+          "score": 2
+        },
+        {
+          "path": "src/main/lib/extractor.ts",
+          "score": 1
+        },
+        {
+          "path": "src/main/lib/interceptor.ts",
+          "score": 1
+        },
+        {
+          "path": "src/main/lib/output.ts",
+          "score": 1
+        },
+        {
+          "path": "src/main/lib/searcher.ts",
+          "score": 2
+        },
+        {
+          "path": "src/main/lib/source-manager.ts",
+          "score": 9
+        },
+        {
+          "path": "src/main/lib/verifier.ts",
+          "score": 1
+        },
+        {
+          "path": "src/preload/index.ts",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/env.d.ts",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/index.html",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/App.vue",
+          "score": 2
+        },
+        {
+          "path": "src/renderer/src/components/EpisodePanel.vue",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/components/ResultCard.vue",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/components/SearchPanel.vue",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/components/SourceSelector.vue",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/components/VerificationDialog.vue",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/components/VideoPlayer.vue",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/main.ts",
+          "score": 1
+        },
+        {
+          "path": "src/renderer/src/types/index.ts",
+          "score": 2
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 33,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "yirenlove/anime-extractor",
+      "score": 54,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/yirenlove/anime-extractor"
+    },
+    {
+      "categories": [
+        "generator",
+        "subscription"
+      ],
+      "commit": "ada8c3f2cbcb29b71b09f34ba1283d5406df7532",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "animeko-addup.json",
+          "score": 12
+        },
+        {
+          "path": "animeko-fulll-list.json",
+          "score": 12
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 2,
+      "generated_source_files": [
+        {
+          "items": 8,
+          "path": "animeko-addup.json",
+          "url": "https://raw.githubusercontent.com/ZEN-GUO/animeko-sources/main/animeko-addup.json"
+        },
+        {
+          "items": 26,
+          "path": "animeko-fulll-list.json",
+          "url": "https://raw.githubusercontent.com/ZEN-GUO/animeko-sources/main/animeko-fulll-list.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "ZEN-GUO/animeko-sources",
+      "score": 24,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/ZEN-GUO/animeko-sources"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "validator",
+        "workflow-bot"
+      ],
+      "commit": "d83593e1b1c627fd054e962563c9dee987321f1c",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/build.yml",
+          "score": 3
+        },
+        {
+          "path": "README.en.md",
+          "score": 3
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "backend/package-lock.json",
+          "score": 3
+        },
+        {
+          "path": "backend/package.json",
+          "score": 3
+        },
+        {
+          "path": "backend/scripts/clean-dist.js",
+          "score": 3
+        },
+        {
+          "path": "backend/src/data-source.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/AuditLog.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/BilibiliCredential.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/Comment.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/DanmakuTrack.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/Movie.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/PlaybackState.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/Room.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/RoomDanmakuMeta.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/ServerFolder.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/Session.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/SystemSettings.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/User.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/entities/UserMount.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/index.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/middleware/auth.ts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/routes/emby.ts",
+          "score": 4
+        },
+        {
+          "path": "backend/src/routes/jellyfin.ts",
+          "score": 4
+        },
+        {
+          "path": "backend/src/routes/subtitles.ts",
+          "score": 4
+        },
+        {
+          "path": "backend/src/services/anisubs/provider.ts",
+          "score": 6
+        },
+        {
+          "path": "backend/src/services/anisubs/scraper.ts",
+          "score": 4
+        },
+        {
+          "path": "backend/src/services/anisubs/subscription.ts",
+          "score": 12
+        },
+        {
+          "path": "backend/src/services/anisubs/types.ts",
+          "score": 12
+        },
+        {
+          "path": "backend/src/services/emby-client.ts",
+          "score": 4
+        }
+      ],
+      "extracted_url_count": 6,
+      "files_scanned": 240,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "Zero-wyc/ZViewer",
+      "score": 100,
+      "signals": [
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/Zero-wyc/ZViewer"
+    }
+  ],
+  "updated": "2026-08-24T09:42:05Z",
+  "version": 1
+}
