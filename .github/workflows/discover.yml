@@ -146,12 +146,12 @@ jobs:
 
       - name: Prepare isolated sanitizer filesystem
         env:
-          SANDBOX: ${{ runner.temp }}/animeko-sanitize
-          RAW_INPUT: ${{ runner.temp }}/animeko-raw-observations
+          SANDBOX: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}
+          RAW_DOWNLOAD: ${{ runner.temp }}/animeko-raw-observations
         run: |
           set -euo pipefail
-          rm -rf "$SANDBOX"
-          mkdir -p "$SANDBOX/baseline/discovery" "$SANDBOX/trusted" "$SANDBOX/work"
+          sudo rm -rf -- "$SANDBOX"
+          mkdir -p "$SANDBOX/baseline/discovery" "$SANDBOX/trusted" "$SANDBOX/work" "$SANDBOX/raw"
           check_regular_file() {
             local file=$1
             local maximum=$2
@@ -181,26 +181,29 @@ jobs:
           find "$SANDBOX/baseline" -type f -exec chmod 0444 {} +
           sudo chown 65534:65534 "$SANDBOX/work"
           sudo chmod 0711 "$SANDBOX/work"
-          test -d "$RAW_INPUT"
+          test -d "$RAW_DOWNLOAD"
           for name in latest.json programs.json candidates.json redundant.json rejected.json; do
-            test -f "$RAW_INPUT/$name"
-            test ! -L "$RAW_INPUT/$name"
+            test -f "$RAW_DOWNLOAD/$name"
+            test ! -L "$RAW_DOWNLOAD/$name"
           done
-          test "$(find "$RAW_INPUT" -mindepth 1 -maxdepth 1 | wc -l)" -eq 5
-          if find "$RAW_INPUT" -mindepth 1 \( ! -type f -o -type l \) -print -quit | grep -q .; then
+          test "$(find "$RAW_DOWNLOAD" -mindepth 1 -maxdepth 1 | wc -l)" -eq 5
+          if find "$RAW_DOWNLOAD" -mindepth 1 \( ! -type f -o -type l \) -print -quit | grep -q .; then
             echo "raw artifact仅允许五个普通文件"
             exit 1
           fi
-          find "$RAW_INPUT" -type f -exec chmod 0444 {} +
-          chmod 0555 "$RAW_INPUT"
+          for name in latest.json programs.json candidates.json redundant.json rejected.json; do
+            cp --no-dereference -- "$RAW_DOWNLOAD/$name" "$SANDBOX/raw/$name"
+          done
+          chmod 0444 "$SANDBOX/raw/"*.json
+          chmod 0555 "$SANDBOX/raw"
 
       - name: Sanitize in offline PID and network namespace
-        working-directory: ${{ runner.temp }}/animeko-sanitize/work
+        working-directory: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work
         env:
-          RAW_INPUT: ${{ runner.temp }}/animeko-raw-observations
-          BASELINE: ${{ runner.temp }}/animeko-sanitize/baseline
-          SANITIZED_OUTPUT: ${{ runner.temp }}/animeko-sanitize/work/output
-          PROMOTER: ${{ runner.temp }}/animeko-sanitize/trusted/promote_discovery.py
+          RAW_INPUT: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/raw
+          BASELINE: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/baseline
+          SANITIZED_OUTPUT: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output
+          PROMOTER: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/trusted/promote_discovery.py
         run: |
           set -euo pipefail
           PYTHON_BIN=$(command -v python)
@@ -225,7 +228,7 @@ jobs:
 
       - name: Verify full sanitized contract in read-only job
         env:
-          SANITIZED_OUTPUT: ${{ runner.temp }}/animeko-sanitize/work/output
+          SANITIZED_OUTPUT: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output
           EXPECTED_RUN_IDENTITY: github:${{ github.run_id }}:${{ github.run_attempt }}
         run: |
           set -euo pipefail
@@ -238,18 +241,24 @@ jobs:
         with:
           name: animeko-sanitized-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            ${{ runner.temp }}/animeko-sanitize/work/output/sanitized-manifest.json
-            ${{ runner.temp }}/animeko-sanitize/work/output/all_animeko_links.txt
-            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/state.json
-            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/programs.json
-            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/candidates.json
-            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/redundant.json
-            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/rejected.json
-            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/latest.json
-            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/promotion.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/sanitized-manifest.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/all_animeko_links.txt
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/discovery/state.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/discovery/programs.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/discovery/candidates.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/discovery/redundant.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/discovery/rejected.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/discovery/latest.json
+            /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}/work/output/discovery/promotion.json
           if-no-files-found: error
           overwrite: false
           retention-days: 3
+
+      - name: Remove isolated sanitizer filesystem
+        if: always()
+        env:
+          SANDBOX: /tmp/animeko-sanitize-${{ github.run_id }}-${{ github.run_attempt }}
+        run: sudo rm -rf -- "$SANDBOX"
 
   publish_pr:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
