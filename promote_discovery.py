@@ -399,6 +399,13 @@ def load_current_state(baseline: Path) -> dict:
     return state
 
 
+def sanitize_snapshot_complete(declared: bool, errors: list[dict]) -> bool:
+    return declared and not any(
+        item.get("error") in {"http-403", "http-429", "deadline"}
+        for item in errors if isinstance(item, dict)
+    )
+
+
 def parse_latest(incoming: Path):
     raw = load_json_limited(incoming / "latest.json")
     if not isinstance(raw, dict) or raw.get("version") != 1:
@@ -425,7 +432,7 @@ def parse_latest(incoming: Path):
             continue
         sanitized = {"error": safe_error(item.get("error")) or "unknown-error"}
         provider = item.get("provider")
-        if provider in {"github", "gitlab", "gitee", "codeberg", "brave"}:
+        if isinstance(provider, str) and SAFE_CODE_RE.fullmatch(provider):
             sanitized["provider"] = provider
         phase = item.get("phase")
         if isinstance(phase, str) and SAFE_CODE_RE.fullmatch(phase):
@@ -434,6 +441,7 @@ def parse_latest(incoming: Path):
         if isinstance(repository, str) and REPOSITORY_RE.fullmatch(repository):
             sanitized["repository"] = repository
         canonical_errors.append(sanitized)
+    complete = sanitize_snapshot_complete(complete, canonical_errors)
     input_bytes = raw.get("input_bytes", {})
     if not isinstance(input_bytes, dict) or set(input_bytes) != {
             "platform_static_analysis", "candidate_cache", "candidate_network"}:
@@ -1058,6 +1066,13 @@ def run_selftests():
             state = update_state(state, {url: _observation()}, "2026-08-20", {url}, set())
             state = update_state(state, {url: _observation()}, "2026-08-22", {url}, set())
             self.assertEqual(state["candidates"][url]["consecutive_successes"], 1)
+
+        def test_rate_limit_forces_sanitized_snapshot_incomplete(self):
+            self.assertTrue(sanitize_snapshot_complete(True, []))
+            self.assertTrue(sanitize_snapshot_complete(True, [{"error": "missing-credential"}]))
+            for code in ("http-403", "http-429", "deadline"):
+                with self.subTest(code=code):
+                    self.assertFalse(sanitize_snapshot_complete(True, [{"error": code}]))
 
         def test_incomplete_snapshot_cannot_advance_probation(self):
             url = "https://sources.example.org/source.json"

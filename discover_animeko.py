@@ -360,6 +360,12 @@ class ApiClient:
         return raw.decode("utf-8-sig", "replace")
 
 
+def snapshot_complete_from_errors(expired: bool, errors: list[dict]) -> bool:
+    limiting_error_codes = {"http-403", "http-429", "deadline"}
+    return not expired and not any(
+        isinstance(item, dict) and item.get("error") in limiting_error_codes for item in errors)
+
+
 def sanitize_provider_errors(errors, client: ApiClient) -> list[dict]:
     output = []
     safe_field = re.compile(r"[A-Za-z0-9_.:-]{1,128}\Z")
@@ -1242,7 +1248,8 @@ def run_discovery():
             else:
                 current_rejected.append(output)
         reset_absent_candidates(state, {result["url"] for result in validation_results})
-        snapshot_complete = not client.expired()
+        sanitized_errors = sanitize_provider_errors(client.errors, client)
+        snapshot_complete = snapshot_complete_from_errors(client.expired(), sanitized_errors)
         if not snapshot_complete:
             for record in state["candidates"].values():
                 record["consecutive_successes"] = 0
@@ -1261,7 +1268,6 @@ def run_discovery():
         candidates_document = {"version": 1, "updated": iso_now(), "candidates": current_valid}
         rejected_document = {"version": 1, "updated": iso_now(), "rejected": current_rejected}
         redundant_document = {"version": 1, "updated": iso_now(), "redundant": current_redundant}
-        sanitized_errors = sanitize_provider_errors(client.errors, client)
         latest = {
             "version": 1,
             "updated": iso_now(),
@@ -1512,6 +1518,14 @@ def run_selftests():
                 self.assertEqual(set(sanitized[0]), {"provider", "error"})
             finally:
                 client.close()
+
+        def test_rate_limit_and_deadline_mark_snapshot_incomplete(self):
+            self.assertTrue(snapshot_complete_from_errors(False, []))
+            self.assertTrue(snapshot_complete_from_errors(False, [{"error": "missing-credential"}]))
+            for code in ("http-403", "http-429", "deadline"):
+                with self.subTest(code=code):
+                    self.assertFalse(snapshot_complete_from_errors(False, [{"error": code}]))
+            self.assertFalse(snapshot_complete_from_errors(True, []))
 
         def test_existing_links_rejects_symlink_invalid_and_over_limit(self):
             old_links = globals()["LINKS_PATH"]
