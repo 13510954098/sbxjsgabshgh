@@ -1,0 +1,399 @@
+name: Discover Animeko Source Ecosystem
+
+on:
+  schedule:
+    - cron: "47 2 * * *"
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - animeko_url_policy.py
+      - discover_animeko.py
+      - promote_discovery.py
+      - publish_discovery.py
+      - update_sources.py
+      - requirements-discovery.lock
+      - discovery/seeds.txt
+      - discovery/trusted_programs.txt
+      - .github/workflows/discover.yml
+
+concurrency:
+  group: discover-animeko-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Set up Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install pinned discovery dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install \
+            --disable-pip-version-check \
+            --require-hashes \
+            --only-binary=:all: \
+            -r requirements-discovery.lock
+          python - <<'PY'
+          import requests
+          import urllib3
+          assert requests.__version__ == "2.34.2", requests.__version__
+          assert urllib3.__version__ == "2.7.0", urllib3.__version__
+          PY
+
+      - name: Compile discovery code
+        run: python -m py_compile animeko_url_policy.py discover_animeko.py update_sources.py
+
+      - name: Run discovery selftests
+        run: python discover_animeko.py --test
+
+      - name: Run updater security selftests
+        run: python update_sources.py --test
+
+      - name: Discover with read-only GitHub token
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python discover_animeko.py --discover
+
+      - name: Validate discovery output
+        run: python discover_animeko.py --validate-state
+
+      - name: Stage fixed raw artifact
+        env:
+          RAW_STAGE: ${{ runner.temp }}/animeko-raw-upload
+        run: |
+          set -euo pipefail
+          rm -rf "$RAW_STAGE"
+          mkdir "$RAW_STAGE"
+          install -m 0644 \
+            discovery/latest.json \
+            discovery/programs.json \
+            discovery/candidates.json \
+            discovery/redundant.json \
+            discovery/rejected.json \
+            "$RAW_STAGE/"
+          test "$(find "$RAW_STAGE" -mindepth 1 -maxdepth 1 -type f | wc -l)" -eq 5
+          test "$(find "$RAW_STAGE" -mindepth 1 -maxdepth 1 | wc -l)" -eq 5
+
+      - name: Upload raw observations
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: animeko-raw-observations-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/animeko-raw-upload/
+          if-no-files-found: error
+          overwrite: false
+          retention-days: 3
+
+  sanitize:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: discover
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout trusted sanitizer without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Download raw observations
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: animeko-raw-observations-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/animeko-raw-observations
+
+      - name: Compile and test trusted sanitizer
+        run: |
+          set -euo pipefail
+          python -I -S -B -m py_compile animeko_url_policy.py promote_discovery.py publish_discovery.py
+          python -I -S -B promote_discovery.py --test
+          python -I -S -B publish_discovery.py --test
+
+      - name: Prepare isolated sanitizer filesystem
+        env:
+          SANDBOX: ${{ runner.temp }}/animeko-sanitize
+          RAW_INPUT: ${{ runner.temp }}/animeko-raw-observations
+        run: |
+          set -euo pipefail
+          rm -rf "$SANDBOX"
+          mkdir -p "$SANDBOX/baseline/discovery" "$SANDBOX/trusted" "$SANDBOX/work"
+          check_regular_file() {
+            local file=$1
+            local maximum=$2
+            test -e "$file"
+            test ! -L "$file"
+            test -f "$file"
+            test ! -x "$file"
+            test "$(stat -c %s -- "$file")" -le "$maximum"
+          }
+          check_regular_file promote_discovery.py 1048576
+          check_regular_file animeko_url_policy.py 1048576
+          cp --no-dereference -- promote_discovery.py animeko_url_policy.py "$SANDBOX/trusted/"
+          chmod 0555 "$SANDBOX/trusted"
+          chmod 0444 "$SANDBOX/trusted/promote_discovery.py" "$SANDBOX/trusted/animeko_url_policy.py"
+          check_regular_file all_animeko_links.txt 1048576
+          check_regular_file discovery/seeds.txt 65536
+          check_regular_file discovery/trusted_programs.txt 65536
+          cp --no-dereference -- all_animeko_links.txt "$SANDBOX/baseline/all_animeko_links.txt"
+          cp --no-dereference -- discovery/seeds.txt discovery/trusted_programs.txt "$SANDBOX/baseline/discovery/"
+          if [ -e discovery/state.json ] || [ -L discovery/state.json ]; then
+            check_regular_file discovery/state.json 5242880
+            cp --no-dereference -- discovery/state.json "$SANDBOX/baseline/discovery/state.json"
+          else
+            printf '%s\n' '{"version":2,"candidates":{},"promoted":[]}' > "$SANDBOX/baseline/discovery/state.json"
+          fi
+          find "$SANDBOX/baseline" -type d -exec chmod 0555 {} +
+          find "$SANDBOX/baseline" -type f -exec chmod 0444 {} +
+          sudo chown 65534:65534 "$SANDBOX/work"
+          sudo chmod 0711 "$SANDBOX/work"
+          test -d "$RAW_INPUT"
+          for name in latest.json programs.json candidates.json redundant.json rejected.json; do
+            test -f "$RAW_INPUT/$name"
+            test ! -L "$RAW_INPUT/$name"
+          done
+          test "$(find "$RAW_INPUT" -mindepth 1 -maxdepth 1 | wc -l)" -eq 5
+          if find "$RAW_INPUT" -mindepth 1 \( ! -type f -o -type l \) -print -quit | grep -q .; then
+            echo "raw artifact仅允许五个普通文件"
+            exit 1
+          fi
+          find "$RAW_INPUT" -type f -exec chmod 0444 {} +
+          chmod 0555 "$RAW_INPUT"
+
+      - name: Sanitize in offline PID and network namespace
+        working-directory: ${{ runner.temp }}/animeko-sanitize/work
+        env:
+          RAW_INPUT: ${{ runner.temp }}/animeko-raw-observations
+          BASELINE: ${{ runner.temp }}/animeko-sanitize/baseline
+          SANITIZED_OUTPUT: ${{ runner.temp }}/animeko-sanitize/work/output
+          PROMOTER: ${{ runner.temp }}/animeko-sanitize/trusted/promote_discovery.py
+        run: |
+          set -euo pipefail
+          PYTHON_BIN=$(command -v python)
+          sudo unshare --net --pid --fork --mount-proc \
+            /usr/bin/setpriv \
+              --reuid=65534 \
+              --regid=65534 \
+              --clear-groups \
+              --no-new-privs \
+              --bounding-set=-all \
+            /usr/bin/env -i \
+              LANG=C.UTF-8 \
+              PATH=/usr/bin:/bin \
+              "$PYTHON_BIN" -I -S -B "$PROMOTER" \
+                --apply "$RAW_INPUT" \
+                --baseline "$BASELINE" \
+                --output "$SANITIZED_OUTPUT"
+          sudo chown -R "$(id -u):$(id -g)" "$SANITIZED_OUTPUT"
+          find "$SANITIZED_OUTPUT" -type d -exec chmod 0755 {} +
+          find "$SANITIZED_OUTPUT" -type f -exec chmod 0644 {} +
+          test -f "$SANITIZED_OUTPUT/sanitized-manifest.json"
+
+      - name: Verify full sanitized contract in read-only job
+        env:
+          SANITIZED_OUTPUT: ${{ runner.temp }}/animeko-sanitize/work/output
+          EXPECTED_RUN_IDENTITY: github:${{ github.run_id }}:${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          python -I -S -B publish_discovery.py \
+            --verify "$SANITIZED_OUTPUT" \
+            --expected-run-identity "$EXPECTED_RUN_IDENTITY"
+
+      - name: Upload sanitized promotion artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: animeko-sanitized-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/animeko-sanitize/work/output/sanitized-manifest.json
+            ${{ runner.temp }}/animeko-sanitize/work/output/all_animeko_links.txt
+            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/state.json
+            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/programs.json
+            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/candidates.json
+            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/redundant.json
+            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/rejected.json
+            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/latest.json
+            ${{ runner.temp }}/animeko-sanitize/work/output/discovery/promotion.json
+          if-no-files-found: error
+          overwrite: false
+          retention-days: 3
+
+  publish_pr:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: sanitize
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: animeko-promotion
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+
+    steps:
+      - name: Checkout trusted publisher without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Download sanitized artifact only
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: animeko-sanitized-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/animeko-sanitized
+
+      - name: Verify and apply fixed sanitized files
+        id: verified
+        env:
+          SANITIZED_INPUT: ${{ runner.temp }}/animeko-sanitized
+          EXPECTED_RUN_IDENTITY: github:${{ github.run_id }}:${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          git config --local core.hooksPath /dev/null
+          case "$(git remote get-url origin)" in
+            "https://github.com/${{ github.repository }}"|"https://github.com/${{ github.repository }}.git") ;;
+            *) echo "origin URL不可信"; exit 1 ;;
+          esac
+          if git config --local --get-regexp '^(http\..*\.extraheader|credential\.)'; then
+            echo "publish checkout不得预置git凭据"
+            exit 1
+          fi
+          CONFIG_HASH_BEFORE=$(sha256sum .git/config | cut -d' ' -f1)
+          MANIFEST_SHA256=$(sha256sum "$SANITIZED_INPUT/sanitized-manifest.json" | cut -d' ' -f1)
+          python -I -S -B -m py_compile animeko_url_policy.py publish_discovery.py
+          python -I -S -B publish_discovery.py --test
+          python -I -S -B publish_discovery.py \
+            --apply "$SANITIZED_INPUT" \
+            --expected-run-identity "$EXPECTED_RUN_IDENTITY"
+          echo "manifest_sha256=$MANIFEST_SHA256" >> "$GITHUB_OUTPUT"
+          echo "Sanitized manifest SHA-256: $MANIFEST_SHA256" >> "$GITHUB_STEP_SUMMARY"
+          CONFIG_HASH_AFTER=$(sha256sum .git/config | cut -d' ' -f1)
+          test "$CONFIG_HASH_BEFORE" = "$CONFIG_HASH_AFTER"
+          test "$(git config --local core.hooksPath)" = /dev/null
+          case "$(git remote get-url origin)" in
+            "https://github.com/${{ github.repository }}"|"https://github.com/${{ github.repository }}.git") ;;
+            *) echo "origin URL在publish后发生变化"; exit 1 ;;
+          esac
+          rm -rf "$SANITIZED_INPUT"
+
+      - name: Stage and enforce publish allowlist
+        id: changes
+        run: |
+          set -euo pipefail
+          allowed='^(all_animeko_links\.txt|discovery/(state|programs|candidates|redundant|rejected|latest|promotion)\.json)$'
+          mapfile -d '' -t changed < <(
+            { git diff --name-only -z; git ls-files --others --exclude-standard -z; }
+          )
+          for path in "${changed[@]}"; do
+            [[ "$path" =~ $allowed ]] || {
+              echo "拒绝publish job修改非白名单路径: $path"
+              exit 1
+            }
+            test -f "$path"
+            test ! -L "$path"
+            test -s "$path"
+            test ! -x "$path"
+          done
+          test -s all_animeko_links.txt
+          git diff --check
+          if [ "${#changed[@]}" -eq 0 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git add -- \
+            all_animeko_links.txt \
+            discovery/state.json \
+            discovery/programs.json \
+            discovery/candidates.json \
+            discovery/redundant.json \
+            discovery/rejected.json \
+            discovery/latest.json \
+            discovery/promotion.json
+          if git diff --cached --summary | grep -E 'mode change|create mode 120000'; then
+            echo "拒绝文件模式或符号链接变化"
+            exit 1
+          fi
+          while IFS= read -r -d '' entry; do
+            mode=${entry%% *}
+            test "$mode" = 100644 || {
+              echo "拒绝非100644 staged mode: $entry"
+              exit 1
+            }
+          done < <(git ls-files -s -z -- \
+            all_animeko_links.txt \
+            discovery/state.json \
+            discovery/programs.json \
+            discovery/candidates.json \
+            discovery/redundant.json \
+            discovery/rejected.json \
+            discovery/latest.json \
+            discovery/promotion.json)
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create protected promotion pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: automation/animeko-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          existing_pr=$(gh pr list \
+            --state open \
+            --base "${{ github.event.repository.default_branch }}" \
+            --limit 100 \
+            --json number,headRefName,headRepositoryOwner \
+            --jq '[.[] | select(.headRepositoryOwner.login == "${{ github.repository_owner }}") | select(.headRefName | startswith("automation/animeko-discovery-"))][0].number // empty')
+          if [ -n "$existing_pr" ]; then
+            echo "已有待审核发现PR #$existing_pr，本次不再创建新分支或PR"
+            exit 0
+          fi
+          git commit -m "chore: 审核 Animeko 生态发现状态 $(date -u +%F)"
+          git switch -c "$BRANCH_NAME"
+          gh auth setup-git
+          git push origin "HEAD:refs/heads/$BRANCH_NAME"
+          gh pr create \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH_NAME" \
+            --title "chore: 审核 Animeko 生态发现状态 $(date -u +%F)" \
+            --body "只读 discovery → 无网络 sanitize → 固定文件 publish。Sanitized manifest SHA-256: ${{ steps.verified.outputs.manifest_sha256 }}。请复核后合并。"
