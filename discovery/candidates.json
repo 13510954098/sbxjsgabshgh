@@ -1,0 +1,116 @@
+{
+  "candidates": [
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 1,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 1,
+        "successful_runs": 1,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "1a11883303037280f04efa369bbc4c9d8ec74ea72247bbe376145f99185c77fd",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/BT/AnimeGarden.json"
+    },
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 1,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 1,
+        "successful_runs": 1,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "2c44264251038010d4a97b621e3c62a364c15243b4521765ff3055886ff468bd",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/1anime.json"
+    },
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 1,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 1,
+        "successful_runs": 1,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "259c1b1d6fe0a21e54c45c837fd0573318d136a9a28728890d6612f3c2837c38",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/AGE.json"
+    },
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 1,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 1,
+        "successful_runs": 1,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "825cea909d588b68e4c907d897b595239fde07bb136cca2bf3a37eac91b99772",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/girigirilove.json"
+    },
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 1,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 1,
+        "successful_runs": 1,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "e727aa8af06e55c11e574a5e40d923aaf354fe370f6e7fe52bc134ae3490ad1d",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
+    }
+  ],
+  "updated": "2026-08-24T07:33:56Z",
+  "version": 1
+}

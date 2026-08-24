@@ -1,0 +1,226 @@
+{
+  "redundant": [
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "230dcf1d9e1cbc00ffb5581dbc9a6af121410cf65fefd14f8c1c31130213bb98",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/BT/nyaa.json"
+    },
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "77ff1b2ffb2a6121589c23e55546dc55f3cc28075cc0a19615e1e3bfdca691d8",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/7sefun.json"
+    },
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "42ace39aaf3f4d5dd0b0ab0ec0f687373d15d809ebd312a7849c411306751ad0",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/MXdm.json"
+    },
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "2cfae799b58d6c16c090df3611d1ec1b4f07e0a98171a0904608b249e5e3f0df",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/NT.json"
+    },
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "2e1474d9bb59f644be11f3f933b72788a71547a6b5b70d36c9c592c05404ca7e",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/aafun.json"
+    },
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "96669b2d065ae5b4478b0f8bb888430c2ae7e5621ed5973362ace2d51c0eca5e",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/gugu3.json"
+    },
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "dacd91aa0d7619bbbdd938b5c07999bfc1ac1753917b3b9cf91934772dbf3b0c",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/mitaodm.json"
+    },
+    {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:dragonheartlx/animeko-subs"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "fddb982436d9d6acfbda8fde9552058b5d9d4d89e71848b4172d4e8a079e71e8",
+      "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yishijie.json"
+    },
+    {
+      "items": 2,
+      "new_items": 0,
+      "observed_by": [
+        "github:crazybunqnq/animeko-sources"
+      ],
+      "ok": true,
+      "overlap_items": 2,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "b6d17b1922cb2096d6afb197be57f11aa7c31c212dd84cff2b535bb8eadf1523",
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/d83593e1b1c627fd054e962563c9dee987321f1c/backend/src/services/anisubs/default-bt1.json"
+    },
+    {
+      "items": 19,
+      "new_items": 0,
+      "observed_by": [
+        "github:crazybunqnq/animeko-sources"
+      ],
+      "ok": true,
+      "overlap_items": 19,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "515e6fba3e1cc7ebb2c588c5284ed2364208012d299fe399ecc78aabc39d5c54",
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/d83593e1b1c627fd054e962563c9dee987321f1c/backend/src/services/anisubs/default-css1.json"
+    }
+  ],
+  "updated": "2026-08-24T07:33:56Z",
+  "version": 1
+}
