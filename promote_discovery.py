@@ -128,8 +128,15 @@ def safe_json_tree(value, depth=0, nodes=None):
             safe_json_tree(item, depth + 1, nodes)
     elif isinstance(value, dict):
         for key, item in value.items():
-            if not isinstance(key, str) or len(key) > 200 or has_control(key):
+            if not isinstance(key, str) or has_control(key):
                 raise RuntimeError("JSON字段名非法")
+            if len(key) > 200:
+                try:
+                    is_canonical_url_key = len(key) <= 8192 and canonicalize_url(key) == key
+                except (UrlPolicyError, TypeError):
+                    is_canonical_url_key = False
+                if not is_canonical_url_key:
+                    raise RuntimeError("超长JSON键必须是canonical URL")
             safe_json_tree(item, depth + 1, nodes)
     elif value is not None and not isinstance(value, (bool, int, float)):
         raise RuntimeError("JSON含非法类型")
@@ -1188,6 +1195,14 @@ def run_selftests():
                 (baseline / "all_animeko_links.txt").write_text(data)
                 with self.assertRaises(RuntimeError):
                     load_links(baseline)
+
+        def test_long_json_key_allowed_only_for_canonical_url(self):
+            long_url = "https://sources.example.org/" + ("a" * 220) + ".json"
+            safe_json_tree({long_url: {"status": "valid"}})
+            with self.assertRaises(RuntimeError):
+                safe_json_tree({"x" * 201: {}})
+            with self.assertRaises(RuntimeError):
+                safe_json_tree({"https://127.0.0.1/" + ("a" * 220): {}})
 
         def test_secret_patterns(self):
             with self.assertRaises(RuntimeError):

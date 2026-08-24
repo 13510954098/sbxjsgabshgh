@@ -129,8 +129,15 @@ def validate_tree(value, depth=0, nodes=None):
             validate_tree(item, depth + 1, nodes)
     elif isinstance(value, dict):
         for key, item in value.items():
-            if not isinstance(key, str) or len(key) > 200 or has_control(key):
+            if not isinstance(key, str) or has_control(key):
                 raise RuntimeError("sanitized JSON字段名非法")
+            if len(key) > 200:
+                try:
+                    is_canonical_url_key = len(key) <= 8192 and canonicalize_url(key) == key
+                except (UrlPolicyError, TypeError):
+                    is_canonical_url_key = False
+                if not is_canonical_url_key:
+                    raise RuntimeError("sanitized超长JSON键必须是canonical URL")
             validate_tree(item, depth + 1, nodes)
     elif value is not None and not isinstance(value, (bool, int, float)):
         raise RuntimeError("sanitized JSON类型非法")
@@ -834,6 +841,14 @@ def run_selftests():
                     "https://example.org/x.json#fragment"):
                 with self.subTest(value=value):
                     self.assertFalse(valid_url(value))
+
+        def test_long_json_key_allowed_only_for_canonical_url(self):
+            long_url = "https://sources.example.org/" + ("a" * 220) + ".json"
+            validate_tree({long_url: {"status": "valid"}})
+            with self.assertRaises(RuntimeError):
+                validate_tree({"x" * 201: {}})
+            with self.assertRaises(RuntimeError):
+                validate_tree({"https://127.0.0.1/" + ("a" * 220): {}})
 
         def test_links_reject_duplicates(self):
             with self.assertRaises(RuntimeError):
