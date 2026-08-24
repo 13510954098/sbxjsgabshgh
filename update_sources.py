@@ -9,6 +9,7 @@ import gzip
 import hashlib
 import ipaddress
 import io
+import importlib.util
 import json
 import math
 import os
@@ -23,6 +24,19 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlsplit, urlunsplit, urljoin, quote, unquote
+
+
+def _load_url_policy():
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "animeko_url_policy.py")
+    spec = importlib.util.spec_from_file_location("animeko_updater_url_policy", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("无法加载animeko URL policy")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+canonicalize_url = _load_url_policy().canonicalize_url
 
 
 _DNS_RESOLVER_WORKER_ARG = "--dns-resolver-worker"
@@ -783,7 +797,13 @@ MAX_PROXY_NESTING = 2
 
 
 def normalize(url: str) -> str:
-    u = url.strip()
+    if not isinstance(url, str):
+        raise ValueError("链接必须是字符串")
+    if has_unsupported_scheme(url):
+        raise ValueError(f"非法协议: {url[:60]}")
+    if urlsplit(url).scheme.lower() != "https":
+        raise ValueError(f"上游配置链接必须使用 HTTPS: {url[:60]}")
+    u = canonicalize_url(url)
     if len(u) > MAX_LEN_URL:
         raise ValueError(f"链接过长: {len(u)}")
     if _has_control_chars(u):
@@ -1912,13 +1932,18 @@ def fetch_group_worker(canon: str, urls: list[str], cache_meta,
 
 def clean_links(data) -> list[str]:
     result = []
+    seen = set()
     for value in data:
         if not isinstance(value, str):
             continue
         value = value.strip()
         if not value or value.startswith("#"):
             continue
-        result.append(value)
+        canonical = canonicalize_url(value)
+        if canonical in seen:
+            continue
+        seen.add(canonical)
+        result.append(canonical)
         if len(result) > MAX_SOURCE_LINKS:
             raise ValueError(f"上游链接过多：超过 {MAX_SOURCE_LINKS}")
     return result
@@ -1937,7 +1962,10 @@ def read_links():
             if not isinstance(data, list):
                 raise ValueError(f"上游链接文件必须是列表：{name}")
             if data:
-                links = clean_links(data)
+                try:
+                    links = clean_links(data)
+                except ValueError:
+                    continue
                 for link in links:
                     try:
                         normalize(link)
@@ -3496,7 +3524,9 @@ def run_selftests():
                 normalize("http://example.com/source.json")
 
         def test_generic_url_canonicalization(self):
-            self.assertEqual(normalize("HTTPS://EXAMPLE.com.:443/x.json?a=1#fragment"),
+            with self.assertRaisesRegex(ValueError, "fragment"):
+                normalize("HTTPS://EXAMPLE.com.:443/x.json?a=1#fragment")
+            self.assertEqual(normalize("HTTPS://EXAMPLE.com.:443/x.json?a=1"),
                              "https://example.com/x.json?a=1")
             self.assertEqual(
                 normalize("https://raw.githubusercontent.com./o/r/main/x.json"),

@@ -1,0 +1,4 @@
+# 自动晋升信任边界。
+# 每行格式：platform:owner/repository，例如 github:owner/repo。
+# 未列入本文件的程序只能产生候选报告，不能自动写入正式链接清单。
+# discovery/seeds.txt 中人工直接填写的订阅链接视为显式信任，但仍须通过完整观察期。
