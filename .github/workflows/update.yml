@@ -5,8 +5,12 @@ on:
     - cron: "17 */4 * * *"
   workflow_dispatch: {}
   push:
+    branches:
+      - main
     paths:
+      - animeko_url_policy.py
       - update_sources.py
+      - requirements-discovery.lock
       - all_animeko_links.txt
       - canonical_links.json
       - .github/workflows/update.yml
@@ -18,19 +22,35 @@ concurrency:
 
 permissions:
   contents: write
+  pull-requests: write
   actions: read
 
 jobs:
   update:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
 
     steps:
-      - name: Checkout
+      - name: Checkout without persisted credentials
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 1
-          persist-credentials: true
+          persist-credentials: false
+
+      - name: Harden Git checkout
+        run: |
+          set -euo pipefail
+          git config --local core.hooksPath /dev/null
+          test "$(git config --local core.hooksPath)" = /dev/null
+          if git config --local --get-regexp '^(http\..*\.extraheader|credential\.)'; then
+            echo "checkout不得预置git凭据"
+            exit 1
+          fi
+          case "$(git remote get-url origin)" in
+            "https://github.com/${{ github.repository }}"|"https://github.com/${{ github.repository }}.git") ;;
+            *) echo "origin URL不可信"; exit 1 ;;
+          esac
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -46,7 +66,11 @@ jobs:
       - name: Install pinned dependencies
         run: |
           set -euo pipefail
-          python -m pip install --disable-pip-version-check "requests==2.34.2" "urllib3==2.7.0"
+          python -m pip install \
+            --disable-pip-version-check \
+            --require-hashes \
+            --only-binary=:all: \
+            -r requirements-discovery.lock
           python - <<'PY'
           import requests
           import urllib3
@@ -55,7 +79,7 @@ jobs:
           PY
 
       - name: Compile updater
-        run: python -m py_compile update_sources.py
+        run: python -m py_compile animeko_url_policy.py update_sources.py
 
       - name: Verify Java runtime
         run: java -version
@@ -117,38 +141,72 @@ jobs:
           path: cache/
           key: animeko-fetch-v4-${{ hashFiles('dist/latest.json') }}-${{ github.run_id }}
 
-      - name: Commit strict dist transaction
+      - name: Create updater pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: automation/animeko-update-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git diff --quiet -- dist/ && git diff --quiet --cached -- dist/; then
-            echo "dist/ 无变化，跳过提交"
+            echo "dist/ 无变化，跳过PR"
             exit 0
           fi
           python - <<'PY'
           import json
           report = json.load(open("reports/latest.json", encoding="utf-8"))
           if report.get("integrity_level") != "strict":
-              raise SystemExit("只有 strict 运行可以提交 dist/")
+              raise SystemExit("只有 strict 运行可以创建更新PR")
           if report.get("changed") is not True:
               raise SystemExit("dist/ 有变化但报告 changed 不是 true")
           PY
-          git add -- dist/
-          git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
-          pushed=false
-          for i in 1 2 3; do
-            if git push; then
-              pushed=true
-              break
-            fi
-            echo "push 失败，等待后重试 ($i/3)"
-            sleep $((i * 2))
+          allowed='^dist/(all|online|bt|all-name|online-name|bt-name|latest)\.json$|^dist/log$'
+          mapfile -d '' -t changed < <(
+            { git diff --name-only -z -- dist/; git ls-files --others --exclude-standard -z -- dist/; }
+          )
+          for path in "${changed[@]}"; do
+            [[ "$path" =~ $allowed ]] || {
+              echo "拒绝updater修改非白名单路径: $path"
+              exit 1
+            }
+            test -f "$path"
+            test ! -L "$path"
+            test -s "$path"
+            test ! -x "$path"
           done
-          if [ "$pushed" != "true" ]; then
-            echo "连续三次 push 失败；不 rebase、不提交旧产物，交由下一次工作流重新生成"
+          existing_pr=$(gh pr list \
+            --state open \
+            --base "${{ github.event.repository.default_branch }}" \
+            --limit 100 \
+            --json number,headRefName,headRepositoryOwner \
+            --jq '[.[] | select(.headRepositoryOwner.login == "${{ github.repository_owner }}") | select(.headRefName | startswith("automation/animeko-update-"))][0].number // empty')
+          if [ -n "$existing_pr" ]; then
+            echo "已有待审核updater PR #$existing_pr，本次不创建重复PR"
+            exit 0
+          fi
+          git diff --check -- dist/
+          git add -- dist/
+          if git diff --cached --summary | grep -E 'mode change|create mode 120000'; then
+            echo "拒绝dist文件mode或symlink变化"
             exit 1
           fi
+          while IFS= read -r -d '' entry; do
+            mode=${entry%% *}
+            test "$mode" = 100644 || {
+              echo "拒绝非100644 staged mode: $entry"
+              exit 1
+            }
+          done < <(git ls-files -s -z -- dist/)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
+          git switch -c "$BRANCH_NAME"
+          gh auth setup-git
+          git push origin "HEAD:refs/heads/$BRANCH_NAME"
+          gh pr create \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH_NAME" \
+            --title "chore: 更新聚合源产物 $(date -u +%F)" \
+            --body "Updater 已通过 strict integrity、事务残留、固定路径与mode检查。请审核 dist/ diff 后合并。"
 
       - name: Upload updater report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
