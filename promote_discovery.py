@@ -73,6 +73,10 @@ ALLOWED_CATEGORIES = frozenset({
     "aggregator", "generator", "converter", "validator", "workflow-bot", "mirror-sync",
     "editor-or-service", "subscription",
 })
+PROGRAM_FIELDS = frozenset({
+    "platform", "repository", "url", "default_branch", "commit", "score", "categories",
+    "signals", "files_scanned", "evidence_files", "extracted_url_count", "generated_source_files",
+})
 LEGACY_STATE_FIELDS = frozenset({
     "first_seen", "last_seen", "observed_dates", "successful_runs", "consecutive_successes",
     "stable_successes", "last_sha256", "status", "evidence", "observed_by",
@@ -554,14 +558,7 @@ def load_observations(incoming: Path, observed_date: str):
     return observations, reports
 
 
-def sanitize_programs(incoming: Path, observed_date: str):
-    document = load_json_limited(incoming / "programs.json")
-    if not isinstance(document, dict) or document.get("version") != 1:
-        raise RuntimeError("programs.json版本无效")
-    updated = valid_timestamp(document.get("updated"))
-    if updated.date().isoformat() != observed_date:
-        raise RuntimeError("programs.json日期与latest不一致")
-    entries = document.get("programs")
+def _sanitize_program_entries(entries, *, require_exact_fields: bool) -> list[dict]:
     if not isinstance(entries, list) or len(entries) > MAX_PROGRAMS:
         raise RuntimeError("programs列表无效")
     result = []
@@ -569,6 +566,8 @@ def sanitize_programs(incoming: Path, observed_date: str):
     for raw in entries:
         if not isinstance(raw, dict):
             raise RuntimeError("program条目必须是对象")
+        if require_exact_fields and set(raw) != PROGRAM_FIELDS:
+            raise RuntimeError("历史program字段集合无效")
         platform = raw.get("platform")
         repository = raw.get("repository")
         if platform not in {"github", "gitlab", "gitee", "codeberg"}:
@@ -636,10 +635,44 @@ def sanitize_programs(incoming: Path, observed_date: str):
             "extracted_url_count": bounded_int(raw.get("extracted_url_count"), "extracted_url_count", maximum=10000),
             "generated_source_files": sorted(clean_generated, key=lambda item: item["path"]),
         })
+    return result
+
+
+def merge_program_inventories(previous: list[dict], current: list[dict]) -> list[dict]:
+    merged = {
+        f"{item['platform']}:{item['repository'].casefold()}": item
+        for item in previous
+    }
+    for item in current:
+        merged.setdefault(f"{item['platform']}:{item['repository'].casefold()}", item)
+    if len(merged) > MAX_PROGRAMS:
+        raise RuntimeError("累计program数量超过上限")
+    return sorted(merged.values(), key=lambda item: (item["platform"], item["repository"].casefold()))
+
+
+def sanitize_programs(incoming: Path, baseline: Path, observed_date: str):
+    document = load_json_limited(incoming / "programs.json")
+    if not isinstance(document, dict) or document.get("version") != 1:
+        raise RuntimeError("programs.json版本无效")
+    updated = valid_timestamp(document.get("updated"))
+    if updated.date().isoformat() != observed_date:
+        raise RuntimeError("programs.json日期与latest不一致")
+    current = _sanitize_program_entries(
+        document.get("programs"), require_exact_fields=False)
+
+    previous_document = load_json_limited(baseline / "discovery/programs.json")
+    if (not isinstance(previous_document, dict)
+            or set(previous_document) != {"version", "updated", "programs"}
+            or previous_document.get("version") != 1):
+        raise RuntimeError("历史programs.json结构无效")
+    valid_timestamp(previous_document.get("updated"))
+    previous = _sanitize_program_entries(
+        previous_document.get("programs"), require_exact_fields=True)
+
     return {
         "version": 1,
         "updated": updated.isoformat().replace("+00:00", "Z"),
-        "programs": sorted(result, key=lambda item: (item["platform"], item["repository"].casefold())),
+        "programs": merge_program_inventories(previous, current),
     }
 
 
@@ -658,7 +691,11 @@ def update_state(current: dict, observations: dict, observed_date: str,
                  direct_seeds: set[str], trusted_programs: set[str], snapshot_complete=True):
     state = copy.deepcopy(current)
     candidates = state["candidates"]
+    promoted_urls = set(state["promoted"])
     for url, record in candidates.items():
+        if url in promoted_urls:
+            record["status"] = "promoted"
+            continue
         record["trusted_evidence"] = False
         record["trusted_provenance"] = []
         if url not in observations:
@@ -669,6 +706,8 @@ def update_state(current: dict, observations: dict, observed_date: str,
                 record["status"] = "absent"
                 record["last_error"] = "absent-from-snapshot"
     for url, observation in observations.items():
+        if url in promoted_urls:
+            continue
         record = candidates.get(url)
         if record is None:
             record = {
@@ -786,36 +825,59 @@ def load_links(baseline: Path):
     return output_lines, links
 
 
+def reconcile_existing_promotions(baseline: Path, state: dict, observed_date: str):
+    _, links = load_links(baseline)
+    existing = set(links)
+    promoted = set(state["promoted"])
+    for url, record in state["candidates"].items():
+        if url in existing:
+            promoted.add(url)
+            record["status"] = "promoted"
+            record.setdefault("promoted_on", observed_date)
+    state["promoted"] = sorted(promoted)
+
+
 def prepare_links(baseline: Path, state: dict, observed_date: str):
     lines, links = load_links(baseline)
     existing = set(links)
-    existing_resources = {resource_key_for_url(url) for url in links}
+    used_resources = {resource_key_for_url(url) for url in links}
     promoted = set(state["promoted"])
-    ready = []
-    ready_resources = set()
+    additions = []
+
+    # 已在滚动PR中等待确认的链接由state.promoted持续重建，直到该PR被合并。
+    for url in sorted(promoted):
+        if url in existing or url not in state["candidates"]:
+            continue
+        resource = resource_key_for_url(url)
+        if resource in used_resources:
+            continue
+        additions.append(url)
+        used_resources.add(resource)
+
+    new_ready = []
     for url, record in sorted(state["candidates"].items()):
         resource = resource_key_for_url(url)
-        if (url in existing or url in promoted or resource in existing_resources
-                or resource in ready_resources or not probation_ready(record, observed_date)):
+        if (url in existing or url in promoted or resource in used_resources
+                or not probation_ready(record, observed_date)):
             continue
-        ready.append(url)
-        ready_resources.add(resource)
-    if len(ready) > MAX_LINK_ADDITIONS:
+        new_ready.append(url)
+        additions.append(url)
+        used_resources.add(resource)
+    if len(new_ready) > MAX_LINK_ADDITIONS:
         raise RuntimeError("单次晋升链接超过上限")
-    if len(existing) + len(ready) > MAX_LINKS:
+    if len(existing) + len(additions) > MAX_LINKS:
         raise RuntimeError("晋升后正式链接数量超过上限")
-    if ready and lines and lines[-1] != "":
-        lines.extend(ready)
-    else:
-        lines.extend(ready)
-    state["promoted"] = sorted(promoted | set(ready))
-    for url in ready:
+
+    state["promoted"] = sorted(promoted | set(new_ready))
+    for url in new_ready:
         state["candidates"][url]["status"] = "promoted"
         state["candidates"][url]["promoted_on"] = observed_date
+    additions = sorted(additions)
+    lines.extend(additions)
     data = ("\n".join(lines) + "\n").encode("utf-8")
     if len(data) > MAX_LINK_FILE_SIZE:
         raise RuntimeError("晋升后链接文件超过大小上限")
-    return data, ready
+    return data, additions
 
 
 def add_probation_to_reports(reports: dict, state: dict, observed_date: str):
@@ -841,10 +903,11 @@ def build_payloads(incoming: Path, baseline: Path):
     direct_seeds = load_direct_seeds(baseline)
     current = load_current_state(baseline)
     observations, reports = load_observations(incoming, observed_date)
-    programs = sanitize_programs(incoming, observed_date)
+    programs = sanitize_programs(incoming, baseline, observed_date)
     state = update_state(
         current, observations, observed_date, direct_seeds, trusted_programs,
         snapshot_complete=latest["snapshot_complete"])
+    reconcile_existing_promotions(baseline, state, observed_date)
     add_probation_to_reports(reports, state, observed_date)
     links_data, promoted = prepare_links(baseline, state, observed_date)
     latest.update({
@@ -1043,6 +1106,40 @@ def run_selftests():
             url = "https://sources.example.org/animeko.json"
             self.assertEqual(derive_trusted_provenance(url, [], {url}, set()), ["manual-seed"])
             self.assertEqual(derive_trusted_provenance(url + "?v=2", [], {url}, set()), [])
+
+        def test_program_inventory_accumulates_without_reopening_confirmed_records(self):
+            def program(repository, commit):
+                return {"platform": "github", "repository": repository, "commit": commit}
+            merged = merge_program_inventories(
+                [program("owner/first", "a" * 40)],
+                [program("owner/second", "b" * 40), program("OWNER/FIRST", "c" * 40)],
+            )
+            self.assertEqual(len(merged), 2)
+            by_key = {item["repository"].casefold(): item for item in merged}
+            self.assertEqual(by_key["owner/first"]["commit"], "a" * 40)
+            self.assertIn("owner/second", by_key)
+
+        def test_pending_promotion_persists_until_rolling_pr_is_merged(self):
+            url = "https://sources.example.org/source.json"
+            state = {"version": 2, "candidates": {}, "promoted": []}
+            for date in ("2026-08-21", "2026-08-22", "2026-08-23"):
+                state = update_state(state, {url: _observation()}, date, {url}, set())
+            with tempfile.TemporaryDirectory() as td:
+                baseline = Path(td)
+                links = baseline / "all_animeko_links.txt"
+                links.write_text("https://sources.example.org/existing.json\n")
+                _, ready = prepare_links(baseline, state, "2026-08-23")
+                self.assertEqual(ready, [url])
+                self.assertIn(url, state["promoted"])
+                self.assertEqual(state["candidates"][url]["status"], "promoted")
+                _, pending = prepare_links(baseline, state, "2026-08-24")
+                self.assertEqual(pending, [url])
+                links.write_text("https://sources.example.org/existing.json\n" + url + "\n")
+                reconcile_existing_promotions(baseline, state, "2026-08-24")
+                _, ready = prepare_links(baseline, state, "2026-08-24")
+                self.assertEqual(ready, [])
+                self.assertIn(url, state["promoted"])
+                self.assertEqual(state["candidates"][url]["status"], "promoted")
 
         def test_private_port_fragment_and_traversal_rejected(self):
             bad = (
