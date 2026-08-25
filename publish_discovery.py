@@ -389,6 +389,31 @@ def validate_programs(document):
                 raise RuntimeError("program generated_source内容无效")
 
 
+def program_identity(item: dict) -> str:
+    return f"{item['platform']}:{item['repository'].casefold()}"
+
+
+def validate_program_transition(current: list[dict], new: list[dict]):
+    current_identities = {program_identity(item) for item in current}
+    new_identities = {program_identity(item) for item in new}
+    if not current_identities <= new_identities:
+        raise RuntimeError("sanitized programs不得删除历史program")
+
+
+def load_current_programs_baseline(path=Path("discovery/programs.json")) -> list[dict]:
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return []
+    if (not stat.S_ISREG(info.st_mode) or info.st_mode & 0o111
+            or info.st_size <= 0 or info.st_size > MAX_FILE_SIZE):
+        raise RuntimeError("publish checkout既有programs文件无效")
+    document = strict_json(path.read_bytes())
+    validate_tree(document)
+    validate_programs(document)
+    return document["programs"]
+
+
 def load_local_policy_lines(path: Path):
     try:
         info = path.lstat()
@@ -568,6 +593,62 @@ def validate_links(data: bytes):
     return len(parse_link_sequence(data))
 
 
+def merge_pending_link_payloads(current_data: bytes, existing_data: bytes, target_data: bytes) -> bytes:
+    current = parse_link_sequence(current_data)
+    existing = parse_link_sequence(existing_data)
+    target = parse_link_sequence(target_data)
+    if existing[:len(current)] != current or target[:len(current)] != current:
+        raise RuntimeError("待确认或本轮links不再以当前main正式链接为前缀")
+
+    merged_pending = []
+    seen_urls = set(current)
+    seen_resources = {resource_key_for_url(url) for url in current}
+    for url in existing[len(current):] + target[len(current):]:
+        if url in seen_urls:
+            continue
+        resource = resource_key_for_url(url)
+        if resource in seen_resources:
+            continue
+        seen_urls.add(url)
+        seen_resources.add(resource)
+        merged_pending.append(url)
+    if len(current) + len(merged_pending) > MAX_LINKS:
+        raise RuntimeError("累计待确认链接后超过正式链接数量上限")
+    if not merged_pending:
+        return current_data
+    base = current_data if current_data.endswith(b"\n") else current_data + b"\n"
+    output = base + b"".join((url + "\n").encode("utf-8") for url in merged_pending)
+    parse_link_sequence(output)
+    return output
+
+
+def read_link_payload_file(path: Path) -> bytes:
+    try:
+        info = path.lstat()
+    except FileNotFoundError as exc:
+        raise RuntimeError(f"links输入文件缺失: {path}") from exc
+    if (not stat.S_ISREG(info.st_mode) or info.st_mode & 0o111
+            or info.st_size <= 0 or info.st_size > MAX_LINK_FILE_SIZE):
+        raise RuntimeError(f"links输入文件类型、mode或大小无效: {path}")
+    data = path.read_bytes()
+    parse_link_sequence(data)
+    return data
+
+
+def merge_pending_link_files(current: Path, existing: Path, target: Path, output: Path):
+    payload = merge_pending_link_payloads(
+        read_link_payload_file(current),
+        read_link_payload_file(existing),
+        read_link_payload_file(target),
+    )
+    _write_atomic(output, payload)
+    print(json.dumps({
+        "merged": True,
+        "links": len(parse_link_sequence(payload)),
+        "output": str(output),
+    }, ensure_ascii=False))
+
+
 def validate_link_transition(current_links: list[str], new_links: list[str], promoted: list[str]):
     if promoted != sorted(set(promoted)):
         raise RuntimeError("promotion.promoted必须排序且唯一")
@@ -633,7 +714,10 @@ def validate_payloads(payloads: dict[str, bytes], expected_run_identity: str):
         documents[relative] = document
     direct_seeds, trusted_programs = load_local_trust_policy()
     validate_state(documents["discovery/state.json"], direct_seeds, trusted_programs)
-    validate_programs(documents["discovery/programs.json"])
+    programs_document = documents["discovery/programs.json"]
+    validate_programs(programs_document)
+    validate_program_transition(
+        load_current_programs_baseline(), programs_document["programs"])
     validate_candidate_report(documents["discovery/candidates.json"], "candidates")
     validate_candidate_report(documents["discovery/redundant.json"], "redundant")
     validate_candidate_report(documents["discovery/rejected.json"], "rejected")
@@ -664,7 +748,9 @@ def validate_payloads(payloads: dict[str, bytes], expected_run_identity: str):
                 "redundant": record["redundant"],
                 "ready": (
                     (record["status"] == "valid"
-                     or (record["status"] == "promoted" and entry["url"] in promotion["promoted"]))
+                     or (record["status"] == "promoted"
+                         and entry["url"] in promotion["promoted"]
+                         and record.get("promoted_on") == promotion["observed_date"]))
                     and record["trusted_evidence"] is True
                     and bool(record["trusted_provenance"]) and record["redundant"] is False
                     and record["successful_runs"] >= 3 and record["consecutive_successes"] >= 3
@@ -690,8 +776,13 @@ def validate_payloads(payloads: dict[str, bytes], expected_run_identity: str):
     if latest["run_identity"] != promotion["run_identity"] or latest["snapshot_complete"] is not promotion["snapshot_complete"]:
         raise RuntimeError("latest与promotion run identity不一致")
     promoted_now = promotion["promoted"]
-    if any(url not in state["promoted"] for url in promoted_now):
-        raise RuntimeError("promotion链接未同步至state.promoted")
+    for url in promoted_now:
+        record = state["candidates"].get(url)
+        if (not isinstance(record, dict) or record.get("status") != "promoted"
+                or url not in state["promoted"]):
+            raise RuntimeError("promotion必须同步为滚动PR中的promoted候选")
+    if not set(state["promoted"]) <= set(new_links):
+        raise RuntimeError("state.promoted只能记录当前正式清单或滚动PR中的链接")
     promotion_resources = [resource_key_for_url(url) for url in promoted_now]
     if len(promotion_resources) != len(set(promotion_resources)):
         raise RuntimeError("promotion含同一资源的transport变体")
@@ -871,6 +962,37 @@ def run_selftests():
             with self.assertRaises(RuntimeError):
                 validate_link_transition(current, current + list(reversed(promoted)), list(reversed(promoted)))
 
+        def test_pending_links_accumulate_without_replacing_old_items(self):
+            current = b"# official\nhttps://sources.example.org/original.json\n"
+            old = current + b"https://sources.example.org/week-one.json\n"
+            new = current + b"https://sources.example.org/week-two.json\n"
+            merged = merge_pending_link_payloads(current, old, new)
+            self.assertEqual(parse_link_sequence(merged), [
+                "https://sources.example.org/original.json",
+                "https://sources.example.org/week-one.json",
+                "https://sources.example.org/week-two.json",
+            ])
+            self.assertTrue(merged.startswith(current))
+
+        def test_pending_links_deduplicate_url_and_resource_variants(self):
+            current = b"https://sources.example.org/original.json\n"
+            raw = "https://raw.githubusercontent.com/o/r/main/x.json"
+            mirror = "https://cdn.jsdelivr.net/gh/o/r@main/x.json"
+            old = current + (raw + "\n").encode()
+            new = current + (raw + "\n" + mirror + "\n").encode()
+            merged = merge_pending_link_payloads(current, old, new)
+            self.assertEqual(parse_link_sequence(merged), [
+                "https://sources.example.org/original.json", raw,
+            ])
+
+        def test_pending_links_reject_stale_or_replaced_main_prefix(self):
+            current = b"https://sources.example.org/original.json\n"
+            replaced = b"https://sources.example.org/replaced.json\n"
+            with self.assertRaises(RuntimeError):
+                merge_pending_link_payloads(current, replaced, current)
+            with self.assertRaises(RuntimeError):
+                merge_pending_link_payloads(current, current, replaced)
+
         def test_run_binding_rejects_mismatch_and_stale_artifact(self):
             latest = {"run_identity": "github:1:1", "updated": "2026-08-23T00:00:00Z"}
             promotion = {"run_identity": "github:1:1", "observed_date": "2026-08-23"}
@@ -895,6 +1017,24 @@ def run_selftests():
                 missing.symlink_to(target)
                 with self.assertRaises(RuntimeError):
                     load_current_state_baseline(missing)
+
+        def test_program_transition_is_append_only_by_identity(self):
+            first = {"platform": "github", "repository": "owner/first"}
+            second = {"platform": "gitlab", "repository": "owner/second"}
+            validate_program_transition([first], [first, second])
+            with self.assertRaises(RuntimeError):
+                validate_program_transition([first, second], [second])
+
+        def test_missing_program_inventory_bootstraps_but_symlink_fails(self):
+            with tempfile.TemporaryDirectory() as td:
+                root = Path(td)
+                missing = root / "programs.json"
+                self.assertEqual(load_current_programs_baseline(missing), [])
+                target = root / "target.json"
+                target.write_text('{"version":1,"updated":"2026-08-24T00:00:00Z","programs":[]}')
+                missing.symlink_to(target)
+                with self.assertRaises(RuntimeError):
+                    load_current_programs_baseline(missing)
 
         def test_expected_paths_exclude_workflow_and_manifest(self):
             self.assertNotIn(".github/workflows/discover.yml", EXPECTED_FILES)
@@ -922,12 +1062,20 @@ def main():
     group.add_argument("--apply", type=Path, metavar="DIR")
     group.add_argument("--verify", type=Path, metavar="DIR")
     group.add_argument("--test", action="store_true")
+    group.add_argument(
+        "--merge-pending-links", type=Path, nargs=4,
+        metavar=("CURRENT", "EXISTING", "TARGET", "OUTPUT"))
     parser.add_argument("--expected-run-identity")
     args = parser.parse_args()
     if args.test:
         if args.expected_run_identity:
             parser.error("--test不得携带expected run identity")
         run_selftests()
+    if args.merge_pending_links:
+        if args.expected_run_identity:
+            parser.error("--merge-pending-links不得携带expected run identity")
+        merge_pending_link_files(*args.merge_pending_links)
+        return
     artifact = args.apply or args.verify
     if not args.expected_run_identity:
         parser.error("--apply/--verify必须提供--expected-run-identity")
