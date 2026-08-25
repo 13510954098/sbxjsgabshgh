@@ -20,14 +20,77 @@ on:
 
 concurrency:
   group: discover-animeko-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
+  resolve_review:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      has_open: ${{ steps.review.outputs.has_open }}
+      number: ${{ steps.review.outputs.number }}
+      branch: ${{ steps.review.outputs.branch }}
+      head_sha: ${{ steps.review.outputs.head_sha }}
+
+    steps:
+      - name: Resolve the single rolling discovery pull request
+        id: review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          REVIEW_LIST: ${{ runner.temp }}/animeko-rolling-reviews.json
+        run: |
+          set -euo pipefail
+          gh pr list \
+            --repo "$GH_REPO" \
+            --state open \
+            --base "${{ github.event.repository.default_branch }}" \
+            --limit 100 \
+            --json number,headRefName,headRefOid,headRepositoryOwner \
+            > "$REVIEW_LIST"
+          python - "$REVIEW_LIST" "$GITHUB_OUTPUT" <<'PY'
+          import json
+          import os
+          import re
+          import sys
+
+          reviews = json.load(open(sys.argv[1], encoding="utf-8"))
+          owner = os.environ["REPOSITORY_OWNER"]
+          matches = []
+          for review in reviews:
+              head_owner = (review.get("headRepositoryOwner") or {}).get("login")
+              branch = review.get("headRefName", "")
+              if head_owner == owner and branch.startswith("automation/animeko-review-"):
+                  matches.append(review)
+          if len(matches) > 1:
+              raise SystemExit("检测到多个滚动Discovery PR，拒绝选择不确定基线")
+          with open(sys.argv[2], "a", encoding="utf-8") as output:
+              if not matches:
+                  output.write("has_open=false\nnumber=\nbranch=\nhead_sha=\n")
+              else:
+                  review = matches[0]
+                  branch = review["headRefName"]
+                  head = review["headRefOid"]
+                  if not re.fullmatch(r"automation/animeko-review-[0-9]+-[0-9]+", branch):
+                      raise SystemExit("滚动Discovery PR分支名无效")
+                  if not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", head):
+                      raise SystemExit("滚动Discovery PR Head SHA无效")
+                  output.write(
+                      f"has_open=true\nnumber={review['number']}\n"
+                      f"branch={branch}\nhead_sha={head}\n")
+          PY
+
   discover:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: resolve_review
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     permissions:
@@ -111,7 +174,7 @@ jobs:
 
   sanitize:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    needs: discover
+    needs: [discover, resolve_review]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -125,6 +188,33 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Overlay cumulative state from the rolling review
+        if: needs.resolve_review.outputs.has_open == 'true'
+        env:
+          REVIEW_BRANCH: ${{ needs.resolve_review.outputs.branch }}
+          REVIEW_HEAD: ${{ needs.resolve_review.outputs.head_sha }}
+          OVERLAY: ${{ runner.temp }}/animeko-review-baseline
+        run: |
+          set -euo pipefail
+          [[ "$REVIEW_BRANCH" =~ ^automation/animeko-review-[0-9]+-[0-9]+$ ]]
+          [[ "$REVIEW_HEAD" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
+          git fetch --no-tags --depth=1 origin "+refs/heads/$REVIEW_BRANCH:refs/remotes/origin/animeko-rolling-review"
+          test "$(git rev-parse refs/remotes/origin/animeko-rolling-review)" = "$REVIEW_HEAD"
+          rm -rf "$OVERLAY"
+          mkdir -p "$OVERLAY"
+          for path in discovery/state.json discovery/programs.json; do
+            entry=$(git ls-tree "$REVIEW_HEAD" -- "$path")
+            [[ "$entry" == "100644 blob "* ]] || {
+              echo "滚动PR基线文件mode或类型无效: $path"
+              exit 1
+            }
+            output="$OVERLAY/${path##*/}"
+            git show "$REVIEW_HEAD:$path" > "$output"
+            test -s "$output"
+            test "$(stat -c %s -- "$output")" -le 5242880
+            install -m 0644 "$output" "$path"
+          done
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -176,6 +266,12 @@ jobs:
             cp --no-dereference -- discovery/state.json "$SANDBOX/baseline/discovery/state.json"
           else
             printf '%s\n' '{"version":2,"candidates":{},"promoted":[]}' > "$SANDBOX/baseline/discovery/state.json"
+          fi
+          if [ -e discovery/programs.json ] || [ -L discovery/programs.json ]; then
+            check_regular_file discovery/programs.json 5242880
+            cp --no-dereference -- discovery/programs.json "$SANDBOX/baseline/discovery/programs.json"
+          else
+            printf '%s\n' '{"version":1,"updated":"1970-01-01T00:00:00Z","programs":[]}' > "$SANDBOX/baseline/discovery/programs.json"
           fi
           find "$SANDBOX/baseline" -type d -exec chmod 0555 {} +
           find "$SANDBOX/baseline" -type f -exec chmod 0444 {} +
@@ -262,10 +358,9 @@ jobs:
 
   publish_pr:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    needs: sanitize
+    needs: [sanitize, resolve_review]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    environment: animeko-promotion
     permissions:
       contents: write
       pull-requests: write
@@ -278,6 +373,33 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Overlay cumulative state from the rolling review
+        if: needs.resolve_review.outputs.has_open == 'true'
+        env:
+          REVIEW_BRANCH: ${{ needs.resolve_review.outputs.branch }}
+          REVIEW_HEAD: ${{ needs.resolve_review.outputs.head_sha }}
+          OVERLAY: ${{ runner.temp }}/animeko-publish-baseline
+        run: |
+          set -euo pipefail
+          [[ "$REVIEW_BRANCH" =~ ^automation/animeko-review-[0-9]+-[0-9]+$ ]]
+          [[ "$REVIEW_HEAD" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
+          git fetch --no-tags --depth=1 origin "+refs/heads/$REVIEW_BRANCH:refs/remotes/origin/animeko-rolling-review"
+          test "$(git rev-parse refs/remotes/origin/animeko-rolling-review)" = "$REVIEW_HEAD"
+          rm -rf "$OVERLAY"
+          mkdir -p "$OVERLAY"
+          for path in discovery/state.json discovery/programs.json; do
+            entry=$(git ls-tree "$REVIEW_HEAD" -- "$path")
+            [[ "$entry" == "100644 blob "* ]] || {
+              echo "滚动PR发布基线文件mode或类型无效: $path"
+              exit 1
+            }
+            output="$OVERLAY/${path##*/}"
+            git show "$REVIEW_HEAD:$path" > "$output"
+            test -s "$output"
+            test "$(stat -c %s -- "$output")" -le 5242880
+            install -m 0644 "$output" "$path"
+          done
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -326,6 +448,8 @@ jobs:
 
       - name: Stage and enforce publish allowlist
         id: changes
+        env:
+          HAS_OPEN_REVIEW: ${{ needs.resolve_review.outputs.has_open }}
         run: |
           set -euo pipefail
           allowed='^(all_animeko_links\.txt|discovery/(state|programs|candidates|redundant|rejected|latest|promotion)\.json)$'
@@ -344,6 +468,51 @@ jobs:
           done
           test -s all_animeko_links.txt
           git diff --check
+          if git diff --quiet -- all_animeko_links.txt; then
+            echo "links_changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "links_changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$HAS_OPEN_REVIEW" != true ]; then
+            meaningful=$(python - <<'PY'
+          import json
+          import pathlib
+          import subprocess
+
+          def from_head(path):
+              return json.loads(subprocess.check_output(
+                  ["git", "show", f"HEAD:{path}"], text=True))
+
+          def active_state(document):
+              promoted = set(document.get("promoted", []))
+              candidates = {
+                  url: record for url, record in document.get("candidates", {}).items()
+                  if url not in promoted
+              }
+              return promoted, candidates
+
+          old_state = from_head("discovery/state.json")
+          new_state = json.loads(pathlib.Path("discovery/state.json").read_text())
+          old_programs = from_head("discovery/programs.json")
+          new_programs = json.loads(pathlib.Path("discovery/programs.json").read_text())
+          identity = lambda item: f"{item['platform']}:{item['repository'].casefold()}"
+          program_changed = (
+              {identity(item) for item in old_programs["programs"]}
+              != {identity(item) for item in new_programs["programs"]}
+          )
+          state_changed = active_state(old_state) != active_state(new_state)
+          links_changed = subprocess.run(
+              ["git", "diff", "--quiet", "--", "all_animeko_links.txt"],
+              check=False).returncode != 0
+          print("true" if program_changed or state_changed or links_changed else "false")
+          PY
+            )
+            if [ "$meaningful" != true ]; then
+              echo "没有新的未确认成果，跳过创建新滚动PR"
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
           if [ "${#changed[@]}" -eq 0 ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -378,31 +547,111 @@ jobs:
             discovery/promotion.json)
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Create protected promotion pull request
+      - name: Create or update the single rolling discovery pull request
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH_NAME: automation/animeko-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_SHA: ${{ github.sha }}
+          HAS_OPEN_REVIEW: ${{ needs.resolve_review.outputs.has_open }}
+          REVIEW_NUMBER: ${{ needs.resolve_review.outputs.number }}
+          REVIEW_BRANCH: ${{ needs.resolve_review.outputs.branch }}
+          REVIEW_HEAD: ${{ needs.resolve_review.outputs.head_sha }}
+          NEW_BRANCH: automation/animeko-review-${{ github.run_id }}-${{ github.run_attempt }}
+          PUBLISH_STAGE: ${{ runner.temp }}/animeko-rolling-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          CURRENT_LINKS: ${{ runner.temp }}/animeko-current-links-${{ github.run_id }}-${{ github.run_attempt }}.txt
+          EXISTING_LINKS: ${{ runner.temp }}/animeko-existing-links-${{ github.run_id }}-${{ github.run_attempt }}.txt
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          existing_pr=$(gh pr list \
-            --state open \
-            --base "${{ github.event.repository.default_branch }}" \
-            --limit 100 \
-            --json number,headRefName,headRepositoryOwner \
-            --jq '[.[] | select(.headRepositoryOwner.login == "${{ github.repository_owner }}") | select(.headRefName | startswith("automation/animeko-discovery-"))][0].number // empty')
-          if [ -n "$existing_pr" ]; then
-            echo "已有待审核发现PR #$existing_pr，本次不再创建新分支或PR"
+          gh auth setup-git
+          [[ "$TRIGGER_SHA" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
+          test "$(git rev-parse HEAD)" = "$TRIGGER_SHA"
+          remote_main=$(git ls-remote --exit-code origin \
+            "refs/heads/${{ github.event.repository.default_branch }}" | cut -f1)
+          [ "$remote_main" = "$TRIGGER_SHA" ] || {
+            echo "main在本轮验证期间已经变化；等待下一轮基于新main重算"
+            exit 1
+          }
+
+          rm -rf "$PUBLISH_STAGE"
+          mkdir -p "$PUBLISH_STAGE/discovery"
+          install -m 0644 all_animeko_links.txt "$PUBLISH_STAGE/all_animeko_links.txt"
+          for name in state programs candidates redundant rejected latest promotion; do
+            install -m 0644 "discovery/$name.json" "$PUBLISH_STAGE/discovery/$name.json"
+          done
+          trap 'rm -rf -- "$PUBLISH_STAGE"; rm -f -- "$CURRENT_LINKS" "$EXISTING_LINKS"' EXIT
+
+          if [ "$HAS_OPEN_REVIEW" = true ]; then
+            [[ "$REVIEW_NUMBER" =~ ^[0-9]+$ ]]
+            [[ "$REVIEW_BRANCH" =~ ^automation/animeko-review-[0-9]+-[0-9]+$ ]]
+            [[ "$REVIEW_HEAD" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
+            remote_review=$(git ls-remote --exit-code origin "refs/heads/$REVIEW_BRANCH" | cut -f1)
+            [ "$remote_review" = "$REVIEW_HEAD" ] || {
+              echo "滚动PR在本轮分析期间已更新；拒绝覆盖，等待下一轮"
+              exit 1
+            }
+            mapfile -t review_files < <(
+              gh api --paginate "repos/$REPOSITORY/pulls/$REVIEW_NUMBER/files?per_page=100" \
+                --jq '.[].filename' | LC_ALL=C sort -u
+            )
+            allowed='^(all_animeko_links\.txt|discovery/(state|programs|candidates|redundant|rejected|latest|promotion)\.json)$'
+            for path in "${review_files[@]}"; do
+              [[ "$path" =~ $allowed ]] || {
+                echo "滚动PR含非白名单文件，拒绝自动更新: $path"
+                exit 1
+              }
+            done
+
+            git reset --hard HEAD
+            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+              git fetch --unshallow origin
+            else
+              git fetch origin
+            fi
+            git fetch origin "+refs/heads/$REVIEW_BRANCH:refs/remotes/origin/animeko-rolling-review"
+            test "$(git rev-parse refs/remotes/origin/animeko-rolling-review)" = "$REVIEW_HEAD"
+            git switch -C "animeko-review-update-${{ github.run_id }}-${{ github.run_attempt }}" \
+              refs/remotes/origin/animeko-rolling-review
+            git merge --no-edit "refs/remotes/origin/${{ github.event.repository.default_branch }}"
+
+            cp --no-dereference -- all_animeko_links.txt "$EXISTING_LINKS"
+            git show \
+              "refs/remotes/origin/${{ github.event.repository.default_branch }}:all_animeko_links.txt" \
+              > "$CURRENT_LINKS"
+            for name in state programs candidates redundant rejected latest promotion; do
+              install -m 0644 "$PUBLISH_STAGE/discovery/$name.json" "discovery/$name.json"
+            done
+            python -I -S -B publish_discovery.py --merge-pending-links \
+              "$CURRENT_LINKS" "$EXISTING_LINKS" "$PUBLISH_STAGE/all_animeko_links.txt" \
+              all_animeko_links.txt
+            chmod 0644 all_animeko_links.txt
+            git diff --check
+            git add -- \
+              all_animeko_links.txt \
+              discovery/state.json \
+              discovery/programs.json \
+              discovery/candidates.json \
+              discovery/redundant.json \
+              discovery/rejected.json \
+              discovery/latest.json \
+              discovery/promotion.json
+            if ! git diff --cached --quiet; then
+              git commit -m "chore: 累计 Animeko 搜索成果 $(date -u +%F)"
+              git push origin "HEAD:refs/heads/$REVIEW_BRANCH"
+            fi
+            gh pr edit "$REVIEW_NUMBER" \
+              --body "确认前，每轮只读搜索成果都会累计到此同一个PR；确认合并后，已确认历史不会再作为新成果拉起。最新Sanitized manifest SHA-256: ${{ steps.verified.outputs.manifest_sha256 }}。"
+            echo "已累计更新滚动Discovery PR #$REVIEW_NUMBER"
             exit 0
           fi
-          git commit -m "chore: 审核 Animeko 生态发现状态 $(date -u +%F)"
-          git switch -c "$BRANCH_NAME"
-          gh auth setup-git
-          git push origin "HEAD:refs/heads/$BRANCH_NAME"
+
+          git commit -m "chore: 开始累计 Animeko 搜索成果 $(date -u +%F)"
+          git switch -c "$NEW_BRANCH"
+          git push origin "HEAD:refs/heads/$NEW_BRANCH"
           gh pr create \
             --base "${{ github.event.repository.default_branch }}" \
-            --head "$BRANCH_NAME" \
-            --title "chore: 审核 Animeko 生态发现状态 $(date -u +%F)" \
-            --body "只读 discovery → 无网络 sanitize → 固定文件 publish。Sanitized manifest SHA-256: ${{ steps.verified.outputs.manifest_sha256 }}。请复核后合并。"
+            --head "$NEW_BRANCH" \
+            --title "chore: 确认 Animeko 累计搜索成果" \
+            --body "确认前，每轮只读搜索成果都会累计到此同一个PR；确认合并后，已确认历史不会再作为新成果拉起。Sanitized manifest SHA-256: ${{ steps.verified.outputs.manifest_sha256 }}。"
