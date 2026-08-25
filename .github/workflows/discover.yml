@@ -44,11 +44,13 @@ jobs:
         id: review
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           REPOSITORY_OWNER: ${{ github.repository_owner }}
           REVIEW_LIST: ${{ runner.temp }}/animeko-rolling-reviews.json
         run: |
           set -euo pipefail
           gh pr list \
+            --repo "$GH_REPO" \
             --state open \
             --base "${{ github.event.repository.default_branch }}" \
             --limit 100 \
