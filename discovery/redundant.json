@@ -177,50 +177,6 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yishijie.json"
     },
     {
-      "items": 1,
-      "new_items": 0,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 1,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": true,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": true,
-      "sha256": "c9b6d2ede71488e7613316c957257dd6584f9e9ddc17884d0cff2e92e44bc1d7",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/bt.json"
-    },
-    {
-      "items": 1,
-      "new_items": 0,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 1,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": true,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": true,
-      "sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
-    },
-    {
       "items": 2,
       "new_items": 0,
       "observed_by": [
@@ -265,6 +221,6 @@
       "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/d83593e1b1c627fd054e962563c9dee987321f1c/backend/src/services/anisubs/default-css1.json"
     }
   ],
-  "updated": "2026-08-24T09:42:05Z",
+  "updated": "2026-08-25T07:30:28Z",
   "version": 1
 }
