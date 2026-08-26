@@ -8,9 +8,9 @@ on:
     branches:
       - main
     paths:
-      - animeko_url_policy.py
-      - update_sources.py
-      - requirements-discovery.lock
+      - src/animeko_url_policy.py
+      - src/update_sources.py
+      - src/requirements-discovery.lock
       - all_animeko_links.txt
       - canonical_links.json
       - editorial/tiers.json
@@ -72,7 +72,7 @@ jobs:
             --disable-pip-version-check \
             --require-hashes \
             --only-binary=:all: \
-            -r requirements-discovery.lock
+            -r src/requirements-discovery.lock
           python - <<'PY'
           import requests
           import urllib3
@@ -81,13 +81,13 @@ jobs:
           PY
 
       - name: Compile updater
-        run: python -m py_compile animeko_url_policy.py update_sources.py
+        run: python -m py_compile src/animeko_url_policy.py src/update_sources.py
 
       - name: Verify Java runtime
         run: java -version
 
       - name: Run updater selftests
-        run: python update_sources.py --test
+        run: python src/update_sources.py --test
 
       - name: Restore cache bound to checked-out dist
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
@@ -101,10 +101,10 @@ jobs:
       - name: Run updater
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python update_sources.py
+        run: python src/update_sources.py
 
       - name: Validate generated outputs
-        run: python update_sources.py --validate
+        run: python src/update_sources.py --validate
 
       - name: Enforce integrity and transaction result
         run: |
