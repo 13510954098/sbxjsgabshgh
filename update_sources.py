@@ -2377,8 +2377,17 @@ def _output_identities(fn: str, items: list) -> set:
     return out
 
 
-def _content_guard_problems(old_outputs: dict, new_outputs: dict) -> list[str]:
+def _policy_adjusted_fingerprints(items: list, tier_policies: dict) -> set[str]:
+    return {
+        sha256_json(apply_creamycake_tier_policy_to_item(item, tier_policies))
+        for item in items
+    }
+
+
+def _content_guard_problems(old_outputs: dict, new_outputs: dict,
+                            tier_policies: dict | None = None) -> list[str]:
     problems = []
+    tier_policies = tier_policies or {}
     for fn in OUTPUT_FILES:
         old_ms = old_outputs.get(fn)
         new_ms = new_outputs.get(fn)
@@ -2394,8 +2403,8 @@ def _content_guard_problems(old_outputs: dict, new_outputs: dict) -> list[str]:
     old_all = old_outputs.get("all.json")
     new_all = new_outputs.get("all.json")
     if isinstance(old_all, list) and isinstance(new_all, list) and old_all:
-        old_fingerprints = {sha256_json(item) for item in old_all}
-        new_fingerprints = {sha256_json(item) for item in new_all}
+        old_fingerprints = _policy_adjusted_fingerprints(old_all, tier_policies)
+        new_fingerprints = _policy_adjusted_fingerprints(new_all, tier_policies)
         replaced = len(old_fingerprints - new_fingerprints)
         if replaced / len(old_fingerprints) > MAX_DELETE_RATIO:
             problems.append(f"[P0-2] all.json 内容替换 {replaced}/{len(old_fingerprints)} 超 "
@@ -2447,6 +2456,25 @@ def _guard_anchor_valid(anchor) -> bool:
         return False
     return all(isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)
                for value in fingerprints)
+
+
+def _migrate_guard_anchor_tier_policies(anchor: dict, old_outputs: dict,
+                                        tier_policies: dict) -> dict:
+    if not tier_policies or not _guard_anchor_valid(anchor):
+        return anchor
+    old_all = old_outputs.get("all.json")
+    if not isinstance(old_all, list):
+        return anchor
+    fingerprints = set(anchor["fingerprints"])
+    for item in old_all:
+        old_fingerprint = sha256_json(item)
+        updated_fingerprint = sha256_json(
+            apply_creamycake_tier_policy_to_item(item, tier_policies))
+        if old_fingerprint != updated_fingerprint and old_fingerprint in fingerprints:
+            fingerprints.remove(old_fingerprint)
+            fingerprints.add(updated_fingerprint)
+    migrated = {"created": anchor["created"], "fingerprints": sorted(fingerprints)}
+    return migrated if _guard_anchor_valid(migrated) else anchor
 
 
 def _load_guard_anchor(d: str):
@@ -2839,6 +2867,9 @@ def main():
     sel_name = build_merged(candidates, "name")
     sel_full = enrich_channel_tiers(sel_full, candidates)
     sel_name = enrich_channel_tiers(sel_name, candidates, "name")
+    creamycake_policies = creamycake_tier_policies(candidates)
+    sel_full = apply_creamycake_tier_policies(sel_full, creamycake_policies)
+    sel_name = apply_creamycake_tier_policies(sel_name, creamycake_policies)
 
     def split(ordered):
         items = [rec["item"] for _, rec in ordered]
@@ -2883,17 +2914,21 @@ def main():
         guard_anchor = _load_guard_anchor("dist")
         if guard_anchor is None:
             guard_anchor = _make_guard_anchor(old_outputs)
+            guard_anchor = _migrate_guard_anchor_tier_policies(
+                guard_anchor, old_outputs, creamycake_policies)
             current_fingerprints = set(_make_guard_anchor(outputs)["fingerprints"])
             missing_from_current = set(guard_anchor["fingerprints"]) - current_fingerprints
             anchor_problems = ([f"[P0-2] 累计内容基线缺失且旧内容变化 {len(missing_from_current)} 项，拒绝覆盖"]
                                if missing_from_current else [])
         else:
+            guard_anchor = _migrate_guard_anchor_tier_policies(
+                guard_anchor, old_outputs, creamycake_policies)
             anchor_problems = _anchor_guard_problems(guard_anchor, outputs)
     else:
         guard_anchor = _make_guard_anchor(outputs)
         anchor_problems = []
     guard_problems = (_count_guard_problems(old_counts, new_counts)
-                      + _content_guard_problems(old_outputs, outputs)
+                      + _content_guard_problems(old_outputs, outputs, creamycake_policies)
                       + _concentration_guard_problems(old_outputs, outputs, origin_by_key)
                       + anchor_problems)
     if guard_problems:
@@ -3269,6 +3304,72 @@ def enrich_channel_tiers(merged: dict, candidates: list, mode: str = "full") -> 
                         args["channelTiers"] = ct
                         break
         out[key] = {"item": m2, "origin": rec["origin"], "rank": rec["rank"]}
+    return out
+
+
+def is_creamycake_tier_source(canon: str) -> bool:
+    parsed = urlsplit(canon)
+    return (
+        parsed.scheme.lower() == "https"
+        and parsed.netloc.lower() == "sub.creamycake.org"
+        and parsed.path == "/v1/css1.json"
+        and not parsed.query
+        and not parsed.fragment
+    )
+
+
+def creamycake_tier_policies(candidates: list) -> dict:
+    policies = {}
+    ambiguous = set()
+    for _rank, _key, item, canon in sorted(candidates, key=lambda row: row[0]):
+        if not is_creamycake_tier_source(canon):
+            continue
+        args = item.get("arguments") or {}
+        factory_id = item.get("factoryId")
+        name = args.get("name")
+        tier = safe_tier(args.get("tier"))
+        channel_tiers = args.get("channelTiers")
+        if (not isinstance(factory_id, str) or not isinstance(name, str)
+                or tier is None or not isinstance(channel_tiers, dict)
+                or any(not isinstance(channel, str) or safe_channel_tier(value) is None
+                       for channel, value in channel_tiers.items())):
+            continue
+        key = (factory_id, name)
+        policy = {
+            "tier": tier,
+            "channelTiers": {
+                str(channel): safe_channel_tier(value)
+                for channel, value in channel_tiers.items()
+            },
+        }
+        previous = policies.get(key)
+        if previous is not None and previous != policy:
+            ambiguous.add(key)
+        else:
+            policies[key] = policy
+    for key in ambiguous:
+        policies.pop(key, None)
+    return policies
+
+
+def apply_creamycake_tier_policy_to_item(item: dict, policies: dict) -> dict:
+    updated = copy.deepcopy(item)
+    args = dict(updated.get("arguments") or {})
+    policy = policies.get((updated.get("factoryId"), args.get("name")))
+    if policy is not None:
+        args["tier"] = policy["tier"]
+        args["channelTiers"] = copy.deepcopy(policy["channelTiers"])
+        updated["arguments"] = args
+    return updated
+
+
+def apply_creamycake_tier_policies(merged: dict, policies: dict) -> dict:
+    if not policies:
+        return merged
+    out = {}
+    for key, rec in merged.items():
+        item = apply_creamycake_tier_policy_to_item(rec["item"], policies)
+        out[key] = {"item": item, "origin": rec["origin"], "rank": rec["rank"]}
     return out
 
 
@@ -3833,6 +3934,64 @@ def run_selftests():
             merged_empty = {key: {"item": empty, "origin": "o", "rank": (0,)}}
             out3 = enrich_channel_tiers(merged_empty, first)[key]["item"]["arguments"]["channelTiers"]
             self.assertEqual(out3, {"A": 1})
+
+        def test_creamycake_tier_policy_overrides_selected_duplicate(self):
+            key = ("web-selector", "X", "https://x.example/search")
+            selected = {"factoryId": "web-selector", "version": 2,
+                        "arguments": {"name": "X", "tier": 6,
+                                      "channelTiers": {"旧线路": 5},
+                                      "searchConfig": {"searchUrl": "https://x.example/search"}}}
+            official = copy.deepcopy(selected)
+            official["arguments"]["tier"] = 1
+            official["arguments"]["channelTiers"] = {"主线": 0, "备用": 6}
+            merged = {key: {"item": selected, "origin": "other", "rank": (0,)}}
+            candidates = [
+                ((2,), key, official, "https://sub.creamycake.org/v1/css1.json"),
+                ((0,), key, selected, "https://example.org/other.json"),
+            ]
+            policies = creamycake_tier_policies(candidates)
+            out = apply_creamycake_tier_policies(merged, policies)[key]["item"]["arguments"]
+            self.assertEqual(out["tier"], 1)
+            self.assertEqual(out["channelTiers"], {"主线": 0, "备用": 6})
+            self.assertEqual(merged[key]["item"]["arguments"]["tier"], 6)
+
+        def test_creamycake_tier_policy_only_trusts_exact_official_url(self):
+            key = ("web-selector", "X", "https://x.example/search")
+            item = {"factoryId": "web-selector", "version": 2,
+                    "arguments": {"name": "X", "tier": 0, "channelTiers": {},
+                                  "searchConfig": {"searchUrl": "https://x.example/search"}}}
+            rejected = (
+                "http://sub.creamycake.org/v1/css1.json",
+                "https://sub.creamycake.org./v1/css1.json",
+                "https://sub.creamycake.org:443/v1/css1.json",
+                "https://sub.creamycake.org/v1/css1.json?mirror=1",
+                "https://evil.example/v1/css1.json",
+            )
+            candidates = [((i,), key, item, url) for i, url in enumerate(rejected)]
+            self.assertEqual(creamycake_tier_policies(candidates), {})
+            candidates.append(((9,), key, item,
+                               "https://sub.creamycake.org/v1/css1.json"))
+            self.assertEqual(creamycake_tier_policies(candidates)[("web-selector", "X")],
+                             {"tier": 0, "channelTiers": {}})
+
+        def test_creamycake_tier_policy_rejects_ambiguous_rules(self):
+            key = ("web-selector", "X", "https://x.example/search")
+            base = {"factoryId": "web-selector", "version": 2,
+                    "arguments": {"name": "X", "tier": 5, "channelTiers": {},
+                                  "searchConfig": {"searchUrl": "https://x.example/search"}}}
+            first = copy.deepcopy(base)
+            second = copy.deepcopy(base)
+            first["arguments"]["tier"] = 1
+            second["arguments"]["tier"] = 2
+            merged = {key: {"item": base, "origin": "other", "rank": (0,)}}
+            candidates = [
+                ((1,), key, first, "https://sub.creamycake.org/v1/css1.json"),
+                ((2,), key, second, "https://sub.creamycake.org/v1/css1.json"),
+            ]
+            self.assertNotIn(("web-selector", "X"), creamycake_tier_policies(candidates))
+            policies = creamycake_tier_policies(candidates)
+            out = apply_creamycake_tier_policies(merged, policies)[key]["item"]["arguments"]
+            self.assertEqual(out["tier"], 5)
 
         def test_cache_roundtrip(self):
             import tempfile
@@ -4626,6 +4785,27 @@ def run_selftests():
             replaced = [mk(i) for i in range(100, 200)]
             problems = _content_guard_problems({"all-name.json": old}, {"all-name.json": replaced})
             self.assertTrue(any("all-name.json" in p for p in problems))
+
+        def test_tier_policy_migration_preserves_content_guards(self):
+            old = {"factoryId": "web-selector", "version": 2,
+                   "arguments": {"name": "X", "tier": 5,
+                                 "channelTiers": {"旧线路": 5},
+                                 "searchConfig": {"searchUrl": "https://x.example/search"}}}
+            policies = {("web-selector", "X"):
+                        {"tier": 0, "channelTiers": {"主线": 0}}}
+            new = apply_creamycake_tier_policy_to_item(old, policies)
+            self.assertFalse(_content_guard_problems(
+                {"all.json": [old]}, {"all.json": [new]}, policies))
+            anchor = _make_guard_anchor({"all.json": [old]})
+            migrated = _migrate_guard_anchor_tier_policies(
+                anchor, {"all.json": [old]}, policies)
+            self.assertFalse(_anchor_guard_problems(migrated, {"all.json": [new]}))
+            self.assertNotEqual(anchor["fingerprints"], migrated["fingerprints"])
+            changed = copy.deepcopy(new)
+            changed["arguments"]["searchConfig"]["searchUrl"] = "https://evil.example"
+            self.assertTrue(_content_guard_problems(
+                {"all.json": [old]}, {"all.json": [changed]}, policies))
+            self.assertTrue(_anchor_guard_problems(migrated, {"all.json": [changed]}))
 
         def test_new_item_source_concentration_guard(self):
             def mk(i):

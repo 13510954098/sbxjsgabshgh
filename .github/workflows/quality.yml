@@ -1,0 +1,150 @@
+name: Evaluate Animeko Source Quality
+
+on:
+  schedule:
+    - cron: "47 3 * * *"
+  workflow_dispatch:
+    inputs:
+      sample_size:
+        description: Sources to sample in this run (0 means all)
+        required: false
+        default: "16"
+  push:
+    branches:
+      - main
+    paths:
+      - animeko_url_policy.py
+      - evaluate_quality.py
+      - update_sources.py
+      - requirements-discovery.lock
+      - dist/online.json
+      - .github/workflows/quality.yml
+
+concurrency:
+  group: quality-animeko-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Harden Git checkout
+        run: |
+          set -euo pipefail
+          git config --local core.hooksPath /dev/null
+          test "$(git config --local core.hooksPath)" = /dev/null
+          if git config --local --get-regexp '^(http\..*\.extraheader|credential\.)'; then
+            echo "checkout不得预置git凭据"
+            exit 1
+          fi
+          case "$(git remote get-url origin)" in
+            "https://github.com/${{ github.repository }}"|"https://github.com/${{ github.repository }}.git") ;;
+            *) echo "origin URL不可信"; exit 1 ;;
+          esac
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install \
+            --disable-pip-version-check \
+            --require-hashes \
+            --only-binary=:all: \
+            -r requirements-discovery.lock
+          python - <<'PY'
+          import requests
+          import urllib3
+          assert requests.__version__ == "2.34.2", requests.__version__
+          assert urllib3.__version__ == "2.7.0", urllib3.__version__
+          PY
+
+      - name: Compile and test evaluator
+        run: |
+          set -euo pipefail
+          python -m py_compile animeko_url_policy.py update_sources.py evaluate_quality.py
+          python update_sources.py --test
+          python evaluate_quality.py --test
+
+      - name: Restore cumulative quality state
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        continue-on-error: true
+        with:
+          path: quality-cache/
+          key: animeko-quality-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            animeko-quality-v1-
+
+      - name: Evaluate rotating source sample
+        env:
+          SAMPLE_SIZE: ${{ inputs.sample_size || '16' }}
+        run: |
+          set -euo pipefail
+          case "$SAMPLE_SIZE" in
+            ''|*[!0-9]*) echo "sample_size必须是非负整数"; exit 2 ;;
+          esac
+          test "$SAMPLE_SIZE" -le 200 || { echo "sample_size超过200"; exit 2; }
+          mkdir -p quality-cache reports
+          python evaluate_quality.py \
+            --input dist/online.json \
+            --state quality-cache/state.json \
+            --report reports/quality.json \
+            --sample-size "$SAMPLE_SIZE"
+          python evaluate_quality.py --validate reports/quality.json
+
+      - name: Write quality summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report_path = Path("reports/quality.json")
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if not summary_path or not report_path.is_file():
+              raise SystemExit(0)
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          run = report["run"]
+          disagreements = [source for source in report["sources"] if source.get("tierDisagreement")]
+          with open(summary_path, "a", encoding="utf-8") as handle:
+              handle.write("## Animeko source quality\n\n")
+              handle.write(f"- Tested this run: {run['testedSources']}/{run['totalSources']}\n")
+              handle.write(f"- Static transport passed: {run['transportPassed']}\n")
+              handle.write(f"- Mature tier disagreements: {len(disagreements)}\n")
+              handle.write("- JavaScript/site programs executed: no\n")
+              handle.write("- Real playback claimed: no\n")
+          PY
+
+      - name: Save cumulative quality state
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        if: success()
+        continue-on-error: true
+        with:
+          path: quality-cache/
+          key: animeko-quality-v1-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: source-quality-${{ github.run_id }}
+          path: reports/quality.json
+          if-no-files-found: ignore
+          overwrite: true
+          retention-days: 30
