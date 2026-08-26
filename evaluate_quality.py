@@ -79,6 +79,11 @@ def bounded_text(value, limit: int = 500) -> str:
     return text[:limit]
 
 
+def as_dict(value):
+    """Coerce an untrusted value to dict (never let a non-dict truthy crash .get)."""
+    return value if isinstance(value, dict) else {}
+
+
 def sha256_json(value) -> str:
     payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
                          allow_nan=False).encode("utf-8")
@@ -86,8 +91,8 @@ def sha256_json(value) -> str:
 
 
 def source_identity(item: dict) -> str:
-    args = item.get("arguments") or {}
-    search = args.get("searchConfig") or {}
+    args = as_dict(item.get("arguments"))
+    search = as_dict(args.get("searchConfig"))
     raw = [item.get("factoryId"), args.get("name"), search.get("searchUrl")]
     return sha256_json(raw)[:24]
 
@@ -805,8 +810,8 @@ def validate_css_fields(config: dict) -> tuple[list[str], list[str]]:
 
 
 def config_capabilities(config: dict) -> dict:
-    matcher = config.get("matchVideo") or {}
-    headers = matcher.get("addHeadersToVideo") or {}
+    matcher = as_dict(config.get("matchVideo"))
+    headers = as_dict(matcher.get("addHeadersToVideo"))
     return {
         "httpsSearch": urlsplit(str(config.get("searchUrl") or "")).scheme == "https",
         "subjectFormat": str(config.get("subjectFormatId") or "a"),
@@ -903,8 +908,8 @@ def static_media_urls(data: bytes, page_url: str, config: dict) -> tuple[list[st
 
 
 def media_headers(config: dict, referer: str) -> dict[str, str]:
-    matcher = config.get("matchVideo") or {}
-    configured = matcher.get("addHeadersToVideo") or {}
+    matcher = as_dict(config.get("matchVideo"))
+    configured = as_dict(matcher.get("addHeadersToVideo"))
     headers = {}
     if isinstance(configured, dict):
         for key, value in configured.items():
@@ -1089,8 +1094,8 @@ def quality_label(score: int, stages: dict) -> str:
 
 def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> dict:
     started = time.monotonic()
-    args = item.get("arguments") or {}
-    config = args.get("searchConfig") or {}
+    args = as_dict(item.get("arguments"))
+    config = as_dict(args.get("searchConfig"))
     name = bounded_text(args.get("name") or "", 200)
     source_id = source_identity(item)
     today = today or datetime.now(timezone.utc).date().isoformat()
@@ -1250,6 +1255,32 @@ def finalize_result(result: dict, started: float) -> dict:
     result["eligibleForTierRecommendation"] = "unsupported" not in result["stages"].values()
     result["totalDurationMs"] = round((time.monotonic() - started) * 1000)
     return result
+
+
+def degraded_observation(item: dict, error: str) -> dict:
+    args = as_dict(item.get("arguments"))
+    config = as_dict(args.get("searchConfig"))
+    state = {
+        "sourceId": source_identity(item),
+        "factoryId": item.get("factoryId"),
+        "name": bounded_text(args.get("name") or "", 200),
+        "configFingerprint": config_fingerprint(item),
+        "testedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "query": "",
+        "officialTier": updater.safe_tier(args.get("tier")),
+        "stages": {"L0": "failed"},
+        "warnings": [],
+        "errors": [bounded_text(error, 120)],
+        "metrics": {},
+        "probe": None,
+        "channelResults": [],
+        "score": 0,
+        "quality": "poor",
+        "eligibleForTierRecommendation": False,
+        "totalDurationMs": 0,
+    }
+    state["metrics"]["capabilities"] = config_capabilities(config)
+    return state
 
 
 def validate_observation(value: dict) -> bool:
@@ -1668,6 +1699,25 @@ def run_selftests():
             self.assertNotIn("X-Test", cleaned)
             self.assertEqual(cleaned["Referer"], "https://a.example")
 
+        def test_malformed_nested_config_degrades_not_crashes(self):
+            item = {"factoryId": "web-selector", "version": 1, "arguments": {
+                "name": "bad", "searchConfig": "not-a-dict", "matchVideo": "oops"}}
+            result = evaluate_source(item, today="2026-08-26")
+            self.assertEqual(result["stages"]["L0"], "failed")
+            self.assertEqual(result["quality"], "poor")
+            self.assertTrue(validate_observation(result))
+
+        def test_bad_arguments_non_dict_is_safe(self):
+            item = {"factoryId": "web-selector", "version": 1, "arguments": "bad"}
+            result = evaluate_source(item, today="2026-08-26")
+            self.assertEqual(result["stages"]["L0"], "failed")
+
+        def test_degraded_observation_is_valid(self):
+            item = {"factoryId": "web-selector", "version": 1, "arguments": {"name": "x"}}
+            obs = degraded_observation(item, "AttributeError: boom")
+            self.assertTrue(validate_observation(obs))
+            self.assertFalse(obs["eligibleForTierRecommendation"])
+
         def test_atomic_write_rejects_oversize(self):
             with tempfile.TemporaryDirectory() as directory:
                 with self.assertRaises(QualityError):
@@ -1728,9 +1778,13 @@ def main(argv: list[str] | None = None):
         selected = choose_sample(items, state, max(0, args.sample_size))
         observations = []
         for index, item in enumerate(selected, 1):
-            name = (item.get("arguments") or {}).get("name") or "<unnamed>"
+            name = as_dict(item.get("arguments")).get("name") or "<unnamed>"
             print(f"[{index}/{len(selected)}] 评估 {name}", flush=True)
-            observation = evaluate_source(item)
+            try:
+                observation = evaluate_source(item)
+            except Exception as exc:  # 单个畸形源降级，不拖垮整轮
+                observation = degraded_observation(item, f"{type(exc).__name__}: {exc}")
+                print(f"  降级: {observation['quality']} {observation['errors']}", flush=True)
             observations.append(observation)
             print(f"  {observation['quality']} score={observation['score']} "
                   f"stage={observation['stages']}", flush=True)
