@@ -13,6 +13,8 @@ on:
       - requirements-discovery.lock
       - all_animeko_links.txt
       - canonical_links.json
+      - editorial/tiers.json
+      - quality/tier-overrides.json
       - .github/workflows/update.yml
       - .gitignore
 

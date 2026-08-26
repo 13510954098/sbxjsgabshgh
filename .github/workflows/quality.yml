@@ -8,13 +8,14 @@ on:
       sample_size:
         description: Sources to sample in this run (0 means all)
         required: false
-        default: "16"
+        default: "32"
   push:
     branches:
       - main
     paths:
       - animeko_url_policy.py
       - evaluate_quality.py
+      - promote_quality.py
       - update_sources.py
       - requirements-discovery.lock
       - dist/online.json
@@ -92,7 +93,7 @@ jobs:
 
       - name: Evaluate rotating source sample
         env:
-          SAMPLE_SIZE: ${{ inputs.sample_size || '16' }}
+          SAMPLE_SIZE: ${{ inputs.sample_size || '32' }}
         run: |
           set -euo pipefail
           case "$SAMPLE_SIZE" in
@@ -148,3 +149,265 @@ jobs:
           if-no-files-found: ignore
           overwrite: true
           retention-days: 30
+
+  promote:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: [quality]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      manifest_sha256: ${{ steps.package.outputs.manifest_sha256 }}
+      produced: ${{ steps.package.outputs.produced }}
+
+    steps:
+      - name: Checkout trusted promote script without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Compile and test promote script
+        run: |
+          set -euo pipefail
+          python -I -S -B -m py_compile promote_quality.py
+          python -I -S -B promote_quality.py --test
+
+      - name: Download quality report artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: source-quality-${{ github.run_id }}
+          path: ${{ runner.temp }}/animeko-quality-report
+
+      - name: Prepare isolated promote filesystem
+        env:
+          SANDBOX: /tmp/animeko-promote-${{ github.run_id }}-${{ github.run_attempt }}
+          REPORT_DIR: ${{ runner.temp }}/animeko-quality-report
+        run: |
+          set -euo pipefail
+          sudo rm -rf -- "$SANDBOX"
+          mkdir -p "$SANDBOX/trusted" "$SANDBOX/work" "$SANDBOX/out"
+          check_regular_file() {
+            local file=$1
+            local maximum=$2
+            test -e "$file"
+            test ! -L "$file"
+            test -f "$file"
+            test ! -x "$file"
+            test "$(stat -c %s -- "$file")" -le "$maximum"
+          }
+          check_regular_file promote_quality.py 1048576
+          cp --no-dereference -- promote_quality.py "$SANDBOX/trusted/"
+          chmod 0555 "$SANDBOX/trusted"
+          chmod 0444 "$SANDBOX/trusted/promote_quality.py"
+          check_regular_file "$REPORT_DIR/quality.json" 10485760
+          cp --no-dereference -- "$REPORT_DIR/quality.json" "$SANDBOX/work/quality.json"
+          chmod 0444 "$SANDBOX/work/quality.json"
+          if [ -e quality/tier-overrides.json ] || [ -L quality/tier-overrides.json ]; then
+            check_regular_file quality/tier-overrides.json 262144
+            cp --no-dereference -- quality/tier-overrides.json "$SANDBOX/work/previous.json"
+            chmod 0444 "$SANDBOX/work/previous.json"
+            echo "BASELINE=$SANDBOX/work/previous.json" >> "$GITHUB_ENV"
+          else
+            # 基线缺失：传不存在的路径，load_previous 按空集合处理
+            echo "BASELINE=$SANDBOX/work/absent-baseline.json" >> "$GITHUB_ENV"
+          fi
+
+      - name: Produce sanitized tier overrides
+        id: package
+        env:
+          SANDBOX: /tmp/animeko-promote-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          cd "$SANDBOX/work"
+          python -I -S -B "$SANDBOX/trusted/promote_quality.py" \
+            --report "$SANDBOX/work/quality.json" \
+            --previous "$BASELINE" \
+            --out "$SANDBOX/out/tier-overrides.json"
+          python -I -S -B "$SANDBOX/trusted/promote_quality.py" \
+            --validate "$SANDBOX/out/tier-overrides.json"
+          output="$SANDBOX/out/tier-overrides.json"
+          test -f "$output"
+          test ! -L "$output"
+          test ! -x "$output"
+          test "$(stat -c %s -- "$output")" -le 262144
+          manifest=$(sha256sum "$output" | cut -d' ' -f1)
+          [[ "$manifest" =~ ^[0-9a-f]{64}$ ]]
+          echo "manifest_sha256=$manifest" >> "$GITHUB_OUTPUT"
+          echo "produced=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload sanitized overrides artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: animeko-tier-overrides-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/animeko-promote-${{ github.run_id }}-${{ github.run_attempt }}/out/
+          if-no-files-found: error
+          overwrite: false
+          retention-days: 14
+
+  publish:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: [promote]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Harden Git checkout
+        run: |
+          set -euo pipefail
+          git config --local core.hooksPath /dev/null
+          test "$(git config --local core.hooksPath)" = /dev/null
+          if git config --local --get-regexp '^(http\..*\.extraheader|credential\.)'; then
+            echo "checkout不得预置git凭据"
+            exit 1
+          fi
+          case "$(git remote get-url origin)" in
+            "https://github.com/${{ github.repository }}"|"https://github.com/${{ github.repository }}.git") ;;
+            *) echo "origin URL不可信"; exit 1 ;;
+          esac
+
+      - name: Resolve and verify sanitized artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: animeko-tier-overrides-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/animeko-tier-overrides-input
+
+      - name: Install verified overrides into allowlisted path
+        id: changes
+        env:
+          SANITIZED_INPUT: ${{ runner.temp }}/animeko-tier-overrides-input
+          EXPECTED: ${{ needs.promote.outputs.manifest_sha256 }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED" =~ ^[0-9a-f]{64}$ ]]
+          input="$SANITIZED_INPUT/tier-overrides.json"
+          test -f "$input"
+          test ! -L "$input"
+          test ! -x "$input"
+          test "$(stat -c %s -- "$input")" -le 262144
+          actual=$(sha256sum "$input" | cut -d' ' -f1)
+          test "$actual" = "$EXPECTED" || { echo "sanitized artifact 与 promote manifest 不符"; exit 1; }
+          python -m py_compile promote_quality.py
+          python -I -S -B promote_quality.py --validate "$input"
+          test ! -L quality || { echo "quality/ 不得为符号链接"; exit 1; }
+          mkdir -p quality
+          install -m 0644 "$input" quality/tier-overrides.json
+          install -m 0644 "$input" "${{ runner.temp }}/animeko-tier-overrides-staged.json"
+          test "$(sha256sum "${{ runner.temp }}/animeko-tier-overrides-staged.json" | cut -d' ' -f1)" = "$EXPECTED"
+          rm -rf -- "$SANITIZED_INPUT"
+          mapfile -d '' -t changed_paths < <(
+            { git diff --name-only -z; git ls-files --others --exclude-standard -z; }
+          )
+          for path in "${changed_paths[@]}"; do
+            [[ "$path" == "quality/tier-overrides.json" ]] || {
+              echo "拒绝publish job修改非白名单路径: $path"; exit 1; }
+          done
+          if [ ${#changed_paths[@]} -eq 0 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git add -- quality/tier-overrides.json
+            if git diff --cached --summary | grep -E 'mode change|create mode 120000'; then
+              echo "拒绝文件模式或符号链接变化"; exit 1
+            fi
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update the single rolling quality pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_SHA: ${{ github.sha }}
+          MANIFEST: ${{ needs.promote.outputs.manifest_sha256 }}
+          NEW_BRANCH: automation/animeko-quality-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          gh auth setup-git
+          [[ "$TRIGGER_SHA" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
+          test "$(git rev-parse HEAD)" = "$TRIGGER_SHA"
+          [[ "$MANIFEST" =~ ^[0-9a-f]{64}$ ]]
+          remote_main=$(git ls-remote --exit-code origin \
+            "refs/heads/${{ github.event.repository.default_branch }}" | cut -f1)
+          [ "$remote_main" = "$TRIGGER_SHA" ] || {
+            echo "main在本轮验证期间已经变化；等待下一轮基于新main重算"
+            exit 1
+          }
+          existing=$(gh pr list \
+            --repo "$REPOSITORY" --state open \
+            --base "${{ github.event.repository.default_branch }}" \
+            --limit 100 --json number,headRefName,headRefOid,headRepositoryOwner \
+            --jq '[.[] | select(.headRepositoryOwner.login == "${{ github.repository_owner }}") | select(.headRefName | startswith("automation/animeko-quality-"))]')
+          count=$(python3 -c 'import json,sys; print(len(json.loads(sys.argv[1])))' "$existing")
+          if [ "$count" -gt 1 ]; then
+            echo "检测到多个滚动quality PR，拒绝不确定更新"
+            exit 1
+          fi
+          if [ "$count" -eq 1 ]; then
+            branch=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])[0]["headRefName"])' "$existing")
+            head=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])[0]["headRefOid"])' "$existing")
+            number=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])[0]["number"])' "$existing")
+            [[ "$branch" =~ ^automation/animeko-quality-[0-9]+-[0-9]+$ ]]
+            [[ "$head" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
+            [[ "$number" =~ ^[0-9]+$ ]]
+            remote_review=$(git ls-remote --exit-code origin "refs/heads/$branch" | cut -f1)
+            [ "$remote_review" = "$head" ] || {
+              echo "滚动PR在本轮分析期间已更新；拒绝覆盖，等待下一轮"; exit 1; }
+            mapfile -t review_files < <(
+              gh api --paginate "repos/$REPOSITORY/pulls/$number/files?per_page=100" \
+                --jq '.[].filename' | LC_ALL=C sort -u)
+            for path in "${review_files[@]}"; do
+              [[ "$path" == "quality/tier-overrides.json" ]] || {
+                echo "滚动PR含非白名单文件，拒绝自动更新: $path"; exit 1; }
+            done
+            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+              git fetch --unshallow origin
+            else
+              git fetch origin
+            fi
+            git fetch origin "+refs/heads/$branch:refs/remotes/origin/animeko-quality-rolling"
+            test "$(git rev-parse refs/remotes/origin/animeko-quality-rolling)" = "$head"
+            git switch -C "animeko-quality-update-${{ github.run_id }}-${{ github.run_attempt }}" \
+              refs/remotes/origin/animeko-quality-rolling
+            git merge --no-edit "refs/remotes/origin/${{ github.event.repository.default_branch }}"
+            install -m 0644 "${{ runner.temp }}/animeko-tier-overrides-staged.json" \
+              quality/tier-overrides.json
+            test "$(sha256sum quality/tier-overrides.json | cut -d' ' -f1)" = "$MANIFEST"
+            git diff --check
+            git add -- quality/tier-overrides.json
+            if ! git diff --cached --quiet; then
+              git commit -m "chore: 累计实测 tier 覆盖 $(date -u +%F)"
+              git push origin "HEAD:refs/heads/$branch"
+            fi
+            gh pr edit "$number" \
+              --body "确认前，每轮实测覆盖都会累计到此同一个PR；合并后下次重开。最新 Sanitized manifest SHA-256: $MANIFEST。"
+            echo "已累计更新滚动quality PR #$number"
+            exit 0
+          fi
+          git commit -m "chore: 开始累计实测 tier 覆盖 $(date -u +%F)"
+          git switch -c "$NEW_BRANCH"
+          git push origin "HEAD:refs/heads/$NEW_BRANCH"
+          gh pr create \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$NEW_BRANCH" \
+            --title "chore: 确认实测 tier 覆盖" \
+            --body "确认前，每轮实测覆盖都会累计到此同一个PR；合并后下次重开。Sanitized manifest SHA-256: $MANIFEST。"

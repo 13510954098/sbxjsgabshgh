@@ -2661,6 +2661,17 @@ def main():
     if len(groups) > MAX_UNIQUE_SOURCES:
         _early_abort(f"唯一上游过多：{len(groups)} > {MAX_UNIQUE_SOURCES}")
 
+    try:
+        editorial_policies = load_editorial_tier_policies()
+    except Exception as exc:
+        _early_abort(f"editorial tiers 读取失败: {type(exc).__name__}: {exc}")
+    if editorial_policies:
+        print(f"editorial tier 政策 {len(editorial_policies)} 条（同名键覆盖 creamycake/上游自报）")
+    quality_overrides = load_quality_tier_overrides()
+    if quality_overrides:
+        print(f"quality tier 覆盖 {len(quality_overrides)} 条"
+              f"（方向门: {'/'.join(sorted(QUALITY_OVERRIDE_DIRECTIONS))}，政策键豁免）")
+
     print(f"抓取 {len(groups)} 个唯一聚合源（共 {sum(len(v) for v in groups.values())} 条链接）...")
 
     snapshot_resolution_started = time.time()
@@ -2868,8 +2879,10 @@ def main():
     sel_full = enrich_channel_tiers(sel_full, candidates)
     sel_name = enrich_channel_tiers(sel_name, candidates, "name")
     creamycake_policies = creamycake_tier_policies(candidates)
-    sel_full = apply_creamycake_tier_policies(sel_full, creamycake_policies)
-    sel_name = apply_creamycake_tier_policies(sel_name, creamycake_policies)
+    # editorial 策展层终审：同名 (factoryId, name) 键上覆盖 creamycake
+    tier_policies = {**creamycake_policies, **editorial_policies}
+    sel_full = apply_creamycake_tier_policies(sel_full, tier_policies)
+    sel_name = apply_creamycake_tier_policies(sel_name, tier_policies)
 
     def split(ordered):
         items = [rec["item"] for _, rec in ordered]
@@ -2877,8 +2890,8 @@ def main():
         bt = [m for m in items if m.get("factoryId") == "rss"]
         return items, online, bt
 
-    ordered_full = sort_merged(sel_full, "full")
-    ordered_name = sort_merged(sel_name, "name")
+    ordered_full = sort_merged(sel_full, "full", tier_policies, quality_overrides)
+    ordered_name = sort_merged(sel_name, "name", tier_policies, quality_overrides)
     origin_by_key = {key: rec["origin"] for key, rec in ordered_full}
     of_full = split(ordered_full)
     of_name = split(ordered_name)
@@ -2915,20 +2928,20 @@ def main():
         if guard_anchor is None:
             guard_anchor = _make_guard_anchor(old_outputs)
             guard_anchor = _migrate_guard_anchor_tier_policies(
-                guard_anchor, old_outputs, creamycake_policies)
+                guard_anchor, old_outputs, tier_policies)
             current_fingerprints = set(_make_guard_anchor(outputs)["fingerprints"])
             missing_from_current = set(guard_anchor["fingerprints"]) - current_fingerprints
             anchor_problems = ([f"[P0-2] 累计内容基线缺失且旧内容变化 {len(missing_from_current)} 项，拒绝覆盖"]
                                if missing_from_current else [])
         else:
             guard_anchor = _migrate_guard_anchor_tier_policies(
-                guard_anchor, old_outputs, creamycake_policies)
+                guard_anchor, old_outputs, tier_policies)
             anchor_problems = _anchor_guard_problems(guard_anchor, outputs)
     else:
         guard_anchor = _make_guard_anchor(outputs)
         anchor_problems = []
     guard_problems = (_count_guard_problems(old_counts, new_counts)
-                      + _content_guard_problems(old_outputs, outputs, creamycake_policies)
+                      + _content_guard_problems(old_outputs, outputs, tier_policies)
                       + _concentration_guard_problems(old_outputs, outputs, origin_by_key)
                       + anchor_problems)
     if guard_problems:
@@ -3358,7 +3371,8 @@ def apply_creamycake_tier_policy_to_item(item: dict, policies: dict) -> dict:
     policy = policies.get((updated.get("factoryId"), args.get("name")))
     if policy is not None:
         args["tier"] = policy["tier"]
-        args["channelTiers"] = copy.deepcopy(policy["channelTiers"])
+        if policy.get("channelTiers") is not None:
+            args["channelTiers"] = copy.deepcopy(policy["channelTiers"])
         updated["arguments"] = args
     return updated
 
@@ -3373,10 +3387,171 @@ def apply_creamycake_tier_policies(merged: dict, policies: dict) -> dict:
     return out
 
 
-def sort_merged(selected: dict, mode: str):
+EDITORIAL_TIERS_PATH = os.path.join("editorial", "tiers.json")
+MAX_EDITORIAL_TIERS_SIZE = 256 * 1024
+MAX_EDITORIAL_TIER_ENTRIES = 200
+EDITORIAL_FACTORY_ID_RE = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
+
+
+def load_editorial_tier_policies(path: str = EDITORIAL_TIERS_PATH) -> dict:
+    """加载车库主人的策展 tier 政策（editorial/tiers.json，可选输入）。
+
+    文件缺失 ≡ 功能关闭（返回空政策）；文件存在但非法 → ValueError，
+    由调用方 fail-closed 中止本轮（trusted owner input 必须严格正确）。
+    政策键与 creamycake 一致：(factoryId, name)；channelTiers 可省略，
+    省略 ≡ 只覆盖源级 tier，不动线路表。
+    """
+    if not os.path.exists(path):
+        return {}
+    if os.path.islink(path) or not os.path.isfile(path):
+        raise ValueError("editorial tiers 路径不是常规文件")
+    size = os.path.getsize(path)
+    if size == 0 or size > MAX_EDITORIAL_TIERS_SIZE:
+        raise ValueError("editorial tiers 文件为空或过大")
+    data = load_json_file(path)
+    if not isinstance(data, dict) or data.get("schemaVersion") != 1:
+        raise ValueError("editorial tiers schemaVersion 非法")
+    entries = data.get("policies")
+    if not isinstance(entries, list) or len(entries) > MAX_EDITORIAL_TIER_ENTRIES:
+        raise ValueError("editorial tiers policies 非法或超上限")
+    policies = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError("editorial tier 条目必须是对象")
+        if set(entry) - {"factoryId", "name", "tier", "channelTiers", "note"}:
+            raise ValueError("editorial tier 条目含未知字段")
+        factory_id = entry.get("factoryId")
+        name = entry.get("name")
+        tier = safe_tier(entry.get("tier"))
+        if (not isinstance(factory_id, str) or not EDITORIAL_FACTORY_ID_RE.fullmatch(factory_id)
+                or not isinstance(name, str) or not name or len(name) > MAX_LEN_NAME):
+            raise ValueError(f"editorial tier 条目字段非法: {name!r}")
+        if tier is None or tier > 6:
+            raise ValueError(f"editorial tier 越界(须0-6): {name!r}")
+        channel_tiers = entry.get("channelTiers")
+        if channel_tiers is not None:
+            if (not isinstance(channel_tiers, dict) or not channel_tiers
+                    or len(channel_tiers) > 20
+                    or any(not isinstance(channel, str) or not channel
+                           or len(channel) > MAX_LEN_NAME
+                           or safe_channel_tier(value) is None
+                           or safe_channel_tier(value) > 6
+                           for channel, value in channel_tiers.items())):
+                raise ValueError(f"editorial channelTiers 非法: {name!r}")
+            channel_tiers = {str(channel): safe_channel_tier(value)
+                             for channel, value in channel_tiers.items()}
+        key = (factory_id, name)
+        if key in policies:
+            raise ValueError(f"editorial tier 条目重复: {name!r}")
+        policies[key] = {"tier": tier, "channelTiers": channel_tiers}
+    return policies
+
+
+QUALITY_OVERRIDES_PATH = os.path.join("quality", "tier-overrides.json")
+MAX_QUALITY_OVERRIDES_SIZE = 256 * 1024
+MAX_QUALITY_OVERRIDES_ENTRIES = 64
+# 阶段2：实测只负责"降级快刀"；阶段3把 "promote" 加入本集合即可放开升档
+QUALITY_OVERRIDE_DIRECTIONS = frozenset({"demote"})
+_QUALITY_SOURCE_ID_RE = re.compile(r"[0-9a-f]{24}\Z")
+_QUALITY_FINGERPRINT_RE = re.compile(r"[0-9a-f]{64}\Z")
+
+
+def _quality_sha256_json(value) -> str:
+    # 与 evaluate_quality.py 的 sha256_json 逐字节对齐（紧凑分隔符），
+    # 与本文件的 sha256_json（默认分隔符）不同，切勿合并使用。
+    payload = json.dumps(value, ensure_ascii=False, sort_keys=True,
+                         separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def quality_source_identity(item: dict) -> str:
+    args = item.get("arguments") or {}
+    search = args.get("searchConfig") or {}
+    return _quality_sha256_json([item.get("factoryId"), args.get("name"),
+                                 search.get("searchUrl")])[:24]
+
+
+def quality_config_fingerprint(item: dict) -> str:
+    return _quality_sha256_json(item)
+
+
+def load_quality_tier_overrides(path: str = QUALITY_OVERRIDES_PATH) -> dict:
+    """读取实测质量 tier 覆盖（fail-open：缺失/损坏/过期/非法 ≡ 空覆盖，绝不阻断聚合）。
+
+    产出方为 promote_quality.py（对 reports/quality.json 离线消毒），
+    本端做消费侧二次校验；文件级 validUntil 过期后整体失效。
+    """
+    try:
+        if not os.path.exists(path):
+            return {}
+        if os.path.islink(path) or not os.path.isfile(path):
+            raise ValueError("quality overrides 路径不是常规文件")
+        if os.path.getsize(path) == 0 or os.path.getsize(path) > MAX_QUALITY_OVERRIDES_SIZE:
+            raise ValueError("quality overrides 文件为空或过大")
+        with open(path, "rb") as handle:
+            document = load_strict_json_bytes(handle.read())
+        if not isinstance(document, dict) or document.get("schemaVersion") != 1:
+            raise ValueError("quality overrides schemaVersion 非法")
+        valid_until = document.get("validUntil")
+        if (not isinstance(valid_until, str)
+                or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", valid_until)):
+            raise ValueError("quality overrides validUntil 非法")
+        today = time.strftime("%Y-%m-%d", time.gmtime())
+        if today > valid_until:
+            print(f"⚠️ quality tier 覆盖已于 {valid_until} 过期，本轮忽略")
+            return {}
+        overrides = document.get("overrides")
+        if not isinstance(overrides, list) or len(overrides) > MAX_QUALITY_OVERRIDES_ENTRIES:
+            raise ValueError("quality overrides 列表非法或超限")
+        out = {}
+        for entry in overrides:
+            if not isinstance(entry, dict):
+                raise ValueError("quality override 条目必须是对象")
+            source_id = entry.get("sourceId")
+            fingerprint = entry.get("configFingerprint")
+            tier = safe_tier(entry.get("tier"))
+            official = entry.get("officialTier")
+            direction = entry.get("direction")
+            if (not isinstance(source_id, str) or not _QUALITY_SOURCE_ID_RE.fullmatch(source_id)
+                    or not isinstance(fingerprint, str)
+                    or not _QUALITY_FINGERPRINT_RE.fullmatch(fingerprint)
+                    or tier is None or tier > 6
+                    or (official is not None and (safe_tier(official) is None
+                                                  or safe_tier(official) > 6))
+                    or direction not in ("promote", "demote")):
+                raise ValueError(f"quality override 条目非法: {source_id!r}")
+            if source_id in out:
+                raise ValueError(f"quality override sourceId 重复: {source_id}")
+            out[source_id] = {"tier": tier, "configFingerprint": fingerprint,
+                              "direction": direction}
+        return out
+    except Exception as exc:
+        print(f"⚠️ quality tier 覆盖不可用（本轮忽略）: {type(exc).__name__}: {exc}")
+        return {}
+
+
+def quality_effective_tier(item: dict, tier_policies: dict, overrides: dict):
+    """排序键用的 tier：creamycake/editorial 已终审的键实测不插嘴；
+    其余源若命中 override 且配置指纹一致（上游未改配置），按方向门应用实测 tier。"""
+    args = item.get("arguments") or {}
+    if not overrides:
+        return args.get("tier")
+    key = (item.get("factoryId"), args.get("name"))
+    if key in tier_policies:
+        return args.get("tier")
+    entry = overrides.get(quality_source_identity(item))
+    if (entry and entry["direction"] in QUALITY_OVERRIDE_DIRECTIONS
+            and entry["configFingerprint"] == quality_config_fingerprint(item)):
+        return entry["tier"]
+    return args.get("tier")
+
+
+def sort_merged(selected: dict, mode: str, tier_policies=None, quality_overrides=None):
+    policy_keys = tier_policies if tier_policies is not None else {}
+    overrides = quality_overrides if quality_overrides is not None else {}
     ordered = sorted(selected.items(), key=lambda it: (
         1 if it[1]["item"].get("factoryId") == "rss" else 0,
-        tier_sort_value((it[1]["item"].get("arguments") or {}).get("tier")),
+        tier_sort_value(quality_effective_tier(it[1]["item"], policy_keys, overrides)),
         classify_priority(it[1]["origin"]),
         it[0][1] if mode == "name" else (it[0][1], it[0][2])))
     return ordered
@@ -3973,6 +4148,210 @@ def run_selftests():
                                "https://sub.creamycake.org/v1/css1.json"))
             self.assertEqual(creamycake_tier_policies(candidates)[("web-selector", "X")],
                              {"tier": 0, "channelTiers": {}})
+
+        def test_editorial_missing_file_disables_feature(self):
+            self.assertEqual(load_editorial_tier_policies("/nonexistent-dir/tiers.json"), {})
+
+        def test_editorial_policy_beats_creamycake_on_same_key(self):
+            key = ("web-selector", "X", "https://x.example/search")
+            selected = {"factoryId": "web-selector", "version": 2,
+                        "arguments": {"name": "X", "tier": 6,
+                                      "channelTiers": {"旧线路": 5},
+                                      "searchConfig": {"searchUrl": "https://x.example/search"}}}
+            official = copy.deepcopy(selected)
+            official["arguments"]["tier"] = 1
+            official["arguments"]["channelTiers"] = {"主线": 0, "备用": 6}
+            candidates = [
+                ((2,), key, official, "https://sub.creamycake.org/v1/css1.json"),
+            ]
+            creamycake = creamycake_tier_policies(candidates)
+            with tempfile.TemporaryDirectory() as td:
+                path = os.path.join(td, "tiers.json")
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"schemaVersion": 1, "policies": [
+                        {"factoryId": "web-selector", "name": "X", "tier": 0,
+                         "note": "车库主人策展置顶"}]}, fh, ensure_ascii=False)
+                editorial = load_editorial_tier_policies(path)
+            merged_policies = {**creamycake, **editorial}
+            merged = {key: {"item": selected, "origin": "other", "rank": (0,)}}
+            out = apply_creamycake_tier_policies(merged, merged_policies)[key]["item"]["arguments"]
+            self.assertEqual(out["tier"], 0)
+            self.assertEqual(out["channelTiers"], {"旧线路": 5})
+            self.assertEqual(merged[key]["item"]["arguments"]["tier"], 6)
+
+        def test_editorial_explicit_channel_tiers_applied(self):
+            key = ("web-selector", "Y", "https://y.example/search")
+            item = {"factoryId": "web-selector", "version": 2,
+                    "arguments": {"name": "Y", "tier": 2,
+                                  "channelTiers": {"旧": 5},
+                                  "searchConfig": {}}}
+            with tempfile.TemporaryDirectory() as td:
+                path = os.path.join(td, "tiers.json")
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"schemaVersion": 1, "policies": [
+                        {"factoryId": "web-selector", "name": "Y", "tier": 3,
+                         "channelTiers": {"主线": 0}}]}, fh, ensure_ascii=False)
+                policies = load_editorial_tier_policies(path)
+            merged = {key: {"item": item, "origin": "o", "rank": (0,)}}
+            out = apply_creamycake_tier_policies(merged, policies)[key]["item"]["arguments"]
+            self.assertEqual(out["tier"], 3)
+            self.assertEqual(out["channelTiers"], {"主线": 0})
+
+        def test_editorial_duplicate_key_rejected(self):
+            with tempfile.TemporaryDirectory() as td:
+                path = os.path.join(td, "tiers.json")
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"schemaVersion": 1, "policies": [
+                        {"factoryId": "web-selector", "name": "X", "tier": 0},
+                        {"factoryId": "web-selector", "name": "X", "tier": 1}]}, fh)
+                with self.assertRaises(ValueError):
+                    load_editorial_tier_policies(path)
+
+        def test_editorial_tier_out_of_range_rejected(self):
+            with tempfile.TemporaryDirectory() as td:
+                path = os.path.join(td, "tiers.json")
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"schemaVersion": 1, "policies": [
+                        {"factoryId": "web-selector", "name": "X", "tier": 7}]}, fh)
+                with self.assertRaises(ValueError):
+                    load_editorial_tier_policies(path)
+
+        def test_editorial_unknown_field_rejected(self):
+            with tempfile.TemporaryDirectory() as td:
+                path = os.path.join(td, "tiers.json")
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"schemaVersion": 1, "policies": [
+                        {"factoryId": "web-selector", "name": "X", "tier": 0,
+                         "priority": 1}]}, fh)
+                with self.assertRaises(ValueError):
+                    load_editorial_tier_policies(path)
+
+        def test_editorial_bad_channel_tier_rejected(self):
+            with tempfile.TemporaryDirectory() as td:
+                path = os.path.join(td, "tiers.json")
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"schemaVersion": 1, "policies": [
+                        {"factoryId": "web-selector", "name": "X", "tier": 0,
+                         "channelTiers": {"主线": "best"}}]}, fh)
+                with self.assertRaises(ValueError):
+                    load_editorial_tier_policies(path)
+
+        def test_editorial_symlink_rejected(self):
+            with tempfile.TemporaryDirectory() as td:
+                target = os.path.join(td, "real.json")
+                with open(target, "w", encoding="utf-8") as fh:
+                    json.dump({"schemaVersion": 1, "policies": []}, fh)
+                link = os.path.join(td, "tiers.json")
+                os.symlink(target, link)
+                with self.assertRaises(ValueError):
+                    load_editorial_tier_policies(link)
+
+        _QUALITY_FIXTURE_ITEM = {"factoryId": "web-selector", "version": 2,
+                                 "arguments": {"name": "Q测源", "description": "", "iconUrl": "",
+                                               "searchConfig": {
+                                                   "searchUrl": "https://q.example/search?wd={keyword}"}}}
+        _QUALITY_FIXTURE_ID = "7e3800f3bfefaff4d5e47ee1"
+        _QUALITY_FIXTURE_FP = ("7d80b1af41f4e3c3dfe036bb54a0c432eaf5843c291ba572e0cb80c7a7931940")
+
+        def test_quality_identity_matches_evaluate_serialization(self):
+            self.assertEqual(quality_source_identity(self._QUALITY_FIXTURE_ITEM),
+                             self._QUALITY_FIXTURE_ID)
+            self.assertEqual(quality_config_fingerprint(self._QUALITY_FIXTURE_ITEM),
+                             self._QUALITY_FIXTURE_FP)
+            self.assertNotEqual(_quality_sha256_json({"a": 1}),
+                                sha256_json({"a": 1}))
+
+        def _write_overrides(self, entries, valid_until="2999-01-01"):
+            if valid_until is None:
+                valid_until = time.strftime("%Y-%m-%d", time.gmtime())
+            td = tempfile.mkdtemp()
+            path = os.path.join(td, "tier-overrides.json")
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump({"schemaVersion": 1, "generatedAt": "2026-08-26T00:00:00Z",
+                           "validUntil": valid_until,
+                           "evidence": {"reportSha256": "0" * 64,
+                                        "reportGeneratedAt": "2026-08-26T00:00:00Z"},
+                           "overrides": entries}, fh, ensure_ascii=False)
+            self.addCleanup(shutil.rmtree, td, True)
+            return path
+
+        def _override_entry(self, tier=4, direction="demote", fingerprint=None):
+            return {"sourceId": self._QUALITY_FIXTURE_ID,
+                    "configFingerprint": fingerprint or self._QUALITY_FIXTURE_FP,
+                    "officialTier": 1, "tier": tier, "direction": direction,
+                    "evidenceCount": 3, "medianScore": 52.0, "transportSuccessRate": 0.7}
+
+        def test_quality_overrides_missing_file_returns_empty(self):
+            self.assertEqual(load_quality_tier_overrides("/nonexistent/tier-overrides.json"), {})
+
+        def test_quality_overrides_expired_file_ignored(self):
+            path = self._write_overrides([self._override_entry()], valid_until="2020-01-01")
+            self.assertEqual(load_quality_tier_overrides(path), {})
+
+        def test_quality_overrides_invalid_tier_drops_all(self):
+            entry = self._override_entry()
+            entry["tier"] = 9
+            path = self._write_overrides([entry])
+            self.assertEqual(load_quality_tier_overrides(path), {})
+
+        def test_quality_overrides_duplicate_source_id_drops_all(self):
+            path = self._write_overrides([self._override_entry(), self._override_entry(tier=3)])
+            self.assertEqual(load_quality_tier_overrides(path), {})
+
+        def test_quality_demote_applies_in_sort(self):
+            item = copy.deepcopy(self._QUALITY_FIXTURE_ITEM)
+            item["arguments"]["tier"] = 0
+            other = {"factoryId": "web-selector", "version": 2,
+                     "arguments": {"name": "Z尾源", "searchConfig":
+                                   {"searchUrl": "https://z.example/search"}}}
+            key_q = ("web-selector", "Q测源", "https://q.example/search?wd={keyword}")
+            key_z = ("web-selector", "Z尾源", "https://z.example/search")
+            selected = {key_q: {"item": item, "origin": "https://example.org/other.json", "rank": (0,)},
+                        key_z: {"item": other, "origin": "https://example.org/other.json", "rank": (1,)}}
+            before = [rec["item"]["arguments"]["name"] for _, rec in sort_merged(selected, "full")]
+            self.assertEqual(before[0], "Q测源")
+            overrides = {self._QUALITY_FIXTURE_ID: {"tier": 4,
+                                                    "configFingerprint": quality_config_fingerprint(item),
+                                                    "direction": "demote"}}
+            after = [rec["item"]["arguments"]["name"]
+                     for _, rec in sort_merged(selected, "full", {}, overrides)]
+            self.assertEqual(after[0], "Z尾源")
+            self.assertEqual(item["arguments"]["tier"], 0)
+
+        def test_quality_override_skipped_when_policy_key_curated(self):
+            overrides = {self._QUALITY_FIXTURE_ID: {"tier": 4,
+                                                    "configFingerprint": self._QUALITY_FIXTURE_FP,
+                                                    "direction": "demote"}}
+            tier_policies = {("web-selector", "Q测源"): {"tier": 1, "channelTiers": None}}
+            item = copy.deepcopy(self._QUALITY_FIXTURE_ITEM)
+            item["arguments"]["tier"] = 1
+            self.assertEqual(quality_effective_tier(item, tier_policies, overrides), 1)
+
+        def test_quality_override_skipped_on_config_drift(self):
+            overrides = {self._QUALITY_FIXTURE_ID: {"tier": 4,
+                                                    "configFingerprint": "0" * 64,
+                                                    "direction": "demote"}}
+            item = copy.deepcopy(self._QUALITY_FIXTURE_ITEM)
+            item["arguments"]["tier"] = 0
+            self.assertEqual(quality_effective_tier(item, {}, overrides), 0)
+
+        def test_quality_promote_blocked_by_default_direction_gate(self):
+            item = copy.deepcopy(self._QUALITY_FIXTURE_ITEM)
+            item["arguments"]["tier"] = 3
+            overrides = {self._QUALITY_FIXTURE_ID: {"tier": 0,
+                                                    "configFingerprint": quality_config_fingerprint(item),
+                                                    "direction": "promote"}}
+            self.assertEqual(quality_effective_tier(item, {}, overrides), 3)
+
+        def test_sort_merged_backward_compatible_without_overrides(self):
+            key = ("web-selector", "A", "https://a.example/search")
+            item = {"factoryId": "web-selector", "version": 2,
+                    "arguments": {"name": "A", "searchConfig":
+                                  {"searchUrl": "https://a.example/search"}}}
+            selected = {key: {"item": item, "origin": "o", "rank": (0,)}}
+            plain = [(k, rec) for k, rec in sort_merged(selected, "full")]
+            with_defaults = [(k, rec) for k, rec in sort_merged(selected, "full", {}, {})]
+            self.assertEqual([k for k, _ in plain], [k for k, _ in with_defaults])
 
         def test_creamycake_tier_policy_rejects_ambiguous_rules(self):
             key = ("web-selector", "X", "https://x.example/search")
