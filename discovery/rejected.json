@@ -3,6 +3,42 @@
     {
       "error": "html",
       "observed_by": [
+        "github:open-ani/animeko"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "url": "https://animeko.org/"
+    },
+    {
+      "error": "html",
+      "observed_by": [
+        "github:open-ani/animeko"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "url": "https://animeko.org/downloads/"
+    },
+    {
+      "error": "html",
+      "observed_by": [
         "github:maxchang3/ani-altstore-source"
       ],
       "ok": false,
@@ -36,6 +72,25 @@
       },
       "sha256": "11a081ac34d22d089f84fbe9f33044cbb127983e61d9a0533681a503e2df32b0",
       "url": "https://biomejs.dev/schemas/2.3.11/schema.json"
+    },
+    {
+      "error": "html",
+      "observed_by": [
+        "github:kevin930321/animeko",
+        "github:open-ani/animeko"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "url": "https://deepwiki.com/open-ani/animeko"
     },
     {
       "error": "html",
@@ -90,6 +145,25 @@
         "trusted_provenance": []
       },
       "url": "https://ghproxy.link/raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/online.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:edicl-514/mikan_player"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "9d21db2114cdacc22ad5fd7242645b3ba4e827d0018ebe266e3511b9159df670",
+      "url": "https://gitee.com/edicl/online-subscription/raw/master/online.json"
     },
     {
       "error": "http-404",
@@ -220,6 +294,100 @@
     {
       "error": "invalid-animeko-source",
       "observed_by": [
+        "github:edicl-514/mikan_player"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "5ae6ac3b1feae94cf43828457779c73647037ca052b5bcd4be00cf9663e0de8c",
+      "url": "https://next.bgm.tv/p1/openapi.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:zero-wyc/zviewer"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "5ea9c8aedda64fcfd4db18775bc060eea923d22d4bc2c29018e35dfc92f64a6f",
+      "url": "https://raw.githubusercontent.com/Predidit/Kazumi/main/assets/plugins/7sefun.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:zero-wyc/zviewer"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "4fed81571de82cc91fe23ce0034da9641cc64e91e2e8c432ddb2444f3419813c",
+      "url": "https://raw.githubusercontent.com/Predidit/Kazumi/main/assets/plugins/DM84.json"
+    },
+    {
+      "error": "http-404",
+      "observed_by": [
+        "github:zero-wyc/zviewer"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "url": "https://raw.githubusercontent.com/Predidit/Kazumi/main/assets/plugins/enlie.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:edicl-514/mikan_player"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "5a7ddb7ddec132293b1aa08102e6ac63e31b2925574658e927d6f931df2519da",
+      "url": "https://raw.githubusercontent.com/bangumi/api/master/open-api/v0.yaml"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
         "github:beckyeeky/animeko-loon"
       ],
       "ok": false,
@@ -333,6 +501,25 @@
     {
       "error": "invalid-animeko-source",
       "observed_by": [
+        "github:edicl-514/mikan_player"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "c22cf39b13dea4ff0c15b0caf5045704c55253c3cc58fbe8b43a23a15a5b1634",
+      "url": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
         "github:crazybunqnq/animeko-sources"
       ],
       "ok": false,
@@ -371,6 +558,26 @@
     {
       "error": "invalid-animeko-source",
       "observed_by": [
+        "github:kevin930321/animeko",
+        "github:open-ani/animeko"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "7fef04f941616a8dc35672a3c76bce6d345061596470b94ef9e6035491969682",
+      "url": "https://socialify.git.ci/open-ani/animeko/image?description=1&descriptionEditable=%E9%9B%86%E6%89%BE%E7%95%AA%E3%80%81%E8%BF%BD%E7%95%AA%E3%80%81%E7%9C%8B%E7%95%AA%E7%9A%84%E4%B8%80%E7%AB%99%E5%BC%8F%E5%BC%B9%E5%B9%95%E8%BF%BD%E7%95%AA%E5%B9%B3%E5%8F%B0&font=Jost&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fopen-ani%2Fanimeko%2Frefs%2Fheads%2Fmain%2F.github%2Fassets%2Flogo.png&name=1&owner=1&pattern=Plus&theme=Light"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
         "github:maxchang3/ani-altstore-source"
       ],
       "ok": false,
@@ -386,8 +593,44 @@
       },
       "sha256": "08d82d9f91b20af174facd02493c16298a9f25e1c3916c9f8fa1e31dffe06173",
       "url": "https://therealfoxster.github.io/altsource-viewer/view/?source=https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
+    },
+    {
+      "error": "html",
+      "observed_by": [
+        "github:yirenlove/anime-extractor"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "url": "https://tidelift.com/subscription/pkg/npm-.malept-cross-spawn-promise?utm_medium=referral&utm_source=npm_fund"
+    },
+    {
+      "error": "html",
+      "observed_by": [
+        "github:zero-wyc/zviewer"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "url": "https://vite.dev/config/"
     }
   ],
-  "updated": "2026-08-25T07:30:28Z",
+  "updated": "2026-08-26T03:45:11Z",
   "version": 1
 }
