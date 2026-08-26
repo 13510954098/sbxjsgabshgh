@@ -14,7 +14,7 @@
         "ready": false,
         "redundant": false,
         "stable_successes": 1,
-        "successful_runs": 1,
+        "successful_runs": 2,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -36,7 +36,7 @@
         "ready": false,
         "redundant": false,
         "stable_successes": 1,
-        "successful_runs": 1,
+        "successful_runs": 2,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -58,7 +58,7 @@
         "ready": false,
         "redundant": false,
         "stable_successes": 1,
-        "successful_runs": 1,
+        "successful_runs": 2,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -80,7 +80,7 @@
         "ready": false,
         "redundant": false,
         "stable_successes": 1,
-        "successful_runs": 1,
+        "successful_runs": 2,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -102,7 +102,7 @@
         "ready": false,
         "redundant": false,
         "stable_successes": 1,
-        "successful_runs": 1,
+        "successful_runs": 2,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -111,6 +111,6 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
     }
   ],
-  "updated": "2026-08-24T09:42:05Z",
+  "updated": "2026-08-26T04:24:39Z",
   "version": 1
 }
