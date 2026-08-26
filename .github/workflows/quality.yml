@@ -13,11 +13,11 @@ on:
     branches:
       - main
     paths:
-      - animeko_url_policy.py
-      - evaluate_quality.py
-      - promote_quality.py
-      - update_sources.py
-      - requirements-discovery.lock
+      - src/animeko_url_policy.py
+      - src/evaluate_quality.py
+      - src/promote_quality.py
+      - src/update_sources.py
+      - src/requirements-discovery.lock
       - dist/online.json
       - .github/workflows/quality.yml
 
@@ -67,7 +67,7 @@ jobs:
             --disable-pip-version-check \
             --require-hashes \
             --only-binary=:all: \
-            -r requirements-discovery.lock
+            -r src/requirements-discovery.lock
           python - <<'PY'
           import requests
           import urllib3
@@ -78,9 +78,9 @@ jobs:
       - name: Compile and test evaluator
         run: |
           set -euo pipefail
-          python -m py_compile animeko_url_policy.py update_sources.py evaluate_quality.py
-          python update_sources.py --test
-          python evaluate_quality.py --test
+          python -m py_compile src/animeko_url_policy.py src/update_sources.py src/evaluate_quality.py
+          python src/update_sources.py --test
+          python src/evaluate_quality.py --test
 
       - name: Restore cumulative quality state
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
@@ -101,12 +101,12 @@ jobs:
           esac
           test "$SAMPLE_SIZE" -le 200 || { echo "sample_size超过200"; exit 2; }
           mkdir -p quality-cache reports
-          python evaluate_quality.py \
+          python src/evaluate_quality.py \
             --input dist/online.json \
             --state quality-cache/state.json \
             --report reports/quality.json \
             --sample-size "$SAMPLE_SIZE"
-          python evaluate_quality.py --validate reports/quality.json
+          python src/evaluate_quality.py --validate reports/quality.json
 
       - name: Write quality summary
         if: always()
@@ -178,8 +178,8 @@ jobs:
       - name: Compile and test promote script
         run: |
           set -euo pipefail
-          python -I -S -B -m py_compile promote_quality.py
-          python -I -S -B promote_quality.py --test
+          python -I -S -B -m py_compile src/promote_quality.py
+          python -I -S -B src/promote_quality.py --test
 
       - name: Download quality report artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
@@ -204,8 +204,8 @@ jobs:
             test ! -x "$file"
             test "$(stat -c %s -- "$file")" -le "$maximum"
           }
-          check_regular_file promote_quality.py 1048576
-          cp --no-dereference -- promote_quality.py "$SANDBOX/trusted/"
+          check_regular_file src/promote_quality.py 1048576
+          cp --no-dereference -- src/promote_quality.py "$SANDBOX/trusted/"
           chmod 0555 "$SANDBOX/trusted"
           chmod 0444 "$SANDBOX/trusted/promote_quality.py"
           check_regular_file "$REPORT_DIR/quality.json" 10485760
@@ -305,8 +305,8 @@ jobs:
           test "$(stat -c %s -- "$input")" -le 262144
           actual=$(sha256sum "$input" | cut -d' ' -f1)
           test "$actual" = "$EXPECTED" || { echo "sanitized artifact 与 promote manifest 不符"; exit 1; }
-          python -m py_compile promote_quality.py
-          python -I -S -B promote_quality.py --validate "$input"
+          python -m py_compile src/promote_quality.py
+          python -I -S -B src/promote_quality.py --validate "$input"
           test ! -L quality || { echo "quality/ 不得为符号链接"; exit 1; }
           mkdir -p quality
           install -m 0644 "$input" quality/tier-overrides.json
