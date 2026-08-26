@@ -260,7 +260,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
-      pull-requests: write
       actions: read
 
     steps:
@@ -330,84 +329,53 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create or update the single rolling quality pull request
+      - name: Publish verified overrides directly to main
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-          TRIGGER_SHA: ${{ github.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          STAGED: ${{ runner.temp }}/animeko-tier-overrides-staged.json
           MANIFEST: ${{ needs.promote.outputs.manifest_sha256 }}
-          NEW_BRANCH: automation/animeko-quality-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
+          [[ "$DEFAULT_BRANCH" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$MANIFEST" =~ ^[0-9a-f]{64}$ ]]
+          test -f "$STAGED" && test ! -L "$STAGED"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           gh auth setup-git
-          [[ "$TRIGGER_SHA" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
-          test "$(git rev-parse HEAD)" = "$TRIGGER_SHA"
-          [[ "$MANIFEST" =~ ^[0-9a-f]{64}$ ]]
-          remote_main=$(git ls-remote --exit-code origin \
-            "refs/heads/${{ github.event.repository.default_branch }}" | cut -f1)
-          [ "$remote_main" = "$TRIGGER_SHA" ] || {
-            echo "main在本轮验证期间已经变化；等待下一轮基于新main重算"
-            exit 1
-          }
-          existing=$(gh pr list \
-            --repo "$REPOSITORY" --state open \
-            --base "${{ github.event.repository.default_branch }}" \
-            --limit 100 --json number,headRefName,headRefOid,headRepositoryOwner \
-            --jq '[.[] | select(.headRepositoryOwner.login == "${{ github.repository_owner }}") | select(.headRefName | startswith("automation/animeko-quality-"))]')
-          count=$(python3 -c 'import json,sys; print(len(json.loads(sys.argv[1])))' "$existing")
-          if [ "$count" -gt 1 ]; then
-            echo "检测到多个滚动quality PR，拒绝不确定更新"
-            exit 1
-          fi
-          if [ "$count" -eq 1 ]; then
-            branch=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])[0]["headRefName"])' "$existing")
-            head=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])[0]["headRefOid"])' "$existing")
-            number=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])[0]["number"])' "$existing")
-            [[ "$branch" =~ ^automation/animeko-quality-[0-9]+-[0-9]+$ ]]
-            [[ "$head" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
-            [[ "$number" =~ ^[0-9]+$ ]]
-            remote_review=$(git ls-remote --exit-code origin "refs/heads/$branch" | cut -f1)
-            [ "$remote_review" = "$head" ] || {
-              echo "滚动PR在本轮分析期间已更新；拒绝覆盖，等待下一轮"; exit 1; }
-            mapfile -t review_files < <(
-              gh api --paginate "repos/$REPOSITORY/pulls/$number/files?per_page=100" \
-                --jq '.[].filename' | LC_ALL=C sort -u)
-            for path in "${review_files[@]}"; do
-              [[ "$path" == "quality/tier-overrides.json" ]] || {
-                echo "滚动PR含非白名单文件，拒绝自动更新: $path"; exit 1; }
-            done
-            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
-              git fetch --unshallow origin
-            else
-              git fetch origin
-            fi
-            git fetch origin "+refs/heads/$branch:refs/remotes/origin/animeko-quality-rolling"
-            test "$(git rev-parse refs/remotes/origin/animeko-quality-rolling)" = "$head"
-            git switch -C "animeko-quality-update-${{ github.run_id }}-${{ github.run_attempt }}" \
-              refs/remotes/origin/animeko-quality-rolling
-            git merge --no-edit "refs/remotes/origin/${{ github.event.repository.default_branch }}"
-            install -m 0644 "${{ runner.temp }}/animeko-tier-overrides-staged.json" \
-              quality/tier-overrides.json
+          attempt=0
+          while [ "$attempt" -lt 3 ]; do
+            attempt=$((attempt + 1))
+            git fetch --depth 1 origin \
+              "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            git switch -C animeko-quality-publish "refs/remotes/origin/$DEFAULT_BRANCH"
+            test ! -L quality
+            mkdir -p quality
+            install -m 0644 "$STAGED" quality/tier-overrides.json
             test "$(sha256sum quality/tier-overrides.json | cut -d' ' -f1)" = "$MANIFEST"
-            git diff --check
+            mapfile -d '' -t changed_paths < <(
+              { git diff --name-only -z; git ls-files --others --exclude-standard -z; }
+            )
+            for path in "${changed_paths[@]}"; do
+              [[ "$path" == "quality/tier-overrides.json" ]] || {
+                echo "拒绝publish修改非白名单路径: $path"; exit 1; }
+            done
+            git diff --check -- quality/tier-overrides.json
             git add -- quality/tier-overrides.json
-            if ! git diff --cached --quiet; then
-              git commit -m "chore: 累计实测 tier 覆盖 $(date -u +%F)"
-              git push origin "HEAD:refs/heads/$branch"
+            if git diff --cached --quiet; then
+              echo "main 已包含相同覆盖，无需推送"
+              exit 0
             fi
-            gh pr edit "$number" \
-              --body "确认前，每轮实测覆盖都会累计到此同一个PR；合并后下次重开。最新 Sanitized manifest SHA-256: $MANIFEST。"
-            echo "已累计更新滚动quality PR #$number"
-            exit 0
-          fi
-          git commit -m "chore: 开始累计实测 tier 覆盖 $(date -u +%F)"
-          git switch -c "$NEW_BRANCH"
-          git push origin "HEAD:refs/heads/$NEW_BRANCH"
-          gh pr create \
-            --base "${{ github.event.repository.default_branch }}" \
-            --head "$NEW_BRANCH" \
-            --title "chore: 确认实测 tier 覆盖" \
-            --body "确认前，每轮实测覆盖都会累计到此同一个PR；合并后下次重开。Sanitized manifest SHA-256: $MANIFEST。"
+            git commit -q -m "chore: 确认实测 tier 覆盖 $(date -u +%F)"
+            remote_main=$(git ls-remote --exit-code origin \
+              "refs/heads/$DEFAULT_BRANCH" | cut -f1)
+            if [ "$remote_main" = "$(git rev-parse HEAD^)" ] && \
+               git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"; then
+              echo "已直推 main（第 $attempt 次尝试）" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "main 在本轮期间已变化，重做基线重试（$attempt/3）"
+          done
+          echo "连续3次推送竞争失败，放弃本轮；下个计划周期会重试"
+          exit 1

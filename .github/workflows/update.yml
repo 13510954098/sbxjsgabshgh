@@ -24,7 +24,7 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: write
+  issues: write
   actions: read
 
 jobs:
@@ -143,21 +143,24 @@ jobs:
           path: cache/
           key: animeko-fetch-v4-${{ hashFiles('dist/latest.json') }}-${{ github.run_id }}
 
-      - name: Create updater pull request
+      - name: Enforce publish guard fuses
+        id: guard
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH_NAME: automation/animeko-update-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          if git diff --quiet -- dist/ && git diff --quiet --cached -- dist/; then
-            echo "dist/ 无变化，跳过PR"
+          if git diff --quiet -- dist/ && git diff --cached --quiet -- dist/; then
+            echo "dist/ 无变化，跳过发布" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           python - <<'PY'
           import json
           report = json.load(open("reports/latest.json", encoding="utf-8"))
           if report.get("integrity_level") != "strict":
-              raise SystemExit("只有 strict 运行可以创建更新PR")
+              raise SystemExit("只有 strict 运行可以发布到 main")
           if report.get("changed") is not True:
               raise SystemExit("dist/ 有变化但报告 changed 不是 true")
           PY
@@ -175,40 +178,170 @@ jobs:
             test -s "$path"
             test ! -x "$path"
           done
-          existing_pr=$(gh pr list \
-            --state open \
-            --base "${{ github.event.repository.default_branch }}" \
-            --limit 100 \
-            --json number,headRefName,headRepositoryOwner \
-            --jq '[.[] | select(.headRepositoryOwner.login == "${{ github.repository_owner }}") | select(.headRefName | startswith("automation/animeko-update-"))][0].number // empty')
-          if [ -n "$existing_pr" ]; then
-            echo "已有待审核updater PR #$existing_pr，本次不创建重复PR"
-            exit 0
-          fi
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          DROP_FUSE = 0.30        # 单产物萎缩超过30% → 熔断
+          GROW_FUSE = 0.50        # 单产物膨胀超过50% → 熔断
+          TOTAL_DROP_FUSE = 0.25  # 受保护产物合计萎缩超过25% → 熔断
+          PROTECTED = ("dist/all.json", "dist/online.json", "dist/bt.json")
+
+          def metric(raw: bytes) -> int:
+              try:
+                  obj = json.loads(raw)
+              except ValueError:
+                  return len(raw)
+              node = obj
+              # Animeko 产物 schema: {"exportedMediaSourceDataList": {"mediaSources": [...]}}
+              for key in ("exportedMediaSourceDataList", "mediaSources"):
+                  if isinstance(node, dict) and key in node:
+                      node = node[key]
+              if isinstance(node, list):
+                  return len(node)
+              if isinstance(node, dict):
+                  return len(node)
+              return len(raw)
+
+          trips = []
+          lines = ["| 产物 | 基线 | 本次 | 比例 |", "|---|---|---|---|"]
+          total_old = 0
+          total_new = 0
+          for path in PROTECTED:
+              current = pathlib.Path(path)
+              if not current.is_file():
+                  continue
+              baseline = subprocess.run(
+                  ["git", "show", f"HEAD:{path}"], capture_output=True, check=False
+              )
+              if baseline.returncode != 0:
+                  lines.append(f"| {path} | 无基线 | - | - |")
+                  continue
+              old = metric(baseline.stdout)
+              new = metric(current.read_bytes())
+              if old <= 0:
+                  continue
+              total_old += old
+              total_new += new
+              ratio = new / old
+              lines.append(f"| {path} | {old} | {new} | {ratio:.1%} |")
+              if ratio < 1 - DROP_FUSE:
+                  trips.append(f"{path} 萎缩至 {ratio:.1%}")
+              if ratio > 1 + GROW_FUSE:
+                  trips.append(f"{path} 膨胀至 {ratio:.1%}")
+          if total_old > 0:
+              total_ratio = total_new / total_old
+              lines.append(f"| **合计** | {total_old} | {total_new} | {total_ratio:.1%} |")
+              if total_ratio < 1 - TOTAL_DROP_FUSE:
+                  trips.append(f"出货总量萎缩至 {total_ratio:.1%}")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as out:
+              out.write("### 出货量熔断检查\n\n" + "\n".join(lines) + "\n")
+          if trips:
+              detail = "；".join(trips)
+              print(f"::error::Update 熔断器触发：{detail} —— 已拒绝直推 main", flush=True)
+              opened = subprocess.run(
+                  ["gh", "issue", "list", "--repo", os.environ["GH_REPO"],
+                   "--state", "open", "--search", "Update 熔断 in:title",
+                   "--json", "number", "--limit", "5"],
+                  capture_output=True, text=True, check=False,
+              )
+              try:
+                  existing = json.loads(opened.stdout or "[]")
+              except ValueError:
+                  existing = []
+              if opened.returncode == 0 and not existing:
+                  subprocess.run(
+                      ["gh", "issue", "create", "--repo", os.environ["GH_REPO"],
+                       "--title", "⚠️ Update 熔断：出货量异常，已暂停直推",
+                       "--body",
+                       "熔断器在发布前拦下了一次异常聚合。\n\n"
+                       f"- 触发原因：{detail}\n"
+                       f"- 运行详情：{os.environ['RUN_URL']}\n\n"
+                       "请人工核对上游源状况。确认数据正常后 Re-run 该 workflow 可放行。"],
+                      check=False,
+                  )
+              sys.exit(1)
+          print("熔断器通过: " + "; ".join(lines[2:]))
+          PY
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Publish guarded artifacts directly to main
+        if: steps.guard.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIGGER_SHA: ${{ github.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          [[ "$TRIGGER_SHA" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]
+          test "$(git rev-parse HEAD)" = "$TRIGGER_SHA"
+          [[ "$DEFAULT_BRANCH" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           git diff --check -- dist/
-          git add -- dist/
-          if git diff --cached --summary | grep -E 'mode change|create mode 120000'; then
-            echo "拒绝dist文件mode或symlink变化"
+          payload="${{ runner.temp }}/animeko-dist-payload"
+          if [ -e "$payload" ] || [ -L "$payload" ]; then
+            echo "payload 路径已被占用"
             exit 1
           fi
-          while IFS= read -r -d '' entry; do
-            mode=${entry%% *}
-            test "$mode" = 100644 || {
-              echo "拒绝非100644 staged mode: $entry"
-              exit 1
-            }
-          done < <(git ls-files -s -z -- dist/)
+          mkdir -p "$payload"
+          cp -a dist/. "$payload/"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: 更新聚合源产物 $(date -u +%F)"
-          git switch -c "$BRANCH_NAME"
           gh auth setup-git
-          git push origin "HEAD:refs/heads/$BRANCH_NAME"
-          gh pr create \
-            --base "${{ github.event.repository.default_branch }}" \
-            --head "$BRANCH_NAME" \
-            --title "chore: 更新聚合源产物 $(date -u +%F)" \
-            --body "Updater 已通过 strict integrity、事务残留、固定路径与mode检查。请审核 dist/ diff 后合并。"
+          attempt=0
+          while [ "$attempt" -lt 3 ]; do
+            attempt=$((attempt + 1))
+            git fetch --depth 1 origin \
+              "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            git switch -C animeko-publish "refs/remotes/origin/$DEFAULT_BRANCH"
+            test ! -L dist
+            rm -rf -- dist
+            mkdir dist
+            cp -a "$payload/." dist/
+            allowed='^dist/(all|online|bt|all-name|online-name|bt-name|latest)\.json$|^dist/log$'
+            mapfile -d '' -t changed < <(
+              { git diff --name-only -z -- dist/; git ls-files --others --exclude-standard -z -- dist/; }
+            )
+            for path in "${changed[@]}"; do
+              [[ "$path" =~ $allowed ]] || {
+                echo "拒绝updater修改非白名单路径: $path"
+                exit 1
+              }
+              test -f "$path"
+              test ! -L "$path"
+              test -s "$path"
+              test ! -x "$path"
+            done
+            git add -- dist/
+            if git diff --cached --quiet; then
+              echo "main 已包含相同产物，本轮无需推送"
+              exit 0
+            fi
+            if git diff --cached --summary | grep -E 'mode change|create mode 120000'; then
+              echo "拒绝dist文件mode或symlink变化"
+              exit 1
+            fi
+            while IFS= read -r -d '' entry; do
+              mode=${entry%% *}
+              test "$mode" = 100644 || {
+                echo "拒绝非100644 staged mode: $entry"
+                exit 1
+              }
+            done < <(git ls-files -s -z -- dist/)
+            git commit -q -m "chore: 更新聚合源产物 $(date -u +%F)"
+            remote_main=$(git ls-remote --exit-code origin \
+              "refs/heads/$DEFAULT_BRANCH" | cut -f1)
+            if [ "$remote_main" = "$(git rev-parse HEAD^)" ] && \
+               git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"; then
+              echo "已直推 main（第 $attempt 次尝试）" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "main 在本轮期间已变化，重做基线重试（$attempt/3）"
+          done
+          echo "连续3次推送竞争失败，放弃本轮；下个周期会基于新 main 重算"
+          exit 1
 
       - name: Upload updater report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
