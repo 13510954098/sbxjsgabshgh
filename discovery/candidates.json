@@ -9,12 +9,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 2,
+        "consecutive_successes": 3,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 2,
-        "successful_runs": 3,
+        "stable_successes": 3,
+        "successful_runs": 4,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -31,12 +31,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 2,
+        "consecutive_successes": 3,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 2,
-        "successful_runs": 3,
+        "stable_successes": 3,
+        "successful_runs": 4,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -53,12 +53,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 2,
+        "consecutive_successes": 3,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 2,
-        "successful_runs": 3,
+        "stable_successes": 3,
+        "successful_runs": 4,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -75,12 +75,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 2,
+        "consecutive_successes": 3,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 2,
-        "successful_runs": 3,
+        "stable_successes": 3,
+        "successful_runs": 4,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -97,12 +97,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 2,
+        "consecutive_successes": 3,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 2,
-        "successful_runs": 3,
+        "stable_successes": 3,
+        "successful_runs": 4,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -111,6 +111,6 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
     }
   ],
-  "updated": "2026-08-27T13:11:48Z",
+  "updated": "2026-08-28T14:41:36Z",
   "version": 1
 }

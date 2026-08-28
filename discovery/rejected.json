@@ -238,7 +238,7 @@
       "url": "https://gitee.com/help%5D(https://gitee.com/help"
     },
     {
-      "error": "invalid-animeko-source",
+      "error": "http-405",
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
@@ -253,11 +253,10 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "7f2f06f40896437536b4f06c3a51aad853da0c51c0a2a06d301d16c97cf30658",
       "url": "https://gitee.com/w658/configs-online"
     },
     {
-      "error": "invalid-animeko-source",
+      "error": "http-405",
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
@@ -272,7 +271,6 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "9bf6e93124cccc6e35ee5219a54bd0ac385fd1f8213bbf99cfb9af7cdd3fda55",
       "url": "https://gitee.com/wan0ge/extract-pure-links"
     },
     {
@@ -403,7 +401,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "0ea913b30cb0facdf123c36f5bc7803c11fd0554ecc7c29cf64bfeab1a662191",
+      "sha256": "1bdf8869d624b8a24f4b3c93d85abb740b8b4a1ecaf040423d28804c996c6f79",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -422,7 +420,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "407e680e9c4609118e96e69c45c3c4125ef711151e125b7e250f55db5a1811ca",
+      "sha256": "e56252e69f721d5d40a1e73b1b72c2d3a5c81bcf3df2a944bc68ff92594af2bd",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -441,7 +439,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "184aab169fca659b90be3361da2950d3103bec015dbce7c04ca5f1d23900adbf",
+      "sha256": "fa270eaf24678ed7ba2f9b6eaef18aa544a53609cb44b19f55707b29ba7d8261",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -460,7 +458,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "903fe12de4fc80c6a7cf88049155280e32867ef0b79c0e374262c3cd3840d2af",
+      "sha256": "c620d7b4e424f212572da60bf6d28a54edb4deab3b480355ee94d503c328cdeb",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -633,6 +631,6 @@
       "url": "https://vite.dev/config/"
     }
   ],
-  "updated": "2026-08-27T13:11:48Z",
+  "updated": "2026-08-28T14:41:36Z",
   "version": 1
 }

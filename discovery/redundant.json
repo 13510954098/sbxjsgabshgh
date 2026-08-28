@@ -230,7 +230,7 @@
       "overlap_items": 2,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-08-27",
+        "first_seen": "2026-08-28",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -240,7 +240,7 @@
       },
       "redundant": true,
       "sha256": "b6d17b1922cb2096d6afb197be57f11aa7c31c212dd84cff2b535bb8eadf1523",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/2314b13a706883fcbe3e471926416e9e9b93983e/backend/src/services/anisubs/default-bt1.json"
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/ecf65df368e136824f381543867720c6b237db63/backend/src/services/anisubs/default-bt1.json"
     },
     {
       "items": 19,
@@ -252,7 +252,7 @@
       "overlap_items": 19,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-08-27",
+        "first_seen": "2026-08-28",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -262,9 +262,9 @@
       },
       "redundant": true,
       "sha256": "515e6fba3e1cc7ebb2c588c5284ed2364208012d299fe399ecc78aabc39d5c54",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/2314b13a706883fcbe3e471926416e9e9b93983e/backend/src/services/anisubs/default-css1.json"
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/ecf65df368e136824f381543867720c6b237db63/backend/src/services/anisubs/default-css1.json"
     }
   ],
-  "updated": "2026-08-27T13:11:48Z",
+  "updated": "2026-08-28T14:41:36Z",
   "version": 1
 }
