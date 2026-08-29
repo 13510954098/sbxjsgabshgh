@@ -177,60 +177,16 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yishijie.json"
     },
     {
-      "items": 1,
-      "new_items": 0,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 1,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": true,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": true,
-      "sha256": "c9b6d2ede71488e7613316c957257dd6584f9e9ddc17884d0cff2e92e44bc1d7",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/bt.json"
-    },
-    {
-      "items": 1,
-      "new_items": 0,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 1,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": true,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": true,
-      "sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
-    },
-    {
       "items": 2,
       "new_items": 0,
       "observed_by": [
-        "github:crazybunqnq/animeko-sources"
+        "github:stay206/dongm"
       ],
       "ok": true,
       "overlap_items": 2,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-08-28",
+        "first_seen": "2026-08-29",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -239,20 +195,20 @@
         "trusted_provenance": []
       },
       "redundant": true,
-      "sha256": "b6d17b1922cb2096d6afb197be57f11aa7c31c212dd84cff2b535bb8eadf1523",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/ecf65df368e136824f381543867720c6b237db63/backend/src/services/anisubs/default-bt1.json"
+      "sha256": "f4d49f245baad68f9a17e5e0c3bae67a21d48b7765c4c7fee28fef8d5f79664f",
+      "url": "https://raw.githubusercontent.com/stay206/dongm/main/bt1.json"
     },
     {
-      "items": 19,
+      "items": 1,
       "new_items": 0,
       "observed_by": [
-        "github:crazybunqnq/animeko-sources"
+        "github:stay206/dongm"
       ],
       "ok": true,
-      "overlap_items": 19,
+      "overlap_items": 1,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-08-28",
+        "first_seen": "2026-08-29",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -261,10 +217,10 @@
         "trusted_provenance": []
       },
       "redundant": true,
-      "sha256": "515e6fba3e1cc7ebb2c588c5284ed2364208012d299fe399ecc78aabc39d5c54",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/ecf65df368e136824f381543867720c6b237db63/backend/src/services/anisubs/default-css1.json"
+      "sha256": "0e63e29439e2ebb0cec8113c4ed598acad797012548392417624215eb3fb4350",
+      "url": "https://raw.githubusercontent.com/stay206/dongm/main/css1.json"
     }
   ],
-  "updated": "2026-08-28T14:41:36Z",
+  "updated": "2026-08-29T09:26:29Z",
   "version": 1
 }
