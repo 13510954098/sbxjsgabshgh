@@ -9,12 +9,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 4,
+        "consecutive_successes": 5,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 4,
-        "successful_runs": 5,
+        "stable_successes": 5,
+        "successful_runs": 6,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -31,12 +31,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 4,
+        "consecutive_successes": 5,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 4,
-        "successful_runs": 5,
+        "stable_successes": 5,
+        "successful_runs": 6,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -53,12 +53,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 4,
+        "consecutive_successes": 5,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 4,
-        "successful_runs": 5,
+        "stable_successes": 5,
+        "successful_runs": 6,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -75,12 +75,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 4,
+        "consecutive_successes": 5,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 4,
-        "successful_runs": 5,
+        "stable_successes": 5,
+        "successful_runs": 6,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -97,12 +97,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 4,
+        "consecutive_successes": 5,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 4,
-        "successful_runs": 5,
+        "stable_successes": 5,
+        "successful_runs": 6,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -112,19 +112,19 @@
     },
     {
       "items": 8,
-      "new_items": 2,
+      "new_items": 7,
       "observed_by": [
         "github:stay206/dongm"
       ],
       "ok": true,
-      "overlap_items": 6,
+      "overlap_items": 1,
       "probation": {
-        "consecutive_successes": 1,
+        "consecutive_successes": 2,
         "first_seen": "2026-08-29",
         "ready": false,
         "redundant": false,
-        "stable_successes": 1,
-        "successful_runs": 1,
+        "stable_successes": 2,
+        "successful_runs": 2,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -133,6 +133,6 @@
       "url": "https://raw.githubusercontent.com/stay206/dongm/main/Untitled-1.json"
     }
   ],
-  "updated": "2026-08-29T09:26:29Z",
+  "updated": "2026-08-30T08:35:56Z",
   "version": 1
 }
