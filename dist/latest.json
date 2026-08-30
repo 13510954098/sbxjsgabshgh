@@ -1,13 +1,13 @@
 {
- "updated": "2026-08-29 07:05:14 UTC",
- "source_base_commit": "fde058b1b2304e6649a351e720fc37b336d2fed6",
- "output_sha256": "efa8e6de8dad65e38cf9e74182cf7a14cc93f739c86096bdba3f347a9f651bf6",
+ "updated": "2026-08-29 13:50:21 UTC",
+ "source_base_commit": "75c066ee256e44da07f4143d389fb09c744dbc84",
+ "output_sha256": "c77219b08abfe6891a72bc5a1b2b8533009fd91debeca7502ebe895356cf0355",
  "counts": {
-  "all.json": 208,
-  "online.json": 190,
+  "all.json": 199,
+  "online.json": 181,
   "bt.json": 18,
-  "all-name.json": 165,
-  "online-name.json": 149,
+  "all-name.json": 157,
+  "online-name.json": 141,
   "bt-name.json": 16
  },
  "guard_anchor": {
@@ -234,7 +234,7 @@
   "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/H.json": "1b850a97c26f85ccf07331e975337ad20be6a96a",
   "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/H.json": "1b850a97c26f85ccf07331e975337ad20be6a96a",
   "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/anibt.json": "1b850a97c26f85ccf07331e975337ad20be6a96a",
-  "https://raw.githubusercontent.com/CrazyBunQnQ/animeko-sources/main/animeko.json": "4b6a08706b2ecc5a4d9c3e6acb084f3b0b4664bf",
+  "https://raw.githubusercontent.com/CrazyBunQnQ/animeko-sources/main/animeko.json": "5d5d05b865197a7bbc045a1485da4a44db52e13c",
   "https://raw.githubusercontent.com/cxay666/ani-yuan/main/ani-yuan.json": "886f1180d7cb33328618143cf073977691d80246",
   "https://raw.githubusercontent.com/DragonheartLX/ani-subs/main/subs/css1.json": "e3e9e81b3c6617434fc647ab1bd22882483bcda3",
   "https://raw.githubusercontent.com/LuckyRabbitFeet/animeko-source/main/index.json": "8c2b52855965de127b792cb3976b25b2b5918763",
@@ -286,7 +286,7 @@
   "https://raw.githubusercontent.com/2016YYy/animeko-source/main/dist/bt.json": "b4667409ea2c53ec6bf504ee33ae912a69ea8831",
   "https://raw.githubusercontent.com/becausemadoka/animeko-source/main/dist/bt.json": "93457b9dfd1a0558e59203875f225bb1c368b3ce"
  },
- "source_snapshots_created": 1787987114,
+ "source_snapshots_created": 1788011421,
  "source_snapshot_methods": {
   "https://sub.creamycake.org/v1/css1.json": "not-github",
   "https://sub.creamycake.org/v1/bt1.json": "not-github",
