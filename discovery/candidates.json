@@ -9,12 +9,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 6,
+        "consecutive_successes": 7,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 6,
-        "successful_runs": 7,
+        "stable_successes": 7,
+        "successful_runs": 8,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -31,12 +31,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 6,
+        "consecutive_successes": 7,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 6,
-        "successful_runs": 7,
+        "stable_successes": 7,
+        "successful_runs": 8,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -53,12 +53,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 6,
+        "consecutive_successes": 7,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 6,
-        "successful_runs": 7,
+        "stable_successes": 7,
+        "successful_runs": 8,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -75,12 +75,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 6,
+        "consecutive_successes": 7,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 6,
-        "successful_runs": 7,
+        "stable_successes": 7,
+        "successful_runs": 8,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -97,12 +97,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 6,
+        "consecutive_successes": 7,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 6,
-        "successful_runs": 7,
+        "stable_successes": 7,
+        "successful_runs": 8,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -111,28 +111,28 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
     },
     {
-      "items": 8,
-      "new_items": 7,
+      "items": 1,
+      "new_items": 1,
       "observed_by": [
-        "github:stay206/dongm"
+        "github:sakuragauthier/sakuragauthier.io"
       ],
       "ok": true,
-      "overlap_items": 1,
+      "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 3,
-        "first_seen": "2026-08-29",
+        "consecutive_successes": 1,
+        "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 3,
-        "successful_runs": 3,
+        "stable_successes": 1,
+        "successful_runs": 1,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
       "redundant": false,
-      "sha256": "4ed7695881f7205f0879049ea5c67d2fdece52b6a1750618c0509685b916803e",
-      "url": "https://raw.githubusercontent.com/stay206/dongm/main/Untitled-1.json"
+      "sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
+      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
     }
   ],
-  "updated": "2026-08-31T08:58:01Z",
+  "updated": "2026-09-01T08:03:42Z",
   "version": 1
 }

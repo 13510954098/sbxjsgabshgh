@@ -1,12 +1,12 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 40,
-  "candidates_extracted": 89,
-  "duration_s": 153.79,
+  "candidates_checked": 51,
+  "candidates_extracted": 100,
+  "duration_s": 228.91,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 1554204,
-    "platform_static_analysis": 15623506
+    "candidate_network": 3074992,
+    "platform_static_analysis": 22853650
   },
   "programs_identified": 28,
   "promoted": [],
@@ -14,17 +14,22 @@
     {
       "error": "error-b21f78e614237667",
       "provider": "brave-web"
+    },
+    {
+      "error": "http-422",
+      "provider": "github",
+      "repository": "TNXG/selfani"
     }
   ],
-  "redundant_candidates": 10,
+  "redundant_candidates": 11,
   "regex_validations": 13,
-  "rejected_candidates": 24,
-  "repositories_discovered": 19,
-  "run_identity": "github:33375143502:1",
+  "rejected_candidates": 34,
+  "repositories_discovered": 27,
+  "run_identity": "github:33484784826:1",
   "snapshot_complete": true,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-08-31T08:58:01Z",
+  "updated": "2026-09-01T08:03:42Z",
   "valid_candidates": 6,
   "version": 1
 }
