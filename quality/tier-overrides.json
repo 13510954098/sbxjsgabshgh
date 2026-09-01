@@ -1,10 +1,61 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-31T10:08:19Z",
-  "validUntil": "2026-09-14",
+  "generatedAt": "2026-09-01T08:57:13Z",
+  "validUntil": "2026-09-15",
   "evidence": {
-    "reportSha256": "58a69a98879369363dc126f3cadf38adb9324089300006f6b48ec18121499533",
-    "reportGeneratedAt": "2026-08-31T10:08:07+00:00"
+    "reportSha256": "349c7f1742bdc2d1ca5e025dd790350598bbcf42a8c595df802c8368034a6760",
+    "reportGeneratedAt": "2026-09-01T08:57:00+00:00"
   },
-  "overrides": []
+  "overrides": [
+    {
+      "sourceId": "0401ef6a9852c10eb127311c",
+      "configFingerprint": "1f0ac5ca6917486f355f1cc43100cd80c179447c0cbf50935bf3f0a5f5aeff91",
+      "officialTier": 3,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 3,
+      "medianScore": 35,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "054d915024f64a89860bbb97",
+      "configFingerprint": "6219970e03f169ed2cb98f417498b1bd0b1aaa9304e0f1fcd542487c5af006d1",
+      "officialTier": 2,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 3,
+      "medianScore": 20,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "05c27a21755c124dc25c7a00",
+      "configFingerprint": "2c17a55f6eba868a3c49b0e4d3840366d0f365d124479a4fb7bfb2393644cee6",
+      "officialTier": null,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 3,
+      "medianScore": 35,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "05e3a9e77cb55ef043bf4c53",
+      "configFingerprint": "2cf0aa696a7665cea3d6279c6dcf9bf3318f1d998c80985572484dade0ad469e",
+      "officialTier": null,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 3,
+      "medianScore": 35,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "067183ef97b5e3391055ae27",
+      "configFingerprint": "fffc50166cb8bda4490be1b6f724f0aa8861a64c1bf3dc916d5213c1e0e51f77",
+      "officialTier": 2,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 3,
+      "medianScore": 20,
+      "transportSuccessRate": 0.0
+    }
+  ]
 }
