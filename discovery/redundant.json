@@ -199,6 +199,28 @@
       "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/bt.json"
     },
     {
+      "items": 1,
+      "new_items": 0,
+      "observed_by": [
+        "github:sakuragauthier/sakuragauthier.io"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 1,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
+      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
+    },
+    {
       "items": 2,
       "new_items": 0,
       "observed_by": [
@@ -243,6 +265,6 @@
       "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/0137721471eb38213b8d541ff0ff2d8ba64e4d4e/backend/src/services/anisubs/default-css1.json"
     }
   ],
-  "updated": "2026-09-01T08:03:42Z",
+  "updated": "2026-09-02T07:24:33Z",
   "version": 1
 }

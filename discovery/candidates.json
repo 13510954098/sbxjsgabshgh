@@ -9,12 +9,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 7,
+        "consecutive_successes": 8,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 7,
-        "successful_runs": 8,
+        "stable_successes": 8,
+        "successful_runs": 9,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -31,12 +31,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 7,
+        "consecutive_successes": 8,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 7,
-        "successful_runs": 8,
+        "stable_successes": 8,
+        "successful_runs": 9,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -53,12 +53,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 7,
+        "consecutive_successes": 8,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 7,
-        "successful_runs": 8,
+        "stable_successes": 8,
+        "successful_runs": 9,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -75,12 +75,12 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 7,
+        "consecutive_successes": 8,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 7,
-        "successful_runs": 8,
+        "stable_successes": 8,
+        "successful_runs": 9,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
@@ -97,42 +97,20 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 7,
+        "consecutive_successes": 8,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 7,
-        "successful_runs": 8,
+        "stable_successes": 8,
+        "successful_runs": 9,
         "trusted_evidence": false,
         "trusted_provenance": []
       },
       "redundant": false,
       "sha256": "e727aa8af06e55c11e574a5e40d923aaf354fe370f6e7fe52bc134ae3490ad1d",
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
-    },
-    {
-      "items": 1,
-      "new_items": 1,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 0,
-      "probation": {
-        "consecutive_successes": 1,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 1,
-        "successful_runs": 1,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": false,
-      "sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
     }
   ],
-  "updated": "2026-09-01T08:03:42Z",
+  "updated": "2026-09-02T07:24:33Z",
   "version": 1
 }

@@ -2,11 +2,11 @@
   "analysis_mode": "static-only",
   "candidates_checked": 51,
   "candidates_extracted": 100,
-  "duration_s": 228.91,
+  "duration_s": 239.85,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 3074992,
-    "platform_static_analysis": 22853650
+    "candidate_network": 3083041,
+    "platform_static_analysis": 22856196
   },
   "programs_identified": 28,
   "promoted": [],
@@ -21,15 +21,15 @@
       "repository": "TNXG/selfani"
     }
   ],
-  "redundant_candidates": 11,
+  "redundant_candidates": 12,
   "regex_validations": 13,
   "rejected_candidates": 34,
   "repositories_discovered": 27,
-  "run_identity": "github:33484784826:1",
+  "run_identity": "github:33603043659:1",
   "snapshot_complete": true,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-09-01T08:03:42Z",
-  "valid_candidates": 6,
+  "updated": "2026-09-02T07:24:33Z",
+  "valid_candidates": 5,
   "version": 1
 }
