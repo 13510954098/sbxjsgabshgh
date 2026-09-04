@@ -177,50 +177,6 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yishijie.json"
     },
     {
-      "items": 1,
-      "new_items": 0,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 1,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": true,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": true,
-      "sha256": "c9b6d2ede71488e7613316c957257dd6584f9e9ddc17884d0cff2e92e44bc1d7",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/bt.json"
-    },
-    {
-      "items": 1,
-      "new_items": 0,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 1,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": true,
-        "stable_successes": 0,
-        "successful_runs": 1,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": true,
-      "sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
-    },
-    {
       "items": 2,
       "new_items": 0,
       "observed_by": [
@@ -230,7 +186,7 @@
       "overlap_items": 2,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-09-01",
+        "first_seen": "2026-09-04",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -240,7 +196,7 @@
       },
       "redundant": true,
       "sha256": "b6d17b1922cb2096d6afb197be57f11aa7c31c212dd84cff2b535bb8eadf1523",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/0137721471eb38213b8d541ff0ff2d8ba64e4d4e/backend/src/services/anisubs/default-bt1.json"
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/867086a35b2e525aea481d5ad0b56a593160c46a/backend/src/services/anisubs/default-bt1.json"
     },
     {
       "items": 19,
@@ -252,7 +208,7 @@
       "overlap_items": 19,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-09-01",
+        "first_seen": "2026-09-04",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -262,9 +218,9 @@
       },
       "redundant": true,
       "sha256": "515e6fba3e1cc7ebb2c588c5284ed2364208012d299fe399ecc78aabc39d5c54",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/0137721471eb38213b8d541ff0ff2d8ba64e4d4e/backend/src/services/anisubs/default-css1.json"
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/867086a35b2e525aea481d5ad0b56a593160c46a/backend/src/services/anisubs/default-css1.json"
     }
   ],
-  "updated": "2026-09-03T07:28:11Z",
+  "updated": "2026-09-04T07:27:56Z",
   "version": 1
 }
