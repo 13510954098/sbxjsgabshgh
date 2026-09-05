@@ -1911,6 +1911,59 @@
     },
     {
       "categories": [
+        "aggregator",
+        "generator",
+        "subscription"
+      ],
+      "commit": "fd19185fd5602ff0a2d6e703c9eeb8b03c4fafa7",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "Untitled-1.json",
+          "score": 11
+        },
+        {
+          "path": "bt1.json",
+          "score": 9
+        },
+        {
+          "path": "css1.json",
+          "score": 11
+        }
+      ],
+      "extracted_url_count": 3,
+      "files_scanned": 3,
+      "generated_source_files": [
+        {
+          "items": 8,
+          "path": "Untitled-1.json",
+          "url": "https://raw.githubusercontent.com/stay206/dongm/main/Untitled-1.json"
+        },
+        {
+          "items": 2,
+          "path": "bt1.json",
+          "url": "https://raw.githubusercontent.com/stay206/dongm/main/bt1.json"
+        },
+        {
+          "items": 1,
+          "path": "css1.json",
+          "url": "https://raw.githubusercontent.com/stay206/dongm/main/css1.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "stay206/dongm",
+      "score": 31,
+      "signals": [
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/stay206/dongm"
+    },
+    {
+      "categories": [
         "converter",
         "mirror-sync"
       ],
@@ -2298,6 +2351,6 @@
       "url": "https://github.com/Zero-wyc/ZViewer"
     }
   ],
-  "updated": "2026-08-26T04:24:39Z",
+  "updated": "2026-09-05T07:09:10Z",
   "version": 1
 }
