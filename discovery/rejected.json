@@ -202,7 +202,7 @@
       "url": "https://gitee.com/wan0ge/extract-pure-links"
     },
     {
-      "error": "http-404",
+      "error": "dns-timeout",
       "observed_by": [
         "github:masofod/anidatasource"
       ],
@@ -235,7 +235,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "e3934960a9d8279eebe05a51ca6464ff66db15e06921646ee97a048431f64cb3",
+      "sha256": "29b9719cef5558935780f8d3f83e6819e14ec75e6deed81a913846759ca42dff",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -254,7 +254,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "03ea2d0946599b1c8707aa2a47dd5ca37ac8c18d02a1d00c91d89a6782974149",
+      "sha256": "820e8b8e48684e6940ae929a990b07090d7feae5d2aa255970227b4a59dc3c72",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -273,7 +273,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "31b2d74b42024a6cd85d78435720d1d236335b8d4dd54faed506b0e117be3112",
+      "sha256": "4105cae5f82ba30ca4802b75f380c59bf1431235c88e5490cad3283a5f3dd58d",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -292,7 +292,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "a4e5601d077c5301957a9fc3cdd8ec80535d835b70edf7457277dee73ed4af88",
+      "sha256": "f7af8d35ee18c0a7601504eb3b9ed9fff44895af933cce7454d8a6b0349a7839",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -390,6 +390,6 @@
       "url": "https://therealfoxster.github.io/altsource-viewer/view/?source=https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
     }
   ],
-  "updated": "2026-09-05T07:09:10Z",
+  "updated": "2026-09-06T07:21:41Z",
   "version": 1
 }
