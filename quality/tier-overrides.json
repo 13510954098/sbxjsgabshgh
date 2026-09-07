@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-06T08:09:44Z",
-  "validUntil": "2026-09-20",
+  "generatedAt": "2026-09-07T08:40:20Z",
+  "validUntil": "2026-09-21",
   "evidence": {
-    "reportSha256": "05cbf11b189ca1710f1d55d92fba003855c4b90e6962a72b9e6ed65456490631",
-    "reportGeneratedAt": "2026-09-06T08:09:31+00:00"
+    "reportSha256": "3d613bfdd83106b2992ce26922da014c834d501cc50a4b37cc769365c14420b4",
+    "reportGeneratedAt": "2026-09-07T08:40:08+00:00"
   },
   "overrides": [
     {
-      "sourceId": "054d915024f64a89860bbb97",
-      "configFingerprint": "6219970e03f169ed2cb98f417498b1bd0b1aaa9304e0f1fcd542487c5af006d1",
+      "sourceId": "004c4d97643ba7e75c73b668",
+      "configFingerprint": "633bda5a146b35f5549681cecdf1eb8bc39c865e4c0fc81a114399415ef261c4",
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
@@ -18,9 +18,39 @@
       "transportSuccessRate": 0.0
     },
     {
+      "sourceId": "024ea2a6bbeea6301bfa50f4",
+      "configFingerprint": "59040acea5911a3dc9ee02cc94f8b605e11ce2b6c041d6b14e72fb2af3d27110",
+      "officialTier": null,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 3,
+      "medianScore": 20,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "054d915024f64a89860bbb97",
+      "configFingerprint": "6219970e03f169ed2cb98f417498b1bd0b1aaa9304e0f1fcd542487c5af006d1",
+      "officialTier": 2,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 4,
+      "medianScore": 20.0,
+      "transportSuccessRate": 0.0
+    },
+    {
       "sourceId": "067183ef97b5e3391055ae27",
       "configFingerprint": "fffc50166cb8bda4490be1b6f724f0aa8861a64c1bf3dc916d5213c1e0e51f77",
       "officialTier": 2,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 4,
+      "medianScore": 20.0,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "069ef2316f86487b12bb8e0f",
+      "configFingerprint": "74be1b0562764406225145229fdf12ba26a5fd0ee5a36698844cf7c278c03e4c",
+      "officialTier": 3,
       "tier": 4,
       "direction": "demote",
       "evidenceCount": 3,
@@ -598,53 +628,23 @@
       "transportSuccessRate": 0.0
     },
     {
-      "sourceId": "bea2c3b9e08cc07cb222b5b9",
-      "configFingerprint": "2f7843f36dfc44e95baa7e69c19cde9a839dbedaba939003b27e861ddc8e7bee",
+      "sourceId": "dc41064a8ddcdc6921eb49c0",
+      "configFingerprint": "d8f33bb1731eea80fd49f21380e4093e10ebc2df1317aa8b8beb36d0569f386f",
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
       "evidenceCount": 3,
-      "medianScore": 20,
+      "medianScore": 15,
       "transportSuccessRate": 0.0
     },
     {
-      "sourceId": "c26f4a7f6066f8c2a3fd8ffc",
-      "configFingerprint": "9975185b767f9579d9f27f5b4db586b88c84685fa9eec5ecb6de92ce24a6a762",
-      "officialTier": 2,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "c4c042c913fffd1864b9087a",
-      "configFingerprint": "5bbc539f63aa44c68d0531c13e206f3943f5dd72ff808792a12dd5f42f52374b",
+      "sourceId": "fffb1252815c46b5c4b70d6c",
+      "configFingerprint": "adb78c1b6a703878d33a8108263d7d7894a7549be56f3bb2104bfc0a4087b9e9",
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
       "evidenceCount": 3,
-      "medianScore": 20,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "cd34c165421191ca9ca66534",
-      "configFingerprint": "52d73ae36ec95d18a86dec6b00ff3c7f20915ce19082f7cbb3b6cc635f295207",
-      "officialTier": 3,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "cdba65de207c57ed3ca1d06f",
-      "configFingerprint": "aafe0373c047a0cbcf58c44b393e773b1a5d7182889f483abb43333415510717",
-      "officialTier": null,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "medianScore": 0,
       "transportSuccessRate": 0.0
     }
   ]
