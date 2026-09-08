@@ -9,11 +9,11 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 1,
+        "consecutive_successes": 0,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 1,
+        "stable_successes": 0,
         "successful_runs": 11,
         "trusted_evidence": false,
         "trusted_provenance": []
@@ -31,11 +31,11 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 1,
+        "consecutive_successes": 0,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 1,
+        "stable_successes": 0,
         "successful_runs": 11,
         "trusted_evidence": false,
         "trusted_provenance": []
@@ -53,11 +53,11 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 1,
+        "consecutive_successes": 0,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 1,
+        "stable_successes": 0,
         "successful_runs": 11,
         "trusted_evidence": false,
         "trusted_provenance": []
@@ -75,11 +75,11 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 1,
+        "consecutive_successes": 0,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 1,
+        "stable_successes": 0,
         "successful_runs": 11,
         "trusted_evidence": false,
         "trusted_provenance": []
@@ -97,11 +97,11 @@
       "ok": true,
       "overlap_items": 0,
       "probation": {
-        "consecutive_successes": 1,
+        "consecutive_successes": 0,
         "first_seen": "2026-08-24",
         "ready": false,
         "redundant": false,
-        "stable_successes": 1,
+        "stable_successes": 0,
         "successful_runs": 11,
         "trusted_evidence": false,
         "trusted_provenance": []
@@ -111,6 +111,6 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
     }
   ],
-  "updated": "2026-09-07T07:38:44Z",
+  "updated": "2026-09-08T07:28:41Z",
   "version": 1
 }
