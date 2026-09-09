@@ -1,7 +1,7 @@
 {
- "updated": "2026-09-08 04:36:18 UTC",
- "source_base_commit": "14ba808a4e8b1fbc1d976248c8758ebc8a8fea23",
- "output_sha256": "fe1066f93d1a54845950f905787db40ff28189b4cec13f5723463607c8f3f7de",
+ "updated": "2026-09-09 04:42:23 UTC",
+ "source_base_commit": "21391754da8b23b9f5f49b38ca4227772ff352c6",
+ "output_sha256": "c163a1a4d7dadafc3af79a464bc8db0329b7063d6959a0a679b8e2365685ffa6",
  "counts": {
   "all.json": 208,
   "online.json": 190,
@@ -224,17 +224,17 @@
   ]
  },
  "source_snapshots": {
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/online.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/bt.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/ani-yuan.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/css.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/animeko-prime.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/animeko-prime-bt.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/H.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/H.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/anibt.json": "a18fc2eb2a4b687ee890428f97ff9b72928c3685",
-  "https://raw.githubusercontent.com/CrazyBunQnQ/animeko-sources/main/animeko.json": "35d5ecf9f6dc4f70414eb82eebb6bbe5e2177b81",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/online.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/bt.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/ani-yuan.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/css.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/animeko-prime.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/animeko-prime-bt.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/online/H.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/H.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/source/bt/anibt.json": "eb1970bbf613c5734dd54f85acaf37c484209d82",
+  "https://raw.githubusercontent.com/CrazyBunQnQ/animeko-sources/main/animeko.json": "2c69c0d3d1f9746e217221ad7955ebe0f6f97a25",
   "https://raw.githubusercontent.com/cxay666/ani-yuan/main/ani-yuan.json": "886f1180d7cb33328618143cf073977691d80246",
   "https://raw.githubusercontent.com/DragonheartLX/ani-subs/main/subs/css1.json": "e3e9e81b3c6617434fc647ab1bd22882483bcda3",
   "https://raw.githubusercontent.com/LuckyRabbitFeet/animeko-source/main/index.json": "8c2b52855965de127b792cb3976b25b2b5918763",
@@ -286,7 +286,7 @@
   "https://raw.githubusercontent.com/2016YYy/animeko-source/main/dist/bt.json": "b4667409ea2c53ec6bf504ee33ae912a69ea8831",
   "https://raw.githubusercontent.com/becausemadoka/animeko-source/main/dist/bt.json": "93457b9dfd1a0558e59203875f225bb1c368b3ce"
  },
- "source_snapshots_created": 1788842178,
+ "source_snapshots_created": 1788928943,
  "source_snapshot_methods": {
   "https://sub.creamycake.org/v1/css1.json": "not-github",
   "https://sub.creamycake.org/v1/bt1.json": "not-github",
