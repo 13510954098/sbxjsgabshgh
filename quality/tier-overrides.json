@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-12T08:10:17Z",
-  "validUntil": "2026-09-26",
+  "generatedAt": "2026-09-13T08:35:05Z",
+  "validUntil": "2026-09-27",
   "evidence": {
-    "reportSha256": "865fca382f79240a87059503683aafb8c80ef044288994b282c706ecefc22c06",
-    "reportGeneratedAt": "2026-09-12T08:10:07+00:00"
+    "reportSha256": "afc9f60d04193241ae848a43fc64935dad57de647c5cc48986baa9b05fc96449",
+    "reportGeneratedAt": "2026-09-13T08:34:51+00:00"
   },
   "overrides": [
     {
@@ -13,8 +13,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -23,8 +23,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -33,8 +33,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 4,
-      "medianScore": 20.0,
+      "evidenceCount": 5,
+      "medianScore": 20,
       "transportSuccessRate": 0.0
     },
     {
@@ -43,8 +43,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 4,
-      "medianScore": 20.0,
+      "evidenceCount": 5,
+      "medianScore": 20,
       "transportSuccessRate": 0.0
     },
     {
@@ -53,8 +53,8 @@
       "officialTier": 3,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -633,8 +633,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 15,
+      "evidenceCount": 4,
+      "medianScore": 15.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -643,8 +643,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 0,
+      "evidenceCount": 4,
+      "medianScore": 0.0,
       "transportSuccessRate": 0.0
     }
   ]
