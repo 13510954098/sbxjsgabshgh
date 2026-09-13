@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-11T08:21:36Z",
-  "validUntil": "2026-09-25",
+  "generatedAt": "2026-09-12T08:10:17Z",
+  "validUntil": "2026-09-26",
   "evidence": {
-    "reportSha256": "8093a1545719045d0abee6a8acb4d8da36d553e3d0ce2748467ffffb2a27f7ef",
-    "reportGeneratedAt": "2026-09-11T08:21:19+00:00"
+    "reportSha256": "865fca382f79240a87059503683aafb8c80ef044288994b282c706ecefc22c06",
+    "reportGeneratedAt": "2026-09-12T08:10:07+00:00"
   },
   "overrides": [
     {
@@ -563,8 +563,8 @@
       "officialTier": 3,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -573,8 +573,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -583,8 +583,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -593,8 +593,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -603,8 +603,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 20,
+      "evidenceCount": 4,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -613,8 +613,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 15,
+      "evidenceCount": 4,
+      "medianScore": 15.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -623,8 +623,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 15,
+      "evidenceCount": 4,
+      "medianScore": 15.0,
       "transportSuccessRate": 0.0
     },
     {
