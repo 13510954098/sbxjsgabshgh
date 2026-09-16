@@ -1,7 +1,7 @@
 {
- "updated": "2026-09-16 04:49:55 UTC",
- "source_base_commit": "60016140521057af16139153c1477d5d8b717ba5",
- "output_sha256": "06412ba077c7eefd1f321e791e816b3afff26fbcbc21d01f7a8104c58210acb0",
+ "updated": "2026-09-16 13:30:41 UTC",
+ "source_base_commit": "623fefada3eaead597c21b58104a71c0eed62000",
+ "output_sha256": "1658365f3398e09e70d9cc063abe55678d1e7856820f3326539289dbcdb5b007",
  "counts": {
   "all.json": 208,
   "online.json": 190,
@@ -286,7 +286,7 @@
   "https://raw.githubusercontent.com/2016YYy/animeko-source/main/dist/bt.json": "b4667409ea2c53ec6bf504ee33ae912a69ea8831",
   "https://raw.githubusercontent.com/becausemadoka/animeko-source/main/dist/bt.json": "93457b9dfd1a0558e59203875f225bb1c368b3ce"
  },
- "source_snapshots_created": 1789534195,
+ "source_snapshots_created": 1789565441,
  "source_snapshot_methods": {
   "https://sub.creamycake.org/v1/css1.json": "not-github",
   "https://sub.creamycake.org/v1/bt1.json": "not-github",
