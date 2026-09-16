@@ -403,7 +403,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "2a5b6ec74a649a7d41df735b31ac6c009d0c245ad18706de475a2a5435eb798e",
+      "sha256": "99a8ec11f7588a4aad67eb046ced3eebc40530231c3be90227b011a01caab83c",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -422,7 +422,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "19a10a8306e9c6bb21a8d68e36a89bc4be1e8780be24967c76925cf4cfa374f3",
+      "sha256": "3f144b8406eccd5dad140fc09a6c73639d00bb37f645450b97c638b3f9271215",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -441,7 +441,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "3ef8636446c2246eaeb8894bb3730bda43f0d204f85431f1ba17aaaf4669df26",
+      "sha256": "c33f0dc13468115744a4b2c8858b3742aaae7855329a4b3bd6e89861b019cfea",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -460,7 +460,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "772d4b15cd43d575ca6b8875289360e96016eeadd99c0b572a074b8cec5c4314",
+      "sha256": "c5ddd91a85701c815630ee322f573793bea11311a86dd7ef1ebb0355ba5f1eaf",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -497,7 +497,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "51087217a7fb5af0131461e62a4a200bee3bacea6fb73de04dd6af5b9cd91833",
+      "sha256": "d669d6132931269113fa13575a87caddbe8a755303de221dd6996f84f8542fce",
       "url": "https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
     },
     {
@@ -633,6 +633,6 @@
       "url": "https://vite.dev/config/"
     }
   ],
-  "updated": "2026-09-15T08:07:39Z",
+  "updated": "2026-09-16T07:59:09Z",
   "version": 1
 }
