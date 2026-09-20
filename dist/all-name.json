@@ -1770,11 +1770,11 @@
         "factoryId": "web-selector",
         "version": 2,
         "arguments": {
-          "name": "AGE动漫",
+          "name": "A影院",
           "description": "",
-          "iconUrl": "https://cdn.aiqingyu1314.com/age/statics/images/avatar.jpg?v=2024042101",
+          "iconUrl": "https://cdn.wyteam.net/webapps/maccms/template/blueghost/img/favicon.ico",
           "searchConfig": {
-            "searchUrl": "https://www.agedm.org/search?query={keyword}&page=1",
+            "searchUrl": "https://www.appmovie.click/index.php/vod/search.html?wd={keyword}&submit=",
             "searchUseOnlyFirstWord": false,
             "searchRemoveSpecial": true,
             "searchUseSubjectNamesCount": 1,
@@ -1782,7 +1782,7 @@
             "requestInterval": 3000,
             "subjectFormatId": "a",
             "selectorSubjectFormatA": {
-              "selectLists": ".card-title > a",
+              "selectLists": ".stui-vodlist__item > a",
               "preferShorterName": true
             },
             "selectorSubjectFormatIndexed": {
@@ -1797,15 +1797,15 @@
             },
             "channelFormatId": "index-grouped",
             "selectorChannelFormatFlattened": {
-              "selectChannelNames": ".nav-item",
+              "selectChannelNames": ".stui-pannel:not(#desc) .stui-pannel__head:has(> .more) > h3.title",
               "matchChannelName": "^(?<ch>.+?)(\\d+)?$",
-              "selectEpisodeLists": "ul.video_detail_episode",
+              "selectEpisodeLists": ".stui-content__playlist",
               "selectEpisodesFromList": "a",
               "selectEpisodeLinksFromList": "",
               "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
             },
             "selectorChannelFormatNoChannel": {
-              "selectEpisodes": "a",
+              "selectEpisodes": "#glist-1 > div.module-blocklist.scroll-box.scroll-box-y > div > a",
               "selectEpisodeLinks": "",
               "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
             },
@@ -1820,8 +1820,8 @@
             },
             "matchVideo": {
               "enableNestedUrl": true,
-              "matchNestedUrl": "^.+(m3u8|vip|xigua.php).+?url=",
-              "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http(s)?:\\/\\/).+((\\.mp4)|(\\.mkv)|(m3u8)).*(\\?.+)?)|(akamaized)|(bilivideo.com)|(.+if=1&url=(?<v>.+))",
+              "matchNestedUrl": "^.+(m3u8|vip|xigua\\.php).+\\?",
+              "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http(s)?:\\/\\/).+((\\.mp4)|(\\.mkv)|(m3u8)).*(\\?.+)?)|(akamaized)|(bilivideo.com)",
               "cookies": "quality=1080",
               "addHeadersToVideo": {
                 "referer": "",
@@ -4941,11 +4941,11 @@
         "factoryId": "web-selector",
         "version": 2,
         "arguments": {
-          "name": "A影院",
+          "name": "AGE动漫",
           "description": "",
-          "iconUrl": "https://cdn.wyteam.net/webapps/maccms/template/blueghost/img/favicon.ico",
+          "iconUrl": "https://cdn.aiqingyu1314.com/age/statics/images/avatar.jpg?v=2024042101",
           "searchConfig": {
-            "searchUrl": "https://www.appmovie.click/index.php/vod/search.html?wd={keyword}&submit=",
+            "searchUrl": "https://www.agedm.org/search?query={keyword}&page=1",
             "searchUseOnlyFirstWord": false,
             "searchRemoveSpecial": true,
             "searchUseSubjectNamesCount": 1,
@@ -4953,7 +4953,7 @@
             "requestInterval": 3000,
             "subjectFormatId": "a",
             "selectorSubjectFormatA": {
-              "selectLists": ".stui-vodlist__item > a",
+              "selectLists": ".card-title > a",
               "preferShorterName": true
             },
             "selectorSubjectFormatIndexed": {
@@ -4968,15 +4968,15 @@
             },
             "channelFormatId": "index-grouped",
             "selectorChannelFormatFlattened": {
-              "selectChannelNames": ".stui-pannel:not(#desc) .stui-pannel__head:has(> .more) > h3.title",
+              "selectChannelNames": ".nav-item",
               "matchChannelName": "^(?<ch>.+?)(\\d+)?$",
-              "selectEpisodeLists": ".stui-content__playlist",
+              "selectEpisodeLists": "ul.video_detail_episode",
               "selectEpisodesFromList": "a",
               "selectEpisodeLinksFromList": "",
               "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
             },
             "selectorChannelFormatNoChannel": {
-              "selectEpisodes": "#glist-1 > div.module-blocklist.scroll-box.scroll-box-y > div > a",
+              "selectEpisodes": "a",
               "selectEpisodeLinks": "",
               "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
             },
@@ -4991,8 +4991,8 @@
             },
             "matchVideo": {
               "enableNestedUrl": true,
-              "matchNestedUrl": "^.+(m3u8|vip|xigua\\.php).+\\?",
-              "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http(s)?:\\/\\/).+((\\.mp4)|(\\.mkv)|(m3u8)).*(\\?.+)?)|(akamaized)|(bilivideo.com)",
+              "matchNestedUrl": "^.+(m3u8|vip|xigua.php).+?url=",
+              "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http(s)?:\\/\\/).+((\\.mp4)|(\\.mkv)|(m3u8)).*(\\?.+)?)|(akamaized)|(bilivideo.com)|(.+if=1&url=(?<v>.+))",
               "cookies": "quality=1080",
               "addHeadersToVideo": {
                 "referer": "",
