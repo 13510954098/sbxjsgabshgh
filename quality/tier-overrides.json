@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-20T08:51:17Z",
-  "validUntil": "2026-10-04",
+  "generatedAt": "2026-09-21T09:20:52Z",
+  "validUntil": "2026-10-05",
   "evidence": {
-    "reportSha256": "4cd0b65f3382d60eb1bdbcf2b9655e0f308a819836c5dacfcddc5f329f0ecb53",
-    "reportGeneratedAt": "2026-09-20T08:51:06+00:00"
+    "reportSha256": "662817b6ca9e66010839ae7a14a9ad9315f945fdce3408f5a5bafa13e74400d6",
+    "reportGeneratedAt": "2026-09-21T09:20:37+00:00"
   },
   "overrides": [
     {
@@ -203,8 +203,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -213,8 +213,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -223,8 +223,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -233,8 +233,8 @@
       "officialTier": 3,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -243,8 +243,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -253,8 +253,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -263,8 +263,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -273,8 +273,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -283,8 +283,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -293,8 +293,8 @@
       "officialTier": 3,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -303,18 +303,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "57d2029232cf853e49075795",
-      "configFingerprint": "ac4e5083cb3fc4e1a4cffd2984c33bb1d2d05014f97a70fe631ab2097c139e86",
-      "officialTier": 2,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -323,8 +313,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -333,8 +323,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -600,6 +590,16 @@
     {
       "sourceId": "b43f9ad04e03017914a41ea0",
       "configFingerprint": "08585a4c1f2db6ec74b3700f090c2c60045a1ee70134862a74e4b2941a194278",
+      "officialTier": null,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 5,
+      "medianScore": 20,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "b7340bb1f73fd1a86b3cbc28",
+      "configFingerprint": "4ffa87344ead039884f8b32a894665e09de0045f576d490ee2665664773711b4",
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
