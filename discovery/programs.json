@@ -2015,6 +2015,155 @@
         "editor-or-service",
         "generator",
         "mirror-sync",
+        "validator",
+        "workflow-bot"
+      ],
+      "commit": "de403bbfe563dabe03cdbe2a196594b9ab44fb3c",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/build.yml",
+          "score": 1
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "score": 1
+        },
+        {
+          "path": ".github/workflows/deploy.yml",
+          "score": 1
+        },
+        {
+          "path": ".github/workflows/docker.yml",
+          "score": 1
+        },
+        {
+          "path": "AGENTS.md",
+          "score": 1
+        },
+        {
+          "path": "README.en.md",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 1
+        },
+        {
+          "path": "THIRD-PARTY-NOTICES.md",
+          "score": 1
+        },
+        {
+          "path": "backend/package-lock.json",
+          "score": 1
+        },
+        {
+          "path": "backend/package.json",
+          "score": 1
+        },
+        {
+          "path": "backend/scripts/clean-dist.js",
+          "score": 1
+        },
+        {
+          "path": "backend/scripts/query-dev-db.mjs",
+          "score": 1
+        },
+        {
+          "path": "backend/src/cli/database-restore.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/data-source.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/AuditLog.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/Comment.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/DanmakuTrack.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/Movie.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/NcmCredential.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/PlaybackState.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/Room.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/ServerFolder.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/entities/Session.ts",
+          "score": 1
+        },
+        {
+          "path": "backend/src/routes/emby.ts",
+          "score": 2
+        },
+        {
+          "path": "backend/src/routes/jellyfin.ts",
+          "score": 2
+        },
+        {
+          "path": "backend/src/routes/subtitles.ts",
+          "score": 2
+        },
+        {
+          "path": "backend/src/services/anisubs/subscription.ts",
+          "score": 10
+        },
+        {
+          "path": "backend/src/services/anisubs/types.ts",
+          "score": 10
+        },
+        {
+          "path": "backend/src/services/emby-client.ts",
+          "score": 2
+        },
+        {
+          "path": "e2e/media-fixture-server.js",
+          "score": 2
+        }
+      ],
+      "extracted_url_count": 6,
+      "files_scanned": 240,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "XYL333FYQ/TongMu",
+      "score": 100,
+      "signals": [
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/XYL333FYQ/TongMu"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
         "validator"
       ],
       "commit": "e6f5d297a09ed8b27bae50852878617b0e41fd14",
@@ -2351,6 +2500,6 @@
       "url": "https://github.com/Zero-wyc/ZViewer"
     }
   ],
-  "updated": "2026-09-21T08:18:18Z",
+  "updated": "2026-09-22T08:02:29Z",
   "version": 1
 }
