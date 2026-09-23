@@ -186,7 +186,7 @@
       "overlap_items": 2,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-09-20",
+        "first_seen": "2026-09-23",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -196,7 +196,29 @@
       },
       "redundant": true,
       "sha256": "b6d17b1922cb2096d6afb197be57f11aa7c31c212dd84cff2b535bb8eadf1523",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/2f96b8c0acab86e4954fc9e1904aefeba5d71e06/backend/src/services/anisubs/default-bt1.json"
+      "url": "https://raw.githubusercontent.com/XYL333FYQ/TongMu/de403bbfe563dabe03cdbe2a196594b9ab44fb3c/backend/src/services/anisubs/default-bt1.json"
+    },
+    {
+      "items": 2,
+      "new_items": 0,
+      "observed_by": [
+        "github:crazybunqnq/animeko-sources"
+      ],
+      "ok": true,
+      "overlap_items": 2,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-09-23",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "b6d17b1922cb2096d6afb197be57f11aa7c31c212dd84cff2b535bb8eadf1523",
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/1599e7a39d9f2472252e99a718514b9d3fce10a4/backend/src/services/anisubs/default-bt1.json"
     },
     {
       "items": 19,
@@ -208,7 +230,7 @@
       "overlap_items": 19,
       "probation": {
         "consecutive_successes": 0,
-        "first_seen": "2026-09-20",
+        "first_seen": "2026-09-23",
         "ready": false,
         "redundant": true,
         "stable_successes": 0,
@@ -218,9 +240,9 @@
       },
       "redundant": true,
       "sha256": "515e6fba3e1cc7ebb2c588c5284ed2364208012d299fe399ecc78aabc39d5c54",
-      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/2f96b8c0acab86e4954fc9e1904aefeba5d71e06/backend/src/services/anisubs/default-css1.json"
+      "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/1599e7a39d9f2472252e99a718514b9d3fce10a4/backend/src/services/anisubs/default-css1.json"
     }
   ],
-  "updated": "2026-09-22T08:02:29Z",
+  "updated": "2026-09-23T08:01:24Z",
   "version": 1
 }
