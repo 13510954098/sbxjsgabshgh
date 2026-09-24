@@ -361,6 +361,154 @@
     {
       "categories": [
         "aggregator",
+        "editor-or-service",
+        "generator",
+        "mirror-sync"
+      ],
+      "commit": "99498ad2dce04bf621f58ede63d73ed5ce08a108",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".agents/skills/datasource-eval/SKILL.md",
+          "score": 7
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/deep_sample.py",
+          "score": 1
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/gen_report.py",
+          "score": 3
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/lib.py",
+          "score": 3
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/run_eval.py",
+          "score": 3
+        },
+        {
+          "path": ".agents/skills/datasource-eval/scripts/sync_channel_tiers.py",
+          "score": 4
+        },
+        {
+          "path": ".github/workflows/build.yml",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "docs/数据源评测规范.md",
+          "score": 7
+        },
+        {
+          "path": "scripts/build-subs.js",
+          "score": 7
+        },
+        {
+          "path": "subs/bt/AnimeGarden.json",
+          "score": 3
+        },
+        {
+          "path": "subs/bt/nyaa.land.json",
+          "score": 3
+        },
+        {
+          "path": "subs/web/t0/girigiri愛動漫.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t0/稀饭动漫.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t1/嘀嗒影视.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t3/E-ACG.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t3/去看吧.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t3/叽哔动漫.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t3/森之屋动漫.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t3/风车影视.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/h1080.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/h720.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/wedm.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/嘀哩嘀哩.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/影视森林.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/新优酷.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/樱花动漫.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/海星动漫.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/热播之家.json",
+          "score": 5
+        },
+        {
+          "path": "subs/web/t4/番茄动漫.json",
+          "score": 5
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 31,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "creamycake-anime/animeko-subs",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "selectormediasourcearguments",
+        "web-selector"
+      ],
+      "url": "https://github.com/creamycake-anime/animeko-subs"
+    },
+    {
+      "categories": [
+        "aggregator",
         "generator",
         "subscription"
       ],
@@ -2500,6 +2648,6 @@
       "url": "https://github.com/Zero-wyc/ZViewer"
     }
   ],
-  "updated": "2026-09-23T08:01:24Z",
+  "updated": "2026-09-24T07:52:23Z",
   "version": 1
 }
