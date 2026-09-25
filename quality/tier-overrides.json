@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-24T08:47:02Z",
-  "validUntil": "2026-10-08",
+  "generatedAt": "2026-09-25T09:07:32Z",
+  "validUntil": "2026-10-09",
   "evidence": {
-    "reportSha256": "d97f30cc18ef286266b5249eaadf3dd0cd9aea2051b966de6741fb6437cd1f06",
-    "reportGeneratedAt": "2026-09-24T08:46:52+00:00"
+    "reportSha256": "ad3279d56ac1dbcb55e4f20a185f1010ad5039ccd6ca35c990d98714bb92a78e",
+    "reportGeneratedAt": "2026-09-25T09:07:19+00:00"
   },
   "overrides": [
     {
@@ -13,8 +13,8 @@
       "officialTier": 2,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -23,8 +23,18 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
+      "transportSuccessRate": 0.0
+    },
+    {
+      "sourceId": "0401ef6a9852c10eb127311c",
+      "configFingerprint": "1f0ac5ca6917486f355f1cc43100cd80c179447c0cbf50935bf3f0a5f5aeff91",
+      "officialTier": 3,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -53,8 +63,8 @@
       "officialTier": 3,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 20,
+      "evidenceCount": 6,
+      "medianScore": 20.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -598,16 +608,6 @@
       "transportSuccessRate": 0.0
     },
     {
-      "sourceId": "bb2dda1ead61eee8a4274cdf",
-      "configFingerprint": "4079e9cc41e2c1b4836616a3d43c977bc62b363f1a34a62468a15ee0c5f89a38",
-      "officialTier": null,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 6,
-      "medianScore": 20.0,
-      "transportSuccessRate": 0.0
-    },
-    {
       "sourceId": "bc68cc6a09c782d0af25ef24",
       "configFingerprint": "e10d7070135a7389ba44eec692085db1d668c92277bb1b229dd3c663576a6e48",
       "officialTier": 2,
@@ -633,8 +633,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 15,
+      "evidenceCount": 6,
+      "medianScore": 15.0,
       "transportSuccessRate": 0.0
     },
     {
@@ -643,8 +643,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 0,
+      "evidenceCount": 6,
+      "medianScore": 0.0,
       "transportSuccessRate": 0.0
     }
   ]
