@@ -235,7 +235,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "01dc5bbe9d70c77a0bf9a0ecadd3dc02f331303e65c43b232b4af4c818e260cd",
+      "sha256": "70b77042da292d2e4991f683d795c3904673af3f0e15c392f8c45d24ace9f6fe",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -254,7 +254,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "dd5167d35c4a0df703f7837599f36bfed677050bddda5e56f3279e6b5fa7de75",
+      "sha256": "597cb59bce4a62ba464d6c98cf37a7767a2f6af9b3bf7f19ded846cc3293e879",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -273,7 +273,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "6af158f0a76f62b72e6f936cc916425a9e9b507e9541c1cb09751be68aad9689",
+      "sha256": "591572ff354fbcec3b5ef3715dd1d1617616450f2e84ed1bba220ff1790d6339",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -292,7 +292,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "c61e27c1d87d5d49d4dd47449614f7b1db63136345bf8691f683e2284709db48",
+      "sha256": "57fba820ec5ba5121b8c4a6eb6442915ac01baebab59eadefe345304c8a17d4a",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -390,6 +390,6 @@
       "url": "https://therealfoxster.github.io/altsource-viewer/view/?source=https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
     }
   ],
-  "updated": "2026-09-24T07:52:23Z",
+  "updated": "2026-09-25T08:14:28Z",
   "version": 1
 }
