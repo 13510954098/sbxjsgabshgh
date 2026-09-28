@@ -1,66 +1,40 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 37,
-  "candidates_extracted": 85,
-  "duration_s": 156.97,
+  "candidates_checked": 54,
+  "candidates_extracted": 103,
+  "duration_s": 318.26,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 712799,
-    "platform_static_analysis": 1921407
+    "candidate_network": 3190361,
+    "platform_static_analysis": 24977399
   },
   "programs_identified": 30,
   "promoted": [],
   "provider_errors": [
     {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "error-9a24c66b472847da",
-      "provider": "codeberg"
-    },
-    {
-      "error": "error-9a24c66b472847da",
-      "provider": "codeberg"
-    },
-    {
-      "error": "error-9a24c66b472847da",
-      "provider": "codeberg"
-    },
-    {
       "error": "error-b21f78e614237667",
       "provider": "brave-web"
+    },
+    {
+      "error": "http-422",
+      "provider": "github",
+      "repository": "kajimi16/hit-ani"
+    },
+    {
+      "error": "http-422",
+      "provider": "github",
+      "repository": "TNXG/selfani"
     }
   ],
   "redundant_candidates": 11,
   "regex_validations": 12,
-  "rejected_candidates": 21,
-  "repositories_discovered": 16,
-  "run_identity": "github:36306641894:1",
-  "snapshot_complete": false,
+  "rejected_candidates": 38,
+  "repositories_discovered": 28,
+  "run_identity": "github:36400587793:1",
+  "snapshot_complete": true,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-09-27T08:37:49Z",
+  "updated": "2026-09-28T09:04:09Z",
   "valid_candidates": 5,
   "version": 1
 }
