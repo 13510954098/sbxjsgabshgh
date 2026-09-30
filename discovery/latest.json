@@ -2,27 +2,15 @@
   "analysis_mode": "static-only",
   "candidates_checked": 54,
   "candidates_extracted": 103,
-  "duration_s": 270.15,
+  "duration_s": 280.4,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 2513004,
-    "platform_static_analysis": 25133700
+    "candidate_network": 2512890,
+    "platform_static_analysis": 24737698
   },
   "programs_identified": 30,
   "promoted": [],
   "provider_errors": [
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
     {
       "error": "http-429",
       "provider": "github-code"
@@ -34,18 +22,23 @@
     {
       "error": "http-422",
       "provider": "github",
+      "repository": "kajimi16/hit-ani"
+    },
+    {
+      "error": "http-422",
+      "provider": "github",
       "repository": "TNXG/selfani"
     }
   ],
   "redundant_candidates": 11,
   "regex_validations": 12,
   "rejected_candidates": 38,
-  "repositories_discovered": 27,
-  "run_identity": "github:36546891151:1",
+  "repositories_discovered": 28,
+  "run_identity": "github:36693449671:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-09-29T09:10:22Z",
+  "updated": "2026-09-30T09:06:48Z",
   "valid_candidates": 5,
   "version": 1
 }
