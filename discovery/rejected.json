@@ -421,7 +421,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "8535febaa729e8f4ca0f0ad70c6956307d4feca9d3b5b8a139e5375c3ad08aba",
+      "sha256": "61d0e4d505828125fadba4ef4b6cca6196d1dd8e2ef870b37817a885a2d4c4f7",
       "url": "https://raw.githubusercontent.com/Predidit/KazumiRules/main/MXdm.json"
     },
     {
@@ -478,7 +478,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "a3b1f9cbab2b2ca62d09af128df6a88ed485a0cbf248411be8e1a7e0e7d6811b",
+      "sha256": "25a3ddca5501edf3bab6fa242e89960e3c9aaab44a61110f25c46859c46835bf",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -497,7 +497,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "491f682c4adf8bf924c261171c041a5284c7ce9584026937322378f96dec07af",
+      "sha256": "1eaa5674e23516c153d67ea9ab027a2e2230e53e91612e0df86ee76cc3891228",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -516,7 +516,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "337bfec30d787ef53e21e95935045b63fbde5f093bb6d561a521b7ac788ca863",
+      "sha256": "5ea4debba1a58eff8680cfed3c990a051e1b79c80bac70db4d7abd087a572194",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -535,7 +535,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "aef6d6c7013d183790b76efba27eb9688bb9bcc6c5f247afc1b5f8aba4d704e7",
+      "sha256": "365b744d9110c677507abee6ca3f85bf046c7348c6a84d844102d7c5b34048b3",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -572,7 +572,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "9f550b06ddace98a1243610c97ff735e021b3f3a64564874bbce3f8cf70fb5ba",
+      "sha256": "007bd0ef4969d577e10b25906200a88a606083fd97d728ff6141112371105439",
       "url": "https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
     },
     {
@@ -709,6 +709,6 @@
       "url": "https://vite.dev/config/"
     }
   ],
-  "updated": "2026-10-01T09:30:48Z",
+  "updated": "2026-10-02T09:08:16Z",
   "version": 1
 }

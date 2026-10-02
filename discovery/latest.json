@@ -2,23 +2,31 @@
   "analysis_mode": "static-only",
   "candidates_checked": 54,
   "candidates_extracted": 103,
-  "duration_s": 230.45,
+  "duration_s": 358.53,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 2513024,
-    "platform_static_analysis": 24670719
+    "candidate_network": 2514543,
+    "platform_static_analysis": 24823975
   },
   "programs_identified": 30,
   "promoted": [],
   "provider_errors": [
     {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
       "error": "error-b21f78e614237667",
       "provider": "brave-web"
     },
     {
-      "error": "http-422",
+      "error": "http-409",
       "provider": "github",
-      "repository": "kajimi16/hit-ani"
+      "repository": "qwerzxcva/pilinara-animeko-features"
     },
     {
       "error": "http-422",
@@ -30,11 +38,11 @@
   "regex_validations": 12,
   "rejected_candidates": 38,
   "repositories_discovered": 28,
-  "run_identity": "github:36842752223:1",
-  "snapshot_complete": true,
+  "run_identity": "github:36987430083:1",
+  "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-10-01T09:30:48Z",
+  "updated": "2026-10-02T09:08:16Z",
   "valid_candidates": 5,
   "version": 1
 }
