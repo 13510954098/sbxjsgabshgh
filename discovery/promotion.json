@@ -1,12 +1,12 @@
 {
-  "applied_at": "2026-10-02T09:08:29Z",
+  "applied_at": "2026-10-03T08:36:46Z",
   "direct_seeds": 0,
   "mode": "offline-artifact-sanitization",
   "network_used": false,
-  "observations": 54,
-  "observed_date": "2026-10-02",
+  "observations": 37,
+  "observed_date": "2026-10-03",
   "promoted": [],
-  "run_identity": "github:36987430083:1",
+  "run_identity": "github:37110163062:1",
   "snapshot_complete": false,
   "trusted_programs": 0,
   "version": 1

@@ -1,16 +1,32 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 54,
-  "candidates_extracted": 103,
-  "duration_s": 358.53,
+  "candidates_checked": 37,
+  "candidates_extracted": 86,
+  "duration_s": 107.19,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 2514543,
-    "platform_static_analysis": 24823975
+    "candidate_network": 714432,
+    "platform_static_analysis": 1946507
   },
   "programs_identified": 30,
   "promoted": [],
   "provider_errors": [
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
     {
       "error": "http-429",
       "provider": "github-code"
@@ -27,22 +43,17 @@
       "error": "http-409",
       "provider": "github",
       "repository": "qwerzxcva/pilinara-animeko-features"
-    },
-    {
-      "error": "http-422",
-      "provider": "github",
-      "repository": "TNXG/selfani"
     }
   ],
   "redundant_candidates": 11,
   "regex_validations": 12,
-  "rejected_candidates": 38,
-  "repositories_discovered": 28,
-  "run_identity": "github:36987430083:1",
+  "rejected_candidates": 21,
+  "repositories_discovered": 18,
+  "run_identity": "github:37110163062:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-10-02T09:08:16Z",
+  "updated": "2026-10-03T08:36:37Z",
   "valid_candidates": 5,
   "version": 1
 }
