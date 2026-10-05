@@ -314,6 +314,44 @@
     {
       "error": "invalid-animeko-source",
       "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "2d2aca2602e2f34423400838a3ce10fc65fcd4cb91abff88871946148f241abd",
+      "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/dev.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "2d2aca2602e2f34423400838a3ce10fc65fcd4cb91abff88871946148f241abd",
+      "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/web.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
         "github:xyl333fyq/tongmu"
       ],
       "ok": false,
@@ -422,6 +460,25 @@
       },
       "sha256": "61d0e4d505828125fadba4ef4b6cca6196d1dd8e2ef870b37817a885a2d4c4f7",
       "url": "https://raw.githubusercontent.com/Predidit/KazumiRules/main/MXdm.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "6a07fd92f0262e48365996e0c6e21c5b246ff24024a22e0a6826e24a6b4e82cd",
+      "url": "https://raw.githubusercontent.com/Predidit/KazumiRules/main/sorani.json"
     },
     {
       "error": "invalid-animeko-source",
@@ -705,7 +762,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "ee8c19f2050df9dc67b2b2035114d1cf64ca7434a8948ee3104a2093bc6518c2",
+      "sha256": "b2e81756b435747d96123ec0ab08f05a63d9261163cec15be4a81ee44ccc2a90",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -724,7 +781,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "12e7d2f2d9c653be896c992430524f765b6bf9b0adc5885c4c8d71c6175b819a",
+      "sha256": "47629d466e46a54eb4ce6ca1970beffc99e79619739166f7d78fca2a178265c4",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -743,7 +800,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "410cfd45a08b2ff38d98bfa3b2a3a9059f1ffed47cacccdf1003b59687031784",
+      "sha256": "a05e4527234a7ad71121ae377dc524d84afae7bcb24ab5387891f8aa0fcc59c1",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -762,7 +819,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "93b21d79e04a5713b688e2ad4ab3147547732a4b235a85f04b59e693c872686c",
+      "sha256": "dacaed98433ec7029e2370ac0ab80ff65b07d4652366209b2aeaec53ed53273e",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -820,6 +877,63 @@
       },
       "sha256": "c22cf39b13dea4ff0c15b0caf5045704c55253c3cc58fbe8b43a23a15a5b1634",
       "url": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "02265e6761a6f310e2d302ff52286713a47c83e1a813e3af154c929f1614cb36",
+      "url": "https://raw.githubusercontent.com/open-ani/animeko/v6.2.0/app/shared/app-data/src/commonMain/kotlin/domain/media/fetch/MediaSourceManager.kt"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "df2e5e153fa46d08711f24ab9342b3bf87388011cf594e1e8336207b12cb9f78",
+      "url": "https://raw.githubusercontent.com/open-ani/animeko/v6.2.0/app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/SelectorMediaSource.kt"
+    },
+    {
+      "error": "invalid-animeko-source",
+      "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "sha256": "18762cd6157d69232aaf70fa3581a7110db1f3a38dd2d64ea86d89cb29d41014",
+      "url": "https://raw.githubusercontent.com/open-ani/animeko/v6.2.0/app/shared/ui-mediaselect/src/commonMain/kotlin/ui/mediafetch/MediaSelectorState.kt"
     },
     {
       "error": "invalid-animeko-source",
@@ -935,6 +1049,6 @@
       "url": "https://vite.dev/config/"
     }
   ],
-  "updated": "2026-10-04T08:56:17Z",
+  "updated": "2026-10-05T09:43:06Z",
   "version": 1
 }

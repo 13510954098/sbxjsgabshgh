@@ -1479,6 +1479,82 @@
     },
     {
       "categories": [
+        "aggregator",
+        "converter",
+        "generator",
+        "mirror-sync",
+        "subscription"
+      ],
+      "commit": "91c92c2bed8c485a804e3c952106baefe3b72373",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/workflows/validate.yml",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "scripts/build-subscriptions.mjs",
+          "score": 1
+        },
+        {
+          "path": "scripts/lib.mjs",
+          "score": 10
+        },
+        {
+          "path": "scripts/validate.mjs",
+          "score": 1
+        },
+        {
+          "path": "sources/catalog.json",
+          "score": 1
+        },
+        {
+          "path": "sources/web/sorani.json",
+          "score": 5
+        },
+        {
+          "path": "subscriptions/dev.json",
+          "score": 10
+        },
+        {
+          "path": "subscriptions/web.json",
+          "score": 10
+        },
+        {
+          "path": "tests/sorani/README.md",
+          "score": 3
+        },
+        {
+          "path": "tests/sorani/observations.json",
+          "score": 3
+        },
+        {
+          "path": "tests/subscriptions.test.mjs",
+          "score": 12
+        }
+      ],
+      "extracted_url_count": 6,
+      "files_scanned": 12,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "Memory1031/animeko-extra-sources",
+      "score": 60,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/Memory1031/animeko-extra-sources"
+    },
+    {
+      "categories": [
         "converter",
         "editor-or-service"
       ],
@@ -2648,6 +2724,6 @@
       "url": "https://github.com/Zero-wyc/ZViewer"
     }
   ],
-  "updated": "2026-10-04T08:56:17Z",
+  "updated": "2026-10-05T09:43:06Z",
   "version": 1
 }
