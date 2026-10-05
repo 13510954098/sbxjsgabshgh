@@ -6,3 +6,7 @@ dist.bak-*
 .update_sources.lock
 __pycache__/
 *.pyc
+
+# Extracted JVM parser build products
+engine/target/
+quality-cache/

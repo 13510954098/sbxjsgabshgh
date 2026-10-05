@@ -15,6 +15,9 @@ on:
     paths:
       - src/animeko_url_policy.py
       - src/evaluate_quality.py
+      - src/animeko_engine.py
+      - tests/test_engine.py
+      - engine/**
       - src/promote_quality.py
       - src/update_sources.py
       - src/requirements-discovery.lock
@@ -23,7 +26,7 @@ on:
 
 concurrency:
   group: quality-animeko-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -32,7 +35,7 @@ jobs:
   quality:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout without persisted credentials
@@ -75,6 +78,25 @@ jobs:
           assert urllib3.__version__ == "2.7.0", urllib3.__version__
           PY
 
+      - name: Set up Java for extracted Animeko engine
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: engine/pom.xml
+
+      - name: Verify extracted source provenance
+        run: python engine/tools/verify.py
+
+      - name: Build extracted Animeko parser (no Android SDK, CEF or player)
+        run: mvn -B -ntp -f engine/pom.xml package
+
+      - name: Test real Kotlin parsing and bounded HTTP integration
+        env:
+          ANIMEKO_ENGINE_JAR: engine/target/animeko-parser-bridge-1.0.0.jar
+        run: python -m unittest discover -s tests -p 'test_engine.py' -v
+
       - name: Compile and test evaluator
         run: |
           set -euo pipefail
@@ -87,9 +109,9 @@ jobs:
         continue-on-error: true
         with:
           path: quality-cache/
-          key: animeko-quality-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          key: animeko-quality-engine-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            animeko-quality-v1-
+            animeko-quality-engine-v1-
 
       - name: Evaluate rotating source sample
         env:
@@ -102,6 +124,8 @@ jobs:
           test "$SAMPLE_SIZE" -le 200 || { echo "sample_size超过200"; exit 2; }
           mkdir -p quality-cache reports
           python src/evaluate_quality.py \
+            --engine-jar engine/target/animeko-parser-bridge-1.0.0.jar \
+            --time-budget 1200 \
             --input dist/online.json \
             --state quality-cache/state.json \
             --report reports/quality.json \
@@ -128,7 +152,10 @@ jobs:
               handle.write(f"- Tested this run: {run['testedSources']}/{run['totalSources']}\n")
               handle.write(f"- Static transport passed: {run['transportPassed']}\n")
               handle.write(f"- Mature tier disagreements: {len(disagreements)}\n")
+              handle.write("- Parser: extracted Animeko Kotlin / Jsoup / JsonPath\n")
+              handle.write("- Upstream: cd0ad5ca8dc501fb06426d83870f49e7e3b0adef\n")
               handle.write("- JavaScript/site programs executed: no\n")
+              handle.write("- Missing browser-only URLs / challenge pages: inconclusive, not proof of a dead source\n")
               handle.write("- Real playback claimed: no\n")
           PY
 
@@ -138,7 +165,7 @@ jobs:
         continue-on-error: true
         with:
           path: quality-cache/
-          key: animeko-quality-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          key: animeko-quality-engine-v1-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload quality report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
