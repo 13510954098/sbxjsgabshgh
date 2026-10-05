@@ -1,0 +1,91 @@
+{
+  "repository": "https://github.com/open-ani/animeko",
+  "commit": "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef",
+  "license": "AGPL-3.0-only",
+  "files": [
+    {
+      "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/format/SelectorSubjectFormat.kt",
+      "file": "src/main/kotlin/upstream/SelectorSubjectFormat.kt",
+      "originalSha256": "31641068a0a383c0af8ff52bf11373dafa4e2ac2b317bea21a65631404efe1a5",
+      "sha256": "7e98e2399a5593c7f8ee99dbf3696bfdc3e0143ef39e9d382e0d6265024d28f9",
+      "adaptation": "Remove UI-only Immutable annotation and unused documentation import; parser bodies unchanged; normalize trailing whitespace only"
+    },
+    {
+      "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/format/SelectorChannelFormat.kt",
+      "file": "src/main/kotlin/upstream/SelectorChannelFormat.kt",
+      "originalSha256": "b5187929a1a0b884a265e4406c7b1ee0a4e01ab9f7742419c1490786b405da98",
+      "sha256": "93a9eb41a6c5519719194a4ffde9efa165f0c1b22c2720c879f4fe4f1f309879",
+      "adaptation": "Remove UI-only Immutable annotation and unused documentation import; parser bodies unchanged; normalize trailing whitespace only"
+    },
+    {
+      "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/format/SelectorFormat.kt",
+      "file": "src/main/kotlin/upstream/SelectorFormat.kt",
+      "originalSha256": "86c6f85f46949037a940e11c919109be0e348df677f28e9c2143c385d937fe6a",
+      "sha256": "61a1c24b6783aaad23c77743c59a081194b686b194651c96839b729e27b2a0e4",
+      "adaptation": "Remove UI-only Immutable annotation and unused documentation import; parser bodies unchanged; normalize trailing whitespace only"
+    },
+    {
+      "source": "utils/jsonpath/src/commonMain/kotlin/JsonPath.kt",
+      "file": "src/main/kotlin/upstream/JsonPath.kt",
+      "originalSha256": "2f588dc84bea485f260e6a24604df671f7afdc7f1c2ec16d05e6cd2b4617c533",
+      "sha256": "2f588dc84bea485f260e6a24604df671f7afdc7f1c2ec16d05e6cd2b4617c533",
+      "adaptation": "verbatim; normalize trailing whitespace only"
+    },
+    {
+      "source": "utils/ktor-client/src/commonMain/kotlin/UrlHelpers.kt",
+      "file": "src/main/kotlin/upstream/UrlHelpers.kt",
+      "originalSha256": "70bfb8d67e51a60a421f270c1c0f188feac272ae14232953047de825975a6eb0",
+      "sha256": "70bfb8d67e51a60a421f270c1c0f188feac272ae14232953047de825975a6eb0",
+      "adaptation": "verbatim; normalize trailing whitespace only"
+    },
+    {
+      "source": "utils/serialization/src/commonMain/kotlin/BigNum.kt",
+      "file": "src/main/kotlin/upstream/BigNum.kt",
+      "originalSha256": "a0d13ca6a023a73ebf52cf31f7ffed0852ae72c4138bb72b300ec646c4f74fc5",
+      "sha256": "a0d13ca6a023a73ebf52cf31f7ffed0852ae72c4138bb72b300ec646c4f74fc5",
+      "adaptation": "verbatim; normalize trailing whitespace only"
+    },
+    {
+      "source": "datasource/api/src/commonMain/kotlin/EpisodeType.kt",
+      "file": "src/main/kotlin/upstream/EpisodeType.kt",
+      "originalSha256": "c8c33592240181eadcc13cc843bf979e9bb5f22f17a54e2b2ad56174be9a1405",
+      "sha256": "fc10991bc684d83bd52eab17d41ae2708d0245dc237995e9bd93a1a732359995",
+      "adaptation": "verbatim; normalize trailing whitespace only"
+    },
+    {
+      "source": "datasource/api/src/commonMain/kotlin/EpisodeSort.kt",
+      "file": "src/main/kotlin/upstream/EpisodeSort.kt",
+      "originalSha256": "c84a87f8ff23d8d85393f94377030d2df8a6f8b6f399246493299ae109d0cc88",
+      "sha256": "f7b6c9dec9f7848dc9406714749f1a3324cf08950e46e17edd4abbb010a8aa36",
+      "adaptation": "Remove documentation-only EpisodeRange import; normalize trailing whitespace only"
+    },
+    {
+      "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/WebSearchSubjectInfo.kt",
+      "file": "src/main/kotlin/upstream/WebSearchSubjectInfo.kt",
+      "originalSha256": "102d4c6212424f206cac1f95534f7b893107e8285d2f094a97edd6faf1edce89",
+      "sha256": "574271f802ecd92f0748a15468da68c6120b764df63b4c08f7595dc6fb8f113d",
+      "adaptation": "Extract DTOs only; subject/episode auto-selection deliberately outside bridge scope; normalize trailing whitespace only"
+    },
+    {
+      "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/SelectorMediaSourceEngine.kt",
+      "file": "src/main/kotlin/upstream/SelectorMediaSourceEngine.kt",
+      "originalSha256": "e5a284a28d93d35e6927a4259cf55205e7ea0f7dc8a48997e57895b7020185c4",
+      "sha256": "6eaac6d82d8eb14ab54e34f2736146ef7526b356596bb6d93e8bce5c36d14c0f",
+      "adaptation": "Extract shouldLoadPage + matchWebVideo verbatim into standalone class; normalize trailing whitespace only"
+    },
+    {
+      "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/SelectorSearchConfig.kt",
+      "file": "src/main/kotlin/upstream/SelectorSearchConfig.kt",
+      "originalSha256": "c2db07ede67d7d585def9c85cc3f635e7108da42f6c5e1d6a55b046a02591e68",
+      "sha256": "991860db1038d551767f388d6c5003451ac672908f1ae42feb2599e4ebad7d3e",
+      "adaptation": "Extract MatchVideoConfig + VideoHeaders defaults/regex/header semantics unchanged; normalize trailing whitespace only"
+    },
+    {
+      "source": "datasource/api/src/commonMain/kotlin/matcher/WebVideoMatcher.kt",
+      "file": "src/main/kotlin/upstream/WebVideoMatcher.kt",
+      "originalSha256": "31c5db326cb6e59473d817cc379d4faa715c22f1c49a2e1a84c4903cee580183",
+      "sha256": "785d03b64b4eecfbcda97fc356b5cc4cb80bb03247685881f02cc86e4c688fa3",
+      "adaptation": "Extract MatchResult and WebVideo DTOs; exclude app Media and flow loader dependencies; normalize trailing whitespace only"
+    }
+  ]
+}

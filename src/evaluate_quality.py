@@ -32,6 +32,9 @@ from unittest import mock
 
 import update_sources as updater
 
+ENGINE = None  # Required by CI; None retains legacy offline fixtures only.
+ENGINE_METHOD = "animeko-extracted-v1"
+
 SCHEMA_VERSION = 1
 MAX_INPUT_SIZE = 25 * 1024 * 1024
 MAX_STATE_SIZE = 5 * 1024 * 1024
@@ -67,7 +70,8 @@ VOID_TAGS = frozenset({
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
     "param", "source", "track", "wbr",
 })
-ALLOWED_REQUEST_HEADERS = frozenset({"user-agent", "referer", "cookie", "range", "accept"})
+ALLOWED_REQUEST_HEADERS = frozenset({"user-agent", "referer", "cookie", "range", "accept",
+    "sec-ch-ua-mobile", "sec-ch-ua-platform", "sec-fetch-dest", "sec-fetch-mode", "sec-fetch-site"})
 
 
 class QualityError(RuntimeError):
@@ -148,6 +152,7 @@ class FetchResult:
     latency_ms: int | None = None
     error: str | None = None
     redirects: list[str] = field(default_factory=list)
+    final_url: str | None = None  # Internal only: never serialize signed URLs into reports.
 
 
 class SafeFetcher:
@@ -155,6 +160,8 @@ class SafeFetcher:
 
     def __init__(self, request_gap_ms: int = 0):
         self.bytes_read = 0
+        self.started = time.monotonic()
+        self.requests = 0
         self.last_request_by_host: dict[str, float] = {}
         configured = max(0.0, min(request_gap_ms / 1000.0, MAX_CONFIG_REQUEST_GAP_SECONDS))
         self.request_gap = max(MIN_REQUEST_GAP_SECONDS, configured)
@@ -162,6 +169,8 @@ class SafeFetcher:
     def fetch(self, url: str, *, headers: dict[str, str] | None = None,
               max_bytes: int = MAX_BODY_BYTES, range_probe: bool = False) -> FetchResult:
         started = time.monotonic()
+        if started - self.started > 150 or self.requests >= 30:
+            return self._failure(url, started, "source-request-budget", [])
         current = url
         redirects: list[str] = []
         request_headers = self._clean_headers(headers or {})
@@ -174,6 +183,9 @@ class SafeFetcher:
             parsed = urlsplit(current)
             host = (parsed.hostname or "").lower().rstrip(".")
             self._wait_for_host(host)
+            self.requests += 1
+            if time.monotonic() - self.started > 150 or self.requests > 30:
+                return self._failure(current, started, "source-request-budget", redirects)
             deadline = time.monotonic() + REQUEST_DEADLINE
             safety_error, pinned_ip = updater.check_url_safety(current, deadline)
             if safety_error:
@@ -199,7 +211,7 @@ class SafeFetcher:
                         next_url = urljoin(current, location)
                         if urlsplit(current).scheme == "https" and urlsplit(next_url).scheme != "https":
                             return self._failure(next_url, started, "redirect-downgrade", redirects, status)
-                        if root_site(urlsplit(next_url).hostname or "") != root_site(host):
+                        if urlsplit(next_url).netloc != urlsplit(current).netloc:
                             request_headers.pop("Cookie", None)
                         current = next_url
                         continue
@@ -215,6 +227,8 @@ class SafeFetcher:
                     chunks = []
                     size = 0
                     for chunk in response.iter_content(32 * 1024):
+                        if time.monotonic() > deadline:
+                            return self._failure(current, started, "body-deadline", redirects, status)
                         if not chunk:
                             continue
                         room = allowed - size
@@ -231,6 +245,7 @@ class SafeFetcher:
                     return FetchResult(
                         ok=True,
                         url=redact_url(response.url) or "",
+                        final_url=response.url,
                         status=status,
                         data=data,
                         content_type=response.headers.get("Content-Type"),
@@ -678,6 +693,8 @@ def json_indexed_subjects(data: bytes, names_expr: str, links_expr: str) -> list
 
 
 def extract_subjects(data: bytes, config: dict, base_url: str) -> list[dict]:
+    if ENGINE is not None:
+        return ENGINE.subjects(data, config, base_url)
     format_id = str(config.get("subjectFormatId") or "a").lower()
     if "json" in format_id:
         fmt = config.get("selectorSubjectFormatJsonPathIndexed") or {}
@@ -706,6 +723,8 @@ def extract_subjects(data: bytes, config: dict, base_url: str) -> list[dict]:
 
 
 def extract_episodes(data: bytes, config: dict, base_url: str) -> list[dict]:
+    if ENGINE is not None:
+        return ENGINE.episodes(data, config, base_url)
     root = parse_html_document(data)
     flattened = config.get("selectorChannelFormatFlattened") or {}
     no_channel = config.get("selectorChannelFormatNoChannel") or {}
@@ -889,6 +908,11 @@ def static_media_urls(data: bytes, page_url: str, config: dict) -> tuple[list[st
     except Exception:
         pass
 
+    if ENGINE is not None:
+        matches = ENGINE.match(candidates, config)
+        return ([r["url"] for r in matches if r["kind"] == "video" and not validate_target_url(r["url"])],
+                [r["url"] for r in matches if r["kind"] == "nested" and not validate_target_url(r["url"])])
+
     def looks_like_media(url: str) -> bool:
         lowered = url.casefold()
         return (any(suffix in urlsplit(url).path.casefold() for suffix in MEDIA_SUFFIXES)
@@ -907,7 +931,12 @@ def static_media_urls(data: bytes, page_url: str, config: dict) -> tuple[list[st
     return media[:20], nested
 
 
-def media_headers(config: dict, referer: str) -> dict[str, str]:
+def media_headers(config: dict, referer: str, resolved: str | None = None) -> dict[str, str]:
+    if ENGINE is not None:
+        # Empty Referer is intentional in Animeko. Page cookies are NOT CDN cookies.
+        if resolved not in ENGINE.headers:
+            raise ValueError("missing engine playback headers")
+        return dict(ENGINE.headers[resolved])
     matcher = as_dict(config.get("matchVideo"))
     configured = as_dict(matcher.get("addHeadersToVideo"))
     headers = {}
@@ -994,6 +1023,12 @@ def parse_hls(text: str, playlist_url: str) -> dict:
     }
 
 
+def looks_like_error_document(data: bytes, content_type: str) -> bool:
+    prefix = data.lstrip()[:256].lower()
+    return ("text/html" in content_type.lower() or "json" in content_type.lower()
+            or prefix.startswith((b"<!doctype html", b"<html", b"{", b"[")))
+
+
 def probe_media(fetcher, media_url: str, headers: dict[str, str]) -> dict:
     current = media_url
     master_playlist = None
@@ -1004,11 +1039,20 @@ def probe_media(fetcher, media_url: str, headers: dict[str, str]) -> dict:
             return {"ok": False, "kind": "unknown", "error": result.error,
                     "latencyMs": result.latency_ms, "url": redact_url(current)}
         content_type = (result.content_type or "").casefold()
+        current = result.final_url or current
+        if looks_like_error_document(result.data, content_type):
+            return {"ok": False, "kind": "unknown", "error": "html-or-json-instead-of-media"}
+
         is_hls = ".m3u8" in urlsplit(current).path.casefold() or "mpegurl" in content_type
         if not is_hls:
+            if not (content_type.startswith(("video/", "audio/")) or
+                    result.data[4:8] == b"ftyp" or result.data.startswith((b"\x1aE\xdf\xa3", b"FLV", b"OggS"))):
+                return {"ok": False, "kind": "file", "error": "unrecognized-media-content"}
             return {"ok": True, "kind": "file", "status": result.status,
                     "latencyMs": result.latency_ms, "url": redact_url(current),
                     "adSuspicion": "unknown"}
+        if not decode_body(result.data).lstrip("\ufeff \r\n\t").startswith("#EXTM3U"):
+            return {"ok": False, "kind": "hls", "error": "invalid-hls-signature"}
         parsed = parse_hls(decode_body(result.data), current)
         public_parsed = {key: value for key, value in parsed.items() if key != "entries"}
         if not parsed["entries"]:
@@ -1028,15 +1072,16 @@ def probe_media(fetcher, media_url: str, headers: dict[str, str]) -> dict:
             continue
         segment = fetcher.fetch(next_url, headers=headers, max_bytes=MAX_SEGMENT_BYTES,
                                 range_probe=True)
+        valid_segment = segment.ok and not looks_like_error_document(segment.data, segment.content_type or "")
         return {
-            "ok": segment.ok,
+            "ok": valid_segment,
             "kind": "hls",
             "masterPlaylist": master_playlist,
             "status": result.status,
             "latencyMs": (result.latency_ms or 0) + (segment.latency_ms or 0),
             "url": redact_url(current),
             "segmentStatus": segment.status,
-            "segmentError": segment.error,
+            "segmentError": segment.error if valid_segment or not segment.ok else "html-or-json-instead-of-segment",
             **public_parsed,
         }
     return {"ok": False, "kind": "hls", "url": redact_url(current),
@@ -1119,6 +1164,11 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
     item_valid, item_problems = updater.validate_item(item)
     if not item_valid:
         errors.extend(f"animeko-config:{problem}" for problem in item_problems)
+    if ENGINE is not None:
+        warnings = [w for w in warnings if not w.startswith(("evaluator-unsupported-selector:", "java-regex-not-python-checkable:"))]
+        result["engineMethod"] = ENGINE_METHOD
+        result["engineCommit"] = "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef"
+        ENGINE.headers.clear()
     result["warnings"].extend(warnings)
     result["metrics"]["capabilities"] = config_capabilities(config)
     if errors:
@@ -1130,7 +1180,8 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
         fetcher = SafeFetcher(int(config.get("requestInterval") or 0))
     search_url = build_search_url(config, query)
     result["metrics"]["searchUrl"] = redact_url(search_url)
-    search = fetcher.fetch(search_url, max_bytes=MAX_BODY_BYTES)
+    search_headers = {"Accept": "application/json, text/html;q=0.9" if config.get("subjectFormatId") == "json-path-indexed" else "text/html"}
+    search = fetcher.fetch(search_url, headers=search_headers, max_bytes=MAX_BODY_BYTES)
     result["metrics"]["searchLatencyMs"] = search.latency_ms
     if not search.ok:
         result["stages"]["searchFetch"] = "failed"
@@ -1138,7 +1189,7 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
         return finalize_result(result, started)
     result["stages"]["searchFetch"] = "passed"
     try:
-        subjects = extract_subjects(search.data, config, search_url)
+        subjects = extract_subjects(search.data, config, search.final_url or search_url)
     except ValueError as exc:
         result["stages"]["subjectParse"] = "unsupported"
         result["warnings"].append(f"subject-parse-unsupported:{exc}")
@@ -1151,7 +1202,7 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
     subject, matched = choose_subject(subjects, query)
     if subject is None:
         challenge = challenge_kind(search.data)
-        result["stages"]["subjectParse"] = "blocked" if challenge else "failed"
+        result["stages"]["subjectParse"] = "blocked" if challenge else ("unknown" if ENGINE is not None else "failed")
         if challenge:
             result["warnings"].append(f"challenge:{challenge}")
         else:
@@ -1160,14 +1211,18 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
     result["stages"]["subjectParse"] = "passed"
     result["stages"]["titleMatch"] = "passed" if matched else "failed"
     result["metrics"]["selectedSubjectName"] = bounded_text(subject.get("name", ""), 200)
-    episode_page = fetcher.fetch(subject["url"], max_bytes=MAX_BODY_BYTES)
+    if ENGINE is not None and not matched:
+        result["stages"]["titleMatch"] = "unknown"
+        result["warnings"].append("test-title-not-found:no-random-subject-fallback")
+        return finalize_result(result, started)
+    episode_page = fetcher.fetch(subject["url"], headers={"Accept": "text/html"}, max_bytes=MAX_BODY_BYTES)
     result["metrics"]["episodeLatencyMs"] = episode_page.latency_ms
     if not episode_page.ok:
         result["stages"]["episodeParse"] = "failed"
         result["errors"].append(f"episode-fetch:{episode_page.error}")
         return finalize_result(result, started)
     try:
-        episodes = extract_episodes(episode_page.data, config, subject["url"])
+        episodes = extract_episodes(episode_page.data, config, episode_page.final_url or subject["url"])
     except ValueError as exc:
         result["stages"]["episodeParse"] = "unsupported"
         result["warnings"].append(f"episode-parse-unsupported:{exc}")
@@ -1193,7 +1248,10 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
         resolved = None
         resolved_referer = None
         play_url = episode["url"]
-        if any(suffix in urlsplit(play_url).path.casefold() for suffix in MEDIA_SUFFIXES):
+        direct = (ENGINE.match([play_url], config)[0] if ENGINE is not None else None)
+        if direct is not None and direct["kind"] == "video":
+            resolved, resolved_referer = direct["url"], subject["url"]
+        elif ENGINE is None and any(suffix in urlsplit(play_url).path.casefold() for suffix in MEDIA_SUFFIXES):
             resolved, resolved_referer = play_url, subject["url"]
         else:
             queue = [(play_url, 0)]
@@ -1206,7 +1264,7 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
                 page = fetcher.fetch(page_url, max_bytes=MAX_BODY_BYTES)
                 if not page.ok:
                     continue
-                media_urls, nested_urls = static_media_urls(page.data, page_url, config)
+                media_urls, nested_urls = static_media_urls(page.data, page.final_url or page_url, config)
                 if media_urls:
                     resolved, resolved_referer = media_urls[0], page_url
                     break
@@ -1221,7 +1279,7 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
         if resolved:
             channel_result["resolvedVideoUrl"] = redact_url(resolved)
             probe = probe_media(
-                fetcher, resolved, media_headers(config, resolved_referer or subject["url"]))
+                fetcher, resolved, media_headers(config, resolved_referer or subject["url"], resolved))
             channel_result["probe"] = probe
             channel_result["transportStatus"] = "passed" if probe.get("ok") else "failed"
         channel_results.append(channel_result)
@@ -1232,7 +1290,8 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
     result["metrics"]["resolvedChannelCount"] = len(resolved_channels)
     result["metrics"]["transportPassedChannelCount"] = len(passed_channels)
     if not resolved_channels:
-        result["stages"]["videoResolve"] = "failed"
+        result["stages"]["videoResolve"] = "unknown" if ENGINE is not None else "failed"
+        result["warnings"].append("video-resolve:browser-runtime-not-tested")
         result["errors"].append("video-resolve:no-static-media-url")
         return finalize_result(result, started)
     result["stages"]["videoResolve"] = "passed"
@@ -1252,7 +1311,19 @@ def finalize_result(result: dict, started: float) -> dict:
     result["errors"] = sorted(set(bounded_text(value) for value in result["errors"]))[:30]
     result["score"] = calculate_score(result["stages"], result["warnings"], result.get("probe"))
     result["quality"] = quality_label(result["score"], result["stages"])
-    result["eligibleForTierRecommendation"] = "unsupported" not in result["stages"].values()
+    unknown = {"unsupported", "blocked", "unknown"}
+    result["eligibleForTierRecommendation"] = not unknown.intersection(result["stages"].values())
+    if ENGINE is not None:
+        # Static absence/HTTP blocking on CI is not proof the Android source is dead.
+        inconclusive_errors = ("http-401", "http-403", "http-429", "Timeout", "timeout", "deadline", "budget", "ConnectionError", "SSLError")
+        if any(token in str(result["errors"]) for token in inconclusive_errors):
+            result["eligibleForTierRecommendation"] = False
+        if result["stages"].get("titleMatch") != "passed":
+            result["eligibleForTierRecommendation"] = False
+        result["evidenceLevel"] = "static-transport" if result["stages"].get("transportProbe") == "passed" else "inconclusive"
+        result["realPlaybackVerified"] = False
+        if not result["eligibleForTierRecommendation"]:
+            result["quality"] = "inconclusive"
     result["totalDurationMs"] = round((time.monotonic() - started) * 1000)
     return result
 
@@ -1280,6 +1351,10 @@ def degraded_observation(item: dict, error: str) -> dict:
         "totalDurationMs": 0,
     }
     state["metrics"]["capabilities"] = config_capabilities(config)
+    if ENGINE is not None:
+        state.update(quality="inconclusive", engineMethod=ENGINE_METHOD,
+                     engineCommit="cd0ad5ca8dc501fb06426d83870f49e7e3b0adef",
+                     evidenceLevel="inconclusive", realPlaybackVerified=False)
     return state
 
 
@@ -1297,7 +1372,7 @@ def validate_observation(value: dict) -> bool:
         and isinstance(value["stages"], dict)
         and isinstance(value["score"], int) and not isinstance(value["score"], bool)
         and 0 <= value["score"] <= 100
-        and value["quality"] in {"excellent", "good", "fair", "poor"}
+        and value["quality"] in {"excellent", "good", "fair", "poor", "inconclusive"}
     )
 
 
@@ -1369,9 +1444,14 @@ def recommendation(history: list[dict], fingerprint: str) -> dict:
         entry for entry in history
         if entry.get("configFingerprint") == fingerprint
         and entry.get("eligibleForTierRecommendation", True)
+        and (ENGINE is None or entry.get("engineMethod") == ENGINE_METHOD)
     ][-MAX_HISTORY:]
     dates = {str(entry.get("testedAt", ""))[:10] for entry in observations}
     ready = len(observations) >= 3 and len(dates) >= 3
+    if ENGINE is not None:
+        comparable = [entry for entry in history if entry.get("configFingerprint") == fingerprint and entry.get("engineMethod") == ENGINE_METHOD]
+        if comparable and not comparable[-1].get("eligibleForTierRecommendation", False):
+            ready = False
     if not observations:
         return {"ready": False, "observations": 0, "distinctDays": 0, "recommendedTier": None}
     scores = [entry["score"] for entry in observations]
@@ -1444,7 +1524,11 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
             "levels": ["L0-config", "L1-subject-and-episode", "L2-static-video-url", "L3-static-transport"],
             "executesSiteJavaScript": False,
             "executesThirdPartyPrograms": False,
-            "executesSourceRegexAgainstNetworkData": False,
+            "executesSourceRegexAgainstNetworkData": ENGINE is not None,
+            "parser": ENGINE_METHOD if ENGINE is not None else "legacy-python",
+            "upstreamCommit": "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef" if ENGINE is not None else None,
+            "regexIsolation": "disposable-JVM-12s-192MiB-heap" if ENGINE is not None else None,
+            "browserRuntimeTested": False,
             "realPlaybackClaimed": False,
             "staticHtmlOnly": True,
             "maxChannelsPerSource": MAX_PLAY_PAGES,
@@ -1751,12 +1835,15 @@ def parse_args(argv: list[str]):
     parser.add_argument("--state", default="quality-cache/state.json")
     parser.add_argument("--report", default="reports/quality.json")
     parser.add_argument("--sample-size", type=int, default=16)
+    parser.add_argument("--time-budget", type=int, default=1200, help="Stop between sources after this many seconds; save partial observations")
+    parser.add_argument("--engine-jar", help="Pinned Animeko parser bridge; mandatory for CI network evaluation")
     parser.add_argument("--test", action="store_true")
     parser.add_argument("--validate", metavar="REPORT")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None):
+    global ENGINE
     args = parse_args(sys.argv[1:] if argv is None else argv)
     if args.test:
         run_selftests()
@@ -1773,11 +1860,20 @@ def main(argv: list[str] | None = None):
         print("质量报告校验通过")
         return 0
     try:
+        if args.engine_jar:
+            from animeko_engine import Engine
+            ENGINE = Engine(args.engine_jar)
         items = load_online_items(args.input)
         state = load_state(args.state)
         selected = choose_sample(items, state, max(0, args.sample_size))
         observations = []
+        if not 1 <= args.time_budget <= 2400:
+            raise QualityError("time-budget must be 1..2400 seconds")
+        deadline = time.monotonic() + args.time_budget
         for index, item in enumerate(selected, 1):
+            if time.monotonic() >= deadline:
+                print("Time budget reached; preserving completed observations and rotation state", flush=True)
+                break
             name = as_dict(item.get("arguments")).get("name") or "<unnamed>"
             print(f"[{index}/{len(selected)}] 评估 {name}", flush=True)
             try:
@@ -1790,6 +1886,8 @@ def main(argv: list[str] | None = None):
                   f"stage={observation['stages']}", flush=True)
         state = update_state(state, observations)
         report = build_report(items, state, observations)
+        report["run"]["selectedSources"] = len(selected)
+        report["run"]["budgetExhausted"] = len(observations) < len(selected)
         problems = validate_report(report)
         if problems:
             raise QualityError("; ".join(problems[:20]))
