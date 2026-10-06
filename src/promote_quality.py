@@ -237,7 +237,7 @@ def decide_overrides(summaries: list) -> list:
             continue
         recommended = rec.get("recommendedTier")
         latest = summary.get("latest")
-        if recommended is None or latest is None:
+        if recommended is None or latest is None or latest.get("eligibleForTierRecommendation") is False:
             continue
         baseline = summary["officialTier"]
         baseline = baseline if baseline is not None else BASELINE_UNTIERED
