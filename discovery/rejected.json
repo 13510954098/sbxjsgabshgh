@@ -3,42 +3,6 @@
     {
       "error": "html",
       "observed_by": [
-        "github:open-ani/animeko"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "url": "https://animeko.org/"
-    },
-    {
-      "error": "html",
-      "observed_by": [
-        "github:open-ani/animeko"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "url": "https://animeko.org/downloads/"
-    },
-    {
-      "error": "html",
-      "observed_by": [
         "github:maxchang3/ani-altstore-source"
       ],
       "ok": false,
@@ -72,24 +36,6 @@
       },
       "sha256": "11a081ac34d22d089f84fbe9f33044cbb127983e61d9a0533681a503e2df32b0",
       "url": "https://biomejs.dev/schemas/2.3.11/schema.json"
-    },
-    {
-      "error": "http-429",
-      "observed_by": [
-        "github:open-ani/animeko"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "url": "https://deepwiki.com/open-ani/animeko"
     },
     {
       "error": "html",
@@ -218,7 +164,7 @@
       "url": "https://gitee.com/help%5D(https://gitee.com/help"
     },
     {
-      "error": "invalid-animeko-source",
+      "error": "dns-timeout",
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
@@ -233,7 +179,6 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "7f2f06f40896437536b4f06c3a51aad853da0c51c0a2a06d301d16c97cf30658",
       "url": "https://gitee.com/w658/configs-online"
     },
     {
@@ -346,7 +291,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "7e1c2de453b001251c78edbbe4d9c206a26892f9c3c632b538958cf5017f02e6",
+      "sha256": "ddab5dba0a9ed704bae7ac35f8ec6449ff8704ab2fdc912084d65c6227336c95",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -365,7 +310,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "731647a4e4d36f77ab1a9288f4002cd8af9ea5a0d7ffea352b16a028a3fe2fc7",
+      "sha256": "6cbfca3ecb2b1488055b36cee6f37e176c0e8a19b9c95196757ccd1c9b530023",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -384,7 +329,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "a33135e3d99823f4a9380647a39b40f098e0771c164bf625ee1fcfa6ff97c7a6",
+      "sha256": "6d399325af3eb7cf50c17ad1d06e3af7281d357d9054ab9ff5dbc407e999b42a",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -403,7 +348,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "88cfbb2db05480047f18f9e9a5fd6d31d9ef469650297c71927f0da4db656d23",
+      "sha256": "9d9fd8c8514fdc5e040e34b8c11710368f78cddec2543b284619479ac26ff9e7",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -497,7 +442,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "e1720eac34278212a3109c4540ce60797168e21efd71207fc921660b9691bad9",
+      "sha256": "65b7190b6ba7f33f760a5b1ab3827baa0e8c2b3d873c156f3ee7b47ff77d51af",
       "url": "https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
     },
     {
@@ -594,27 +539,8 @@
       },
       "sha256": "5445c561c399d4765a382e7229ff5c98bf631c9ebd355ae4e7c67678b3788460",
       "url": "https://raw.githubusercontent.com/wan0ge/wan0ge/refs/heads/master/README.md"
-    },
-    {
-      "error": "invalid-animeko-source",
-      "observed_by": [
-        "github:open-ani/animeko"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "sha256": "7fef04f941616a8dc35672a3c76bce6d345061596470b94ef9e6035491969682",
-      "url": "https://socialify.git.ci/open-ani/animeko/image?description=1&descriptionEditable=%E9%9B%86%E6%89%BE%E7%95%AA%E3%80%81%E8%BF%BD%E7%95%AA%E3%80%81%E7%9C%8B%E7%95%AA%E7%9A%84%E4%B8%80%E7%AB%99%E5%BC%8F%E5%BC%B9%E5%B9%95%E8%BF%BD%E7%95%AA%E5%B9%B3%E5%8F%B0&font=Jost&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fopen-ani%2Fanimeko%2Frefs%2Fheads%2Fmain%2F.github%2Fassets%2Flogo.png&name=1&owner=1&pattern=Plus&theme=Light"
     }
   ],
-  "updated": "2026-10-12T09:50:50Z",
+  "updated": "2026-10-13T09:48:24Z",
   "version": 1
 }
