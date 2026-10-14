@@ -2,11 +2,11 @@
   "analysis_mode": "static-only",
   "candidates_checked": 44,
   "candidates_extracted": 95,
-  "duration_s": 147.16,
+  "duration_s": 116.22,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 790130,
-    "platform_static_analysis": 2144013
+    "candidate_network": 790785,
+    "platform_static_analysis": 2149323
   },
   "programs_identified": 31,
   "promoted": [],
@@ -36,6 +36,10 @@
       "provider": "github-code"
     },
     {
+      "error": "error-1d09cbddce7d7857",
+      "provider": "gitee"
+    },
+    {
       "error": "error-b21f78e614237667",
       "provider": "brave-web"
     },
@@ -49,11 +53,11 @@
   "regex_validations": 12,
   "rejected_candidates": 29,
   "repositories_discovered": 19,
-  "run_identity": "github:38378610894:1",
+  "run_identity": "github:38532376563:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-10-13T09:48:24Z",
+  "updated": "2026-10-14T08:04:59Z",
   "valid_candidates": 5,
   "version": 1
 }
