@@ -1221,6 +1221,157 @@
     {
       "categories": [
         "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "subscription",
+        "validator"
+      ],
+      "commit": "074f5c3a5947212056286139ac628d20b973518d",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "Dockerfile",
+          "score": 3
+        },
+        {
+          "path": "README.md",
+          "score": 12
+        },
+        {
+          "path": "backend/build.gradle.kts",
+          "score": 3
+        },
+        {
+          "path": "backend/settings.gradle.kts",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/Logs.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/Main.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/api/ApiRoutes.kt",
+          "score": 4
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/auth/SessionStore.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/bangumi/BangumiClient.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/config/AppConfig.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/data/UserDataStore.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/http/Http.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/http/UrlGuard.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/proxy/HlsRewriter.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/proxy/ProxySessionStore.kt",
+          "score": 3
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/selector/SelectorConfig.kt",
+          "score": 11
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/selector/SelectorEngine.kt",
+          "score": 4
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/selector/SelectorRepository.kt",
+          "score": 7
+        },
+        {
+          "path": "backend/src/main/kotlin/com/animeko/web/selector/SubscriptionService.kt",
+          "score": 10
+        },
+        {
+          "path": "backend/src/main/resources/selectors/example-css-site.json",
+          "score": 5
+        },
+        {
+          "path": "backend/src/main/resources/selectors/example-json-site.json",
+          "score": 5
+        },
+        {
+          "path": "backend/src/test/kotlin/com/animeko/web/api/ApiDataSubscriptionsTest.kt",
+          "score": 12
+        },
+        {
+          "path": "backend/src/test/kotlin/com/animeko/web/api/ProxyRouteTest.kt",
+          "score": 7
+        },
+        {
+          "path": "backend/src/test/kotlin/com/animeko/web/selector/SelectorEngineTest.kt",
+          "score": 4
+        },
+        {
+          "path": "backend/src/test/kotlin/com/animeko/web/selector/SelectorRepositoryTest.kt",
+          "score": 7
+        },
+        {
+          "path": "backend/src/test/kotlin/com/animeko/web/selector/SubscriptionServiceTest.kt",
+          "score": 12
+        },
+        {
+          "path": "backend/src/test/resources/fixtures/subscription_aggregate.json",
+          "score": 10
+        },
+        {
+          "path": "frontend/src/pages/SourcesPage.tsx",
+          "score": 12
+        },
+        {
+          "path": "frontend/src/types.ts",
+          "score": 5
+        },
+        {
+          "path": "scripts/live-smoke.sh",
+          "score": 7
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 72,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "lyhmono/animeko-web",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "selectormediasourcearguments",
+        "web-selector"
+      ],
+      "url": "https://github.com/lyhmono/animeko-web"
+    },
+    {
+      "categories": [
+        "aggregator",
         "generator",
         "mirror-sync",
         "subscription",
@@ -2724,6 +2875,6 @@
       "url": "https://github.com/Zero-wyc/ZViewer"
     }
   ],
-  "updated": "2026-10-16T07:35:11Z",
+  "updated": "2026-10-17T07:14:45Z",
   "version": 1
 }

@@ -292,7 +292,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "02ed3190c22f07f7ceb7eeaa4baee4aa2ee0762a64f80ab801e116b8d2bbcd72",
+      "sha256": "efc40501225b75ce1e86ce039b6212cb49dc90b772a8b6a28dfabac5df27b88a",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -311,7 +311,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "ea3d03ccd43a9c29f0e30ecea2f753cf6e8fbce8c058e8938fa378f7d26fbf67",
+      "sha256": "ad2c70da19db3c63ec546f7f5b127f7201d89f8233e860d264382aea2ff6b5ca",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -330,7 +330,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "2eade6142259877cc1dbbfc442c0ee9f351f60ae1379c23324d6a991f85dcb48",
+      "sha256": "3ab0d9a8ee8ad0969b1b099302b84cd15344932dde742406f45f7ffe10c0f80c",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -349,7 +349,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "00e82c9a5b34bf04e5db679e0cfca1de85e9041deaa971465286cad3f25dbd75",
+      "sha256": "6f835b33f805b4ada81567ab22c5db982390582a83ef305fc59f856273490634",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -540,8 +540,26 @@
       },
       "sha256": "5445c561c399d4765a382e7229ff5c98bf631c9ebd355ae4e7c67678b3788460",
       "url": "https://raw.githubusercontent.com/wan0ge/wan0ge/refs/heads/master/README.md"
+    },
+    {
+      "error": "dns-fail",
+      "observed_by": [
+        "github:lyhmono/animeko-web"
+      ],
+      "ok": false,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-17",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "url": "https://sub.example.org/v1/css1.json"
     }
   ],
-  "updated": "2026-10-16T07:35:11Z",
+  "updated": "2026-10-17T07:14:45Z",
   "version": 1
 }
