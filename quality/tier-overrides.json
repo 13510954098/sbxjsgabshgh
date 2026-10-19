@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-18T08:22:31Z",
-  "validUntil": "2026-11-01",
+  "generatedAt": "2026-10-19T09:21:29Z",
+  "validUntil": "2026-11-02",
   "evidence": {
-    "reportSha256": "c5cf873a317f92bad4583f19f38a1aadf55501fa2dded113dd16ec7480de7a35",
-    "reportGeneratedAt": "2026-10-18T08:22:19+00:00"
+    "reportSha256": "02249c4d59fe0d750d8611ca0880578f8d95d300b761338c44938dc73e4fc5dd",
+    "reportGeneratedAt": "2026-10-19T09:21:12+00:00"
   },
   "overrides": [
     {
@@ -23,8 +23,8 @@
       "officialTier": null,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 85,
+      "evidenceCount": 4,
+      "medianScore": 85.0,
       "transportSuccessRate": 0.0
     },
     {
