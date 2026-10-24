@@ -428,6 +428,45 @@ jobs:
           echo "连续3次发布竞争失败，放弃本轮；下个周期会基于新 main 重算"
           exit 1
 
+      - name: Resolve abort issue after a healthy run
+        if: success()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          # "Explain updater abort" opens this issue when the updater stops; nothing
+          # closed it on recovery, so it outlived the incident it described.
+          listed = subprocess.run(
+              ["gh", "issue", "list", "--repo", os.environ["GH_REPO"],
+               "--state", "open", "--search", "Update 中止 in:title",
+               "--json", "number", "--limit", "5"],
+              capture_output=True, text=True, check=False,
+          )
+          if listed.returncode != 0:
+              raise SystemExit(f"查询 issue 失败，跳过：{listed.stderr.strip()}")
+          try:
+              open_issues = json.loads(listed.stdout or "[]")
+          except ValueError:
+              raise SystemExit("issue 列表解析失败，跳过")
+          for issue in open_issues:
+              number = str(issue.get("number"))
+              subprocess.run(
+                  ["gh", "issue", "close", number, "--repo", os.environ["GH_REPO"],
+                   "--comment", f"本轮 Update 已完整成功，上游抓取恢复，自动关闭。\n\n"
+                   f"- 运行详情：{os.environ['RUN_URL']}"],
+                  check=False,
+              )
+              print(f"已关闭 issue #{number}", flush=True)
+          PY
+
       - name: Upload updater report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
