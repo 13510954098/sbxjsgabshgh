@@ -993,6 +993,15 @@ def file_order_key(canon: str) -> int:
 
 def extract(obj):
     if isinstance(obj, dict):
+        # A schemaVersion>=2 document carries the authoritative, complete list at
+        # the top level. `exportedMediaSourceDataList` is the trimmed mirror
+        # upstream keeps for pre-6.3.0 clients, and it deliberately omits sources
+        # that need newer client features — reading it first silently dropped
+        # creamycake's `2k-dongman` and the whole json-api source.
+        schema_version = obj.get("schemaVersion")
+        if (isinstance(schema_version, int) and not isinstance(schema_version, bool)
+                and schema_version >= 2 and isinstance(obj.get("mediaSources"), list)):
+            return obj["mediaSources"]
         if "exportedMediaSourceDataList" in obj:
             edsl = obj["exportedMediaSourceDataList"]
             return edsl.get("mediaSources") if isinstance(edsl, dict) and isinstance(edsl.get("mediaSources"), list) else None
@@ -5703,24 +5712,29 @@ def run_selftests():
             with open(os.path.join(fixture_dir, "animeko-bt1-schema-v2.json"), "rb") as fixture:
                 bt_payload = fixture.read()
 
-            failures = []
-            css_segment, css_valid = try_parse(css_payload, canon_base + "/css1.json", failures)
-            self.assertTrue(css_valid, failures)
-            self.assertEqual(len(css_segment), 18)
-            by_id = {item[2].get("id"): item[2] for item in css_segment}
-
-            # The full source list carries the json-api entry that upstream keeps
-            # out of the 6.3.0-compatible exported list. It is now validated and
-            # shipped like any other source, so the whole list must come through.
-            source_payload = json.loads(css_payload)
-            source_payload.pop("exportedMediaSourceDataList", None)
+            # schemaVersion 2 means the complete list lives at the top level; the
+            # exportedMediaSourceDataList mirror is upstream's trimmed build for
+            # pre-6.3.0 clients and omits sources needing newer client features.
             source_failures = []
             source_segment, source_valid = try_parse(
-                json.dumps(source_payload, ensure_ascii=False).encode(),
-                canon_base + "/css1.json", source_failures)
+                css_payload, canon_base + "/css1.json", source_failures)
             self.assertTrue(source_valid, source_failures)
             self.assertEqual(len(source_segment), 20)
             source_by_id = {item[2].get("id"): item[2] for item in source_segment}
+            # Exactly the two entries upstream withholds from the compatible list.
+            self.assertIn("2k-dongman", source_by_id)
+            self.assertIn("xifan-dongman-next", source_by_id)
+
+            # Dropping schemaVersion must fall back to the compatible list.
+            legacy_payload = json.loads(css_payload)
+            legacy_payload.pop("schemaVersion", None)
+            legacy_segment, legacy_valid = try_parse(
+                json.dumps(legacy_payload, ensure_ascii=False).encode(),
+                canon_base + "/css1.json", [])
+            self.assertTrue(legacy_valid)
+            self.assertEqual(len(legacy_segment), 18)
+            self.assertNotIn("xifan-dongman-next",
+                             {item[2].get("id") for item in legacy_segment})
             self.assertIn("linkTemplate", source_by_id["girigiri-ai-dongman"]["arguments"]["searchConfig"][
                 "selectorSubjectFormatJsonPathIndexed"])
             json_api = source_by_id["xifan-dongman-next"]
@@ -5754,6 +5768,25 @@ def run_selftests():
             item = json.loads(json.dumps(item))
             item["arguments"]["searchConfig"].update(overrides)
             return item
+
+        def test_extract_prefers_complete_list_on_schema_v2(self):
+            modern = {"schemaVersion": 2, "mediaSources": [1, 2, 3, 4, 5],
+                      "exportedMediaSourceDataList": {"mediaSources": [1, 2, 3]}}
+            self.assertEqual(extract(modern), [1, 2, 3, 4, 5])
+            # Older envelopes keep the previous precedence exactly as before.
+            self.assertEqual(extract({"schemaVersion": 1, "mediaSources": [1, 2, 3, 4, 5],
+                                      "exportedMediaSourceDataList": {"mediaSources": [1, 2, 3]}}),
+                             [1, 2, 3])
+            self.assertEqual(extract({"exportedMediaSourceDataList": {"mediaSources": [1, 2]}}),
+                             [1, 2])
+            self.assertEqual(extract({"mediaSources": [7]}), [7])
+            self.assertEqual(extract([9]), [9])
+            # A bogus schemaVersion must not route around the compatible list.
+            for bad in (True, "2", 2.0, None):
+                self.assertEqual(
+                    extract({"schemaVersion": bad, "mediaSources": [1, 2, 3, 4, 5],
+                             "exportedMediaSourceDataList": {"mediaSources": [1, 2, 3]}}),
+                    [1, 2, 3], f"schemaVersion={bad!r}")
 
         def test_json_api_source_is_accepted_and_shipped(self):
             item = self._json_api_item()
