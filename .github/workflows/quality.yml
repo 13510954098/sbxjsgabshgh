@@ -147,16 +147,30 @@ jobs:
           report = json.loads(report_path.read_text(encoding="utf-8"))
           run = report["run"]
           disagreements = [source for source in report["sources"] if source.get("tierDisagreement")]
+          withheld = [source for source in report["sources"]
+                      if (source.get("latest") or {}).get("pinnedParserVerdictWithheld")]
           with open(summary_path, "a", encoding="utf-8") as handle:
               handle.write("## Animeko source quality\n\n")
               handle.write(f"- Tested this run: {run['testedSources']}/{run['totalSources']}\n")
               handle.write(f"- Static transport passed: {run['transportPassed']}\n")
               handle.write(f"- Mature tier disagreements: {len(disagreements)}\n")
+              handle.write(f"- Verdicts withheld (config outruns pinned parser): {len(withheld)}\n")
               handle.write("- Parser: extracted Animeko Kotlin / Jsoup / JsonPath\n")
               handle.write("- Upstream: cd0ad5ca8dc501fb06426d83870f49e7e3b0adef\n")
               handle.write("- JavaScript/site programs executed: no\n")
               handle.write("- Missing browser-only URLs / challenge pages: inconclusive, not proof of a dead source\n")
               handle.write("- Real playback claimed: no\n")
+          if withheld:
+              # Failing while using config the pinned extraction cannot execute is
+              # indistinguishable from a dead site, so those verdicts are dropped
+              # rather than demoting a source our own parser is too old to drive.
+              detail = "; ".join(sorted(
+                  "{}: {}".format(
+                      (source.get("name") or "?")[:40],
+                      ",".join(((source.get("latest") or {}).get("engineUnsupported") or [])[:3]),
+                  ) for source in withheld)[:6]).replace("\n", " ")[:600]
+              print(f"::warning title=Pinned parser is behind upstream::{len(withheld)} "
+                    f"source(s) withheld from tier recommendations: {detail}")
           PY
 
       - name: Save cumulative quality state
