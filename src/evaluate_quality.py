@@ -35,6 +35,23 @@ import update_sources as updater
 ENGINE = None  # Required by CI; None retains legacy offline fixtures only.
 ENGINE_METHOD = "animeko-extracted-v1"
 
+ENGINE_SOURCE_DIR = Path(__file__).resolve().parents[1] / "engine/src/main/kotlin/upstream"
+# searchConfig section -> the Kotlin declaration that parses it. Main.kt decodes
+# exactly these; `selectorChannelFormatFlattened` keeps its historical JSON name
+# while the parser object is SelectorChannelFormatIndexGrouped.
+PINNED_PARSER_SECTIONS = {
+    "selectorSubjectFormatA": "SelectorSubjectFormatA",
+    "selectorSubjectFormatIndexed": "SelectorSubjectFormatIndexed",
+    "selectorSubjectFormatJsonPathIndexed": "SelectorSubjectFormatJsonPathIndexed",
+    "selectorChannelFormatFlattened": "SelectorChannelFormatIndexGrouped",
+    "selectorChannelFormatNoChannel": "SelectorChannelFormatNoChannel",
+    "matchVideo": "MatchVideoConfig",
+}
+PINNED_SUBJECT_FORMATS = ("SelectorSubjectFormatA", "SelectorSubjectFormatIndexed",
+                          "SelectorSubjectFormatJsonPathIndexed")
+PINNED_CHANNEL_FORMATS = ("SelectorChannelFormatIndexGrouped", "SelectorChannelFormatNoChannel")
+MAX_UNSUPPORTED_FIELDS = 10
+
 SCHEMA_VERSION = 1
 MAX_INPUT_SIZE = 25 * 1024 * 1024
 MAX_STATE_SIZE = 5 * 1024 * 1024
@@ -828,6 +845,95 @@ def validate_css_fields(config: dict) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+def _kotlin_parameter_names(text: str, open_paren: int) -> frozenset:
+    depth = 0
+    for index in range(open_paren, len(text)):
+        if text[index] == "(":
+            depth += 1
+        elif text[index] == ")":
+            depth -= 1
+            if depth == 0:
+                return frozenset(re.findall(r"\bval\s+(\w+)\s*:", text[open_paren:index]))
+    return frozenset()
+
+
+def _pinned_config_fields(text: str, declaration: str) -> frozenset:
+    direct = re.search(rf"\bdata class {re.escape(declaration)}\s*\(", text)
+    if direct:
+        return _kotlin_parameter_names(text, direct.end() - 1)
+    owner = re.search(rf"\bobject {re.escape(declaration)}\b", text)
+    if not owner:
+        return frozenset()
+    nested = re.search(r"\bdata class Config\s*\(", text[owner.end():])
+    return _kotlin_parameter_names(text, owner.end() + nested.end() - 1) if nested else frozenset()
+
+
+def _pinned_format_id(text: str, declaration: str) -> str | None:
+    owner = re.search(rf"\bobject {re.escape(declaration)}\b", text)
+    if not owner:
+        return None
+    found = re.search(r'SelectorFormatId\("([^"]+)"\)', text[owner.end():owner.end() + 400])
+    return found.group(1) if found else None
+
+
+_PINNED_CAPABILITIES: dict | None = None
+
+
+def pinned_parser_capabilities() -> dict:
+    """What the *extracted* parsers in engine/ actually understand.
+
+    Read from the Kotlin sources rather than hardcoded, so re-pinning the
+    extraction to a newer upstream commit relaxes the gate automatically
+    instead of leaving a stale list behind.
+    """
+    global _PINNED_CAPABILITIES
+    if _PINNED_CAPABILITIES is None:
+        text = ""
+        if ENGINE_SOURCE_DIR.is_dir():
+            for path in sorted(ENGINE_SOURCE_DIR.glob("*.kt")):
+                text += path.read_text(encoding="utf-8") + "\n"
+        _PINNED_CAPABILITIES = {
+            "fields": {section: _pinned_config_fields(text, declaration)
+                       for section, declaration in PINNED_PARSER_SECTIONS.items()},
+            "subjectFormatIds": frozenset(
+                value for value in (_pinned_format_id(text, name) for name in PINNED_SUBJECT_FORMATS)
+                if value),
+            "channelFormatIds": frozenset(
+                value for value in (_pinned_format_id(text, name) for name in PINNED_CHANNEL_FORMATS)
+                if value),
+        }
+    return _PINNED_CAPABILITIES
+
+
+def unsupported_engine_config(config: dict) -> list:
+    """Config features the pinned extraction cannot reproduce.
+
+    The bridge decodes with ignoreUnknownKeys, so a field upstream added after
+    the pinned commit is dropped silently rather than rejected: the parser then
+    returns plausible-but-wrong output. girigiri's `linkTemplate` is the live
+    example — without it the bare ids from the suggest API never become
+    `/GV<id>/` detail URLs, so every transport probe 404s and a healthy tier-0
+    source looks dead. Scoring a source on output we know to be wrong would
+    demote it, so such observations must never reach a tier recommendation.
+    """
+    capabilities = pinned_parser_capabilities()
+    if not capabilities["subjectFormatIds"]:
+        return []  # Extraction unreadable; stay silent rather than block everything.
+    problems = []
+    subject_id = str(config.get("subjectFormatId") or "a")
+    if subject_id not in capabilities["subjectFormatIds"]:
+        problems.append(f"subjectFormatId={subject_id}")
+    channel_id = str(config.get("channelFormatId") or "")
+    if channel_id and channel_id not in capabilities["channelFormatIds"]:
+        problems.append(f"channelFormatId={channel_id}")
+    for section, known in sorted(capabilities["fields"].items()):
+        value = config.get(section)
+        if not isinstance(value, dict) or not known:
+            continue
+        problems.extend(f"{section}.{key}" for key in sorted(value) if key not in known)
+    return problems[:MAX_UNSUPPORTED_FIELDS]
+
+
 def config_capabilities(config: dict) -> dict:
     matcher = as_dict(config.get("matchVideo"))
     headers = as_dict(matcher.get("addHeadersToVideo"))
@@ -1171,6 +1277,10 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
         ENGINE.headers.clear()
     result["warnings"].extend(warnings)
     result["metrics"]["capabilities"] = config_capabilities(config)
+    unsupported = unsupported_engine_config(config)
+    if unsupported:
+        result["engineUnsupported"] = unsupported
+        result["warnings"].append("pinned-parser-cannot-execute:" + ",".join(unsupported))
     if errors:
         result["errors"].extend(errors)
         result["stages"]["L0"] = "failed"
@@ -1324,6 +1434,15 @@ def finalize_result(result: dict, started: float) -> dict:
         result["realPlaybackVerified"] = False
         if not result["eligibleForTierRecommendation"]:
             result["quality"] = "inconclusive"
+    if result.get("engineUnsupported") and result["stages"].get("transportProbe") != "passed":
+        # A probe that passed needs no protection: we reached working video while
+        # ignoring the field, so the verdict cannot be a false negative. Only
+        # failure is ambiguous — "the site is dead" and "our parser predates this
+        # config" look identical — and only failure can demote. Applies with or
+        # without the JVM bridge; the Python fallback is the same vintage.
+        result["pinnedParserVerdictWithheld"] = True
+        result["eligibleForTierRecommendation"] = False
+        result["quality"] = "inconclusive"
     result["totalDurationMs"] = round((time.monotonic() - started) * 1000)
     return result
 
@@ -1351,6 +1470,13 @@ def degraded_observation(item: dict, error: str) -> dict:
         "totalDurationMs": 0,
     }
     state["metrics"]["capabilities"] = config_capabilities(config)
+    unsupported = unsupported_engine_config(config)
+    if unsupported:
+        # A degraded observation never reached a transport probe, so the
+        # ambiguity in finalize_result applies here unconditionally.
+        state["engineUnsupported"] = unsupported
+        state["pinnedParserVerdictWithheld"] = True
+        state["quality"] = "inconclusive"
     if ENGINE is not None:
         state.update(quality="inconclusive", engineMethod=ENGINE_METHOD,
                      engineCommit="cd0ad5ca8dc501fb06426d83870f49e7e3b0adef",
@@ -1517,6 +1643,7 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
         })
     tested = len(observations)
     passed_transport = sum(entry.get("stages", {}).get("transportProbe") == "passed" for entry in observations)
+    withheld = {entry["sourceId"] for entry in observations if entry.get("pinnedParserVerdictWithheld")}
     return {
         "schemaVersion": SCHEMA_VERSION,
         "generatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
@@ -1542,6 +1669,10 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
             "testedSources": tested,
             "transportPassed": passed_transport,
             "transportPassRate": round(passed_transport / tested, 3) if tested else None,
+            # Sources that failed while using config the pinned extraction cannot
+            # execute. Non-zero means the engine is overdue for a re-pin, and
+            # those verdicts are being withheld until it happens.
+            "sourcesWithheldForPinnedParser": len(withheld),
         },
         "observations": observations,
         "sources": summaries,
@@ -1775,6 +1906,96 @@ def run_selftests():
             self.assertEqual(result["quality"], "excellent")
             self.assertEqual(result["score"], 100)
             self.assertNotIn("entries", result["probe"])
+
+        def test_pinned_capabilities_are_read_from_extracted_kotlin(self):
+            caps = pinned_parser_capabilities()
+            self.assertEqual(caps["subjectFormatIds"], frozenset({"a", "indexed", "json-path-indexed"}))
+            self.assertEqual(caps["channelFormatIds"], frozenset({"index-grouped", "no-channel"}))
+            self.assertEqual(caps["fields"]["selectorSubjectFormatJsonPathIndexed"],
+                             frozenset({"selectLinks", "selectNames", "preferShorterName"}))
+            self.assertIn("selectLists", caps["fields"]["selectorSubjectFormatA"])
+            self.assertIn("selectEpisodesFromList", caps["fields"]["selectorChannelFormatFlattened"])
+            # `by lazy` properties are not JSON fields and must not be harvested.
+            self.assertIn("matchVideoUrl", caps["fields"]["matchVideo"])
+            self.assertNotIn("matchVideoUrlRegex", caps["fields"]["matchVideo"])
+
+        def test_unsupported_config_detection(self):
+            # The live girigiri config: the pinned extraction predates linkTemplate.
+            self.assertEqual(
+                unsupported_engine_config({
+                    "subjectFormatId": "json-path-indexed",
+                    "selectorSubjectFormatJsonPathIndexed": {
+                        "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
+                        "linkTemplate": "/GV{value}/", "preferShorterName": True}}),
+                ["selectorSubjectFormatJsonPathIndexed.linkTemplate"])
+            self.assertEqual(
+                unsupported_engine_config({"subjectFormatId": "holographic"}),
+                ["subjectFormatId=holographic"])
+            self.assertEqual(
+                unsupported_engine_config({"subjectFormatId": "a", "channelFormatId": "quantum"}),
+                ["channelFormatId=quantum"])
+            # Ordinary configs must not be flagged: a false positive freezes a tier.
+            self.assertEqual(unsupported_engine_config({
+                "searchUrl": "https://site.example/s?q={keyword}", "subjectFormatId": "a",
+                "channelFormatId": "index-grouped",
+                "selectorSubjectFormatA": {"selectLists": "h3 > a", "preferShorterName": True},
+                "selectorChannelFormatFlattened": {"selectEpisodeLists": ".l",
+                                                   "selectEpisodesFromList": "a"},
+                "matchVideo": {"enableNestedUrl": False, "matchVideoUrl": ".+m3u8.+",
+                               "addHeadersToVideo": {"referer": "https://site.example"}}}), [])
+
+        def _link_template_item(self, tier=0):
+            return {"factoryId": "web-selector", "version": 2, "arguments": {
+                "name": "girigiri", "description": "", "iconUrl": "", "tier": tier, "searchConfig": {
+                    "searchUrl": "https://site.example/ajax/suggest?wd={keyword}",
+                    "subjectFormatId": "json-path-indexed",
+                    "selectorSubjectFormatJsonPathIndexed": {
+                        "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
+                        "linkTemplate": "/GV{value}/"},
+                    "selectorChannelFormatNoChannel": {"selectEpisodes": "a"},
+                    "channelFormatId": "no-channel",
+                    "matchVideo": {"enableNestedUrl": False, "matchVideoUrl": ".+m3u8.+"},
+                }}}
+
+        def test_failure_under_unexecutable_config_withholds_verdict(self):
+            # Names resolve (titleMatch passes) but ids never become /GV<id>/ urls,
+            # so every probe 404s. Without the gate this demotes a healthy tier-0.
+            item = self._link_template_item()
+            config = item["arguments"]["searchConfig"]
+            sid = source_identity(item)
+            query = source_query("girigiri", sid, "2026-08-25")
+            search_url = build_search_url(config, query)
+            responses = {search_url: FetchResult(
+                True, redact_url(search_url) or "", 200,
+                json.dumps({"list": [{"id": "5395", "name": query}]}).encode(),
+                "application/json", 10)}
+            result = evaluate_source(item, FakeFetcher(responses), today="2026-08-25")
+            self.assertEqual(result["engineUnsupported"],
+                             ["selectorSubjectFormatJsonPathIndexed.linkTemplate"])
+            self.assertTrue(result["pinnedParserVerdictWithheld"])
+            self.assertFalse(result["eligibleForTierRecommendation"])
+            self.assertEqual(result["quality"], "inconclusive")
+            self.assertTrue(validate_observation(result))
+            # Three failing days must still produce no tier recommendation.
+            history = []
+            for day in ("2026-08-25", "2026-08-26", "2026-08-27"):
+                entry = dict(result, testedAt=f"{day}T00:00:00+00:00")
+                history.append(entry)
+            rec = recommendation(history, config_fingerprint(item))
+            self.assertFalse(rec["ready"])
+            self.assertIsNone(rec["recommendedTier"])
+
+        def test_passing_probe_under_unexecutable_config_still_counts(self):
+            # Reaching working video while ignoring the field cannot be a false
+            # negative, so these verdicts must not be withheld.
+            result = finalize_result({
+                "stages": {"L0": "passed", "titleMatch": "passed", "transportProbe": "passed"},
+                "warnings": [], "errors": [], "probe": {"ok": True},
+                "engineUnsupported": ["selectorSubjectFormatIndexed.selectCovers"],
+            }, time.monotonic())
+            self.assertNotIn("pinnedParserVerdictWithheld", result)
+            self.assertTrue(result["eligibleForTierRecommendation"])
+            self.assertNotEqual(result["quality"], "inconclusive")
 
         def test_safe_fetch_header_filter(self):
             cleaned = SafeFetcher._clean_headers({"Authorization": "secret", "Referer": "https://a.example",
