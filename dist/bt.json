@@ -58,6 +58,7 @@
         }
       },
       {
+        "id": "animegarden",
         "factoryId": "rss",
         "version": 1,
         "arguments": {
@@ -72,6 +73,7 @@
         }
       },
       {
+        "id": "nyaa-land",
         "factoryId": "rss",
         "version": 1,
         "arguments": {
