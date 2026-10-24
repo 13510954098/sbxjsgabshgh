@@ -42,6 +42,42 @@ class ExtractedEngineTests(unittest.TestCase):
         page = json.dumps({'ad':{'name':'FAKE','slug':'bad'},'data':{'videos':[{'name':'A < B & C','slug':'real'}]}}).encode()
         rows = self.engine.subjects(page, c, 'https://site.example/search')
         self.assertEqual(rows, [{'name':'A < B & C','url':'https://site.example/video/real'}])
+    def test_link_template_builds_detail_urls(self):
+        # girigiri's live shape: the suggest API returns bare ids and the client
+        # builds /GV<id>/. Proves the extraction is past upstream 6.3.
+        c = copy.deepcopy(CONFIG)
+        c.update(subjectFormatId='json-path-indexed', rawBaseUrl='https://site.example/',
+                 selectorSubjectFormatJsonPathIndexed={
+                     'selectNames': "$.list[*]['name']", 'selectLinks': "$.list[*]['id']",
+                     'linkTemplate': '/GV{value}/'})
+        page = json.dumps({'list': [{'id': '5395', 'name': 'A'}]}).encode()
+        rows = self.engine.subjects(page, c, 'https://site.example/index.php/ajax/suggest')
+        self.assertEqual(rows, [{'name': 'A', 'url': 'https://site.example/GV5395/'}])
+    def test_absent_link_template_keeps_raw_link(self):
+        c = copy.deepcopy(CONFIG)
+        c.update(subjectFormatId='json-path-indexed', rawBaseUrl='https://site.example/video/',
+                 selectorSubjectFormatJsonPathIndexed={
+                     'selectNames': '$[*].name', 'selectLinks': '$[*].slug'})
+        rows = self.engine.subjects(json.dumps([{'name': 'A', 'slug': 'real'}]).encode(), c,
+                                    'https://site.example/search')
+        self.assertEqual(rows, [{'name': 'A', 'url': 'https://site.example/video/real'}])
+    def test_same_host_http_link_upgraded_to_https(self):
+        # computeSelectorUrl: sites hardcode absolute http on https pages.
+        rows = self.engine.subjects(b'<h3><a href="http://site.example/detail">T</a></h3>',
+                                    CONFIG, 'https://site.example/search')
+        self.assertEqual(rows, [{'name': 'T', 'url': 'https://site.example/detail'}])
+        rows = self.engine.subjects(b'<h3><a href="http://other.example/detail">T</a></h3>',
+                                    CONFIG, 'https://site.example/search')
+        self.assertEqual(rows[0]['url'], 'http://other.example/detail')
+    def test_source_user_agent_wins_over_legacy_video_headers(self):
+        c = copy.deepcopy(CONFIG)
+        c['matchVideo']['matchVideoUrl'] = r'https://cdn\.example/.*\.m3u8'
+        c['userAgent'] = '  Custom/1.0  '
+        rows = self.engine.match(['https://cdn.example/a.m3u8'], c)
+        self.assertEqual(rows[0]['headers']['User-Agent'], 'Custom/1.0')
+        c['userAgent'] = '   '  # blank falls back to the legacy per-video UA
+        rows = self.engine.match(['https://cdn.example/a.m3u8'], c)
+        self.assertTrue(rows[0]['headers']['User-Agent'].startswith('Mozilla/5.0'))
     def test_channel_regex_filters_unmatched(self):
         page = '<span class="tab">广告</span><span class="tab">快看1080</span><div class="list"><a href="/ad">第1集</a></div><div class="list"><a href="/good">第2集</a></div>'.encode()
         rows = self.engine.episodes(page, CONFIG, 'https://site.example/detail')

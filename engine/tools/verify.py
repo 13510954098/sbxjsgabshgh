@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 lock = json.loads((root/'upstream-lock.json').read_text())
-assert lock['commit'] == 'cd0ad5ca8dc501fb06426d83870f49e7e3b0adef'
+assert lock['commit'] == '4809e6f501f17c7bd7c93ff8575db8cbb0ed6910'
 listed = set()
 for entry in lock['files']:
     p = (root/entry['file']).resolve()
