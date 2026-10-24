@@ -1,22 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-24T07:30:55Z",
+  "generatedAt": "2026-10-24T07:35:27Z",
   "validUntil": "2026-11-07",
   "evidence": {
-    "reportSha256": "bd7b1798b02f51e466786346aaa6f494d36d5e7c876ac6a80f6e4222b4b19871",
-    "reportGeneratedAt": "2026-10-24T07:30:42+00:00"
+    "reportSha256": "fc3f771c5962e8ecf3ebd9308ef910af5fde78c11aba8d33770d7042e8c00e95",
+    "reportGeneratedAt": "2026-10-24T07:35:16+00:00"
   },
   "overrides": [
-    {
-      "sourceId": "4ab988cdce236378e0edba4d",
-      "configFingerprint": "7583bf5aa9909f11b4213bd3c399b4ea8237bb09a681d331f282f6c38909a08c",
-      "officialTier": 4,
-      "tier": 3,
-      "direction": "promote",
-      "evidenceCount": 4,
-      "medianScore": 92.5,
-      "transportSuccessRate": 0.75
-    },
     {
       "sourceId": "9294bb836551c1ba254d9ac5",
       "configFingerprint": "c4dbde6375c2477c941c675ae59bdee43706c408ffaeb9e69fa235ab4820ecf7",
