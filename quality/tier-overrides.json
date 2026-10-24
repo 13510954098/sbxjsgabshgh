@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-24T06:59:48Z",
+  "generatedAt": "2026-10-24T07:10:14Z",
   "validUntil": "2026-11-07",
   "evidence": {
-    "reportSha256": "992e6be69d92772fec24430f46a45349cc09609f3168b1c86fab4acd1938fb00",
-    "reportGeneratedAt": "2026-10-24T06:59:34+00:00"
+    "reportSha256": "ad0c592d9a6525bb78c5eec11cf192cd1b647d9d5f2a6639aa3602b3fd44e0be",
+    "reportGeneratedAt": "2026-10-24T07:10:02+00:00"
   },
   "overrides": [
     {
@@ -38,16 +38,6 @@
       "transportSuccessRate": 0.0
     },
     {
-      "sourceId": "bc01dfcb99ac852311bc70ec",
-      "configFingerprint": "fa0e99e5f861c2be03034aea7a99047a9a31e0b6478f42ed595cd991b5f6c282",
-      "officialTier": 4,
-      "tier": 3,
-      "direction": "promote",
-      "evidenceCount": 4,
-      "medianScore": 95.0,
-      "transportSuccessRate": 0.75
-    },
-    {
       "sourceId": "d7860c11fcae7d8e7f70e893",
       "configFingerprint": "304f2e4009df29e33165e8bf3f659aa0425eacdd2ce392ab63b27ab1958947c1",
       "officialTier": 3,
@@ -61,11 +51,11 @@
       "sourceId": "ec0b6cffa15a446a26267248",
       "configFingerprint": "96ef2045a566bc31f5b1ef9ad796bb9b5b8f5b652a7209f37c53c65ec9b5ad59",
       "officialTier": null,
-      "tier": 3,
+      "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 95,
-      "transportSuccessRate": 0.667
+      "evidenceCount": 4,
+      "medianScore": 90.0,
+      "transportSuccessRate": 0.5
     }
   ]
 }
