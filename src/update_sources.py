@@ -180,8 +180,8 @@ KNOWN_OBJECT_FIELDS = ("selectorSubjectFormatA", "selectorSubjectFormatIndexed",
                        "addHeadersToVideo")
 KNOWN_PLAIN_STRING_FIELDS = ("rawBaseUrl", "subjectFormatId", "channelFormatId",
                              "defaultResolution", "defaultSubtitleLanguage", "cookies",
-                             "referer", "userAgent")
-ALLOWED_ITEM_FIELDS = frozenset(("factoryId", "version", "arguments"))
+                             "referer", "userAgent", "linkTemplate")
+ALLOWED_ITEM_FIELDS = frozenset(("id", "clientVersions", "factoryId", "version", "arguments"))
 ALLOWED_ARGUMENT_FIELDS = frozenset(("name", "description", "iconUrl", "searchConfig", "tier",
                                      "channelTiers", "rssUrl", "searchUrl"))
 ALLOWED_SEARCH_CONFIG_FIELDS = frozenset(
@@ -1178,6 +1178,15 @@ def validate_item(m) -> tuple[bool, list[str]]:
     unknown_item_fields = sorted(set(m) - ALLOWED_ITEM_FIELDS)
     if unknown_item_fields:
         problems.append(f"未知条目字段: {unknown_item_fields}")
+    source_id = m.get("id")
+    if "id" in m and (not isinstance(source_id, str) or not source_id.strip()
+                       or len(source_id) > MAX_LEN_NAME or _has_control_chars(source_id)):
+        problems.append("id 非字符串/为空/超长/含控制字符")
+    client_versions = m.get("clientVersions")
+    if "clientVersions" in m and (
+            not isinstance(client_versions, str)
+            or client_versions not in (">=6.3.0", "<6.3.0")):
+        problems.append("clientVersions 值非法")
     factory_id = m.get("factoryId")
     version = m.get("version")
     if factory_id not in ALLOWED_FACTORY:
@@ -1923,12 +1932,15 @@ def fetch_group_worker(canon: str, urls: list[str], cache_meta,
         data, meta = fetch_url(
             url, cache_meta, deadline, expected_snapshot, input_budget=input_budget)
         if data is not None:
-            _, valid = try_parse(data, canon)
+            parse_diagnostics = []
+            _, valid = try_parse(data, canon, parse_diagnostics)
             if valid:
                 if attempts:
                     meta["previous_attempts"] = attempts
                 return data, meta
             meta["error"] = "fresh-content-invalid"
+            if parse_diagnostics:
+                meta["parse_diagnostics"] = [detail for _, detail in parse_diagnostics]
         attempts.append({"url": url, "status": meta.get("status"), "error": meta.get("error")})
         last_meta = meta
         error = meta.get("error") or ""
@@ -3289,9 +3301,19 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
         return [], False
     out = []
     valid = 0
+    # json-api is a recognized upstream factory, but its request/response schema is
+    # not implemented by the vendored engine yet. Exclude it from both output and
+    # the source validity denominator rather than treating it as malformed.
+    eligible_count = 0
+    unsupported_count = 0
     for index, m in enumerate(ms):
         if not isinstance(m, dict):
+            eligible_count += 1
             continue
+        if m.get("factoryId") == "json-api":
+            unsupported_count += 1
+            continue
+        eligible_count += 1
         try:
             m2 = normalize_item(m)
             ok_flag, problems = validate_item(m2)
@@ -3300,6 +3322,8 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
                 parsed_fail.append((canon, f"item-{index}-exception:{type(exc).__name__}"))
             continue
         if not ok_flag:
+            if parsed_fail is not None:
+                parsed_fail.append((canon, f"item-{index}-invalid:{'; '.join(problems[:8])}"))
             continue
         args = m2.get("arguments") or {}
         name = args.get("name")
@@ -3311,17 +3335,19 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
         rank = (quality, canon, u, sha256_json(m2))
         out.append((rank, key, m2, canon))
         valid += 1
+    if unsupported_count and parsed_fail is not None:
+        parsed_fail.append((canon, f"known-unsupported-factory:json-api:{unsupported_count} (TODO: implement schema and engine support)"))
     if valid == 0:
         if parsed_fail is not None:
             parsed_fail.append((canon, "no-valid-items"))
         return [], False
-    valid_ratio = valid / len(ms)
+    valid_ratio = valid / eligible_count if eligible_count else 0
     if valid_ratio < MIN_SOURCE_ITEM_VALID_RATIO:
         if parsed_fail is not None:
-            parsed_fail.append((canon, f"valid-items-ratio-too-low:{valid}/{len(ms)}"))
+            parsed_fail.append((canon, f"valid-items-ratio-too-low:{valid}/{eligible_count}"))
         return [], False
-    if valid < len(ms) and parsed_fail is not None:
-        parsed_fail.append((canon, f"partial-invalid-items:{len(ms) - valid}/{len(ms)}"))
+    if valid < eligible_count and parsed_fail is not None:
+        parsed_fail.append((canon, f"partial-invalid-items:{eligible_count - valid}/{eligible_count}"))
     return out, True
 
 
@@ -5465,6 +5491,53 @@ def run_selftests():
             seg, valid = try_parse(body, canon, [])
             self.assertTrue(valid)
             self.assertEqual(len(seg), 90)
+
+        def test_animeko_live_format_fixtures(self):
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            canon_base = "https://sub.creamycake.org/v1"
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                css_payload = fixture.read()
+            with open(os.path.join(fixture_dir, "animeko-bt1-schema-v2.json"), "rb") as fixture:
+                bt_payload = fixture.read()
+
+            failures = []
+            css_segment, css_valid = try_parse(css_payload, canon_base + "/css1.json", failures)
+            self.assertTrue(css_valid, failures)
+            self.assertEqual(len(css_segment), 18)
+            by_id = {item[2].get("id"): item[2] for item in css_segment}
+
+            # The full source list includes a json-api entry, while the exported
+            # compatible list omits it. Exercise the source list path explicitly so
+            # that this known-but-deferred factory cannot poison the valid ratio.
+            source_payload = json.loads(css_payload)
+            source_payload.pop("exportedMediaSourceDataList", None)
+            source_failures = []
+            source_segment, source_valid = try_parse(
+                json.dumps(source_payload, ensure_ascii=False).encode(),
+                canon_base + "/css1.json", source_failures)
+            self.assertTrue(source_valid, source_failures)
+            self.assertEqual(len(source_segment), 19)
+            source_by_id = {item[2].get("id"): item[2] for item in source_segment}
+            self.assertIn("linkTemplate", source_by_id["girigiri-ai-dongman"]["arguments"]["searchConfig"][
+                "selectorSubjectFormatJsonPathIndexed"])
+            self.assertTrue(any("known-unsupported-factory:json-api" in str(x)
+                                for x in source_failures))
+
+            valid_item = source_by_id["girigiri-ai-dongman"]
+            valid_client_versions = json.loads(json.dumps(valid_item))
+            valid_client_versions["clientVersions"] = ">=6.3.0"
+            self.assertTrue(validate_item(valid_client_versions)[0])
+            malformed_client_versions = json.loads(json.dumps(valid_item))
+            malformed_client_versions["clientVersions"] = {"unexpected": "shape"}
+            self.assertFalse(validate_item(malformed_client_versions)[0])
+            unknown_field = json.loads(json.dumps(valid_item))
+            unknown_field["unexpectedPayload"] = "must remain rejected"
+            self.assertFalse(validate_item(unknown_field)[0])
+
+            bt_segment, bt_valid = try_parse(bt_payload, canon_base + "/bt1.json", [])
+            self.assertTrue(bt_valid)
+            self.assertEqual(len(bt_segment), 2)
+            self.assertTrue(all(item[2]["factoryId"] == "rss" for item in bt_segment))
 
         def test_streaming_output_limit(self):
             import tempfile
