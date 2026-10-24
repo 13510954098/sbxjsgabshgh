@@ -394,8 +394,17 @@ jobs:
           attempt=0
           while [ "$attempt" -lt 3 ]; do
             attempt=$((attempt + 1))
-            git fetch --depth 1 origin \
-              "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            if ! git fetch --depth 1 origin \
+                 "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"; then
+              echo "拉取 $DEFAULT_BRANCH 失败，退避后重试（$attempt/3）"
+              sleep "$attempt"; continue
+            fi
+            # 另一轮 quality 可能在本 job 起跑之后就已发布过覆盖，此时 main 已
+            # 领先于本次 checkout 的 HEAD，而工作区里带着同一个文件的暂存改动，
+            # git switch 会拒绝切换；它是裸命令，set -e 当场终止整步，于是这个
+            # 重试循环永远到不了第二次。待发布内容原样存放在 $STAGED 里，下面
+            # 会重新安装并再次核对 sha256，所以此处丢弃工作区改动是安全的。
+            git reset -q --hard
             git switch -C animeko-quality-publish "refs/remotes/origin/$DEFAULT_BRANCH"
             test ! -L quality
             mkdir -p quality
@@ -416,9 +425,10 @@ jobs:
             fi
             git commit -q -m "chore: 确认实测 tier 覆盖 $(date -u +%F)"
             branch="animeko-micro/${RUN_ID}-${attempt}"
-            git push origin "HEAD:refs/heads/$branch"
-            # 规则集 Protect main 要求一切变更走 PR：开微型PR并在同一步内立即自合并
-            if gh pr create --base "$DEFAULT_BRANCH" --head "$branch" \
+            # 规则集 Protect main 要求一切变更走 PR：开微型PR并在同一步内立即自合并。
+            # push 同样必须留在条件链里，否则一次瞬时失败就会跳过重试直接打死整步。
+            if git push origin "HEAD:refs/heads/$branch" \
+                 && gh pr create --base "$DEFAULT_BRANCH" --head "$branch" \
                  --title "chore: 确认实测 tier 覆盖" \
                  --body "自动发布通道（微型PR，立即自合并，请勿人工处理）。" \
                  && gh pr merge "$branch" --merge --delete-branch; then
@@ -428,6 +438,7 @@ jobs:
             echo "微型PR发布失败，清理后重试（$attempt/3）"
             gh pr close "$branch" --delete-branch || true
             gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$branch" || true
+            sleep "$attempt"
           done
           echo "连续3次发布竞争失败，放弃本轮；下个计划周期会重试"
           exit 1
