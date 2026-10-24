@@ -191,6 +191,7 @@ ALLOWED_SEARCH_CONFIG_FIELDS = frozenset(
 )
 
 MAX_LEN_NAME = 200
+MAX_LEN_CLIENT_VERSIONS = 100
 MAX_LEN_DESC = 1000
 MAX_LEN_SELECTOR = 500
 MAX_LEN_REGEX = 500
@@ -342,6 +343,40 @@ def is_private_hostname(host: str) -> bool:
 
 def _has_control_chars(value: str) -> bool:
     return any(ord(ch) < 32 or ord(ch) == 127 for ch in value)
+
+
+# Characters that can legitimately appear in a version-range expression:
+# digits, prerelease identifiers (6.4.0-beta01), comparators, wildcards and
+# the separators used to combine clauses (">=6.3.0 <7.0.0", ">=6.3.0 || <6.0.0").
+_CLIENT_VERSIONS_SAFE_RE = re.compile(r"^[0-9A-Za-z.\-+_<>=~^*|, ]+$")
+
+
+def _client_versions_problem(value) -> str | None:
+    """Check the upstream ``clientVersions`` range expression by shape, not grammar.
+
+    The comparator syntax belongs to upstream Animeko and is still moving: 6.3.0
+    introduced ``clientVersions`` with values like ``>=6.3.0`` and 6.4.0 is already
+    in beta, so tomorrow's subscriptions may legitimately carry ``>=6.4.0``,
+    ``>=6.3.0 <7.0.0`` or an ``||`` union. Pinning an allowlist of literal values
+    here would repeat the 2026-10 outage, where a perfectly valid upstream schema
+    bump was rejected field-by-field until the whole source fell below
+    MIN_SOURCE_ITEM_VALID_RATIO.
+
+    We never act on this field — it is carried through as metadata — so the only
+    things worth rejecting are values that are unusable or unsafe to propagate.
+    Anything well-formed but unrecognized is allowed through on purpose.
+    """
+    if not isinstance(value, str):
+        return "clientVersions 非字符串"
+    if not value.strip():
+        return "clientVersions 为空"
+    if len(value) > MAX_LEN_CLIENT_VERSIONS:
+        return "clientVersions 超长"
+    if _has_control_chars(value):
+        return "clientVersions 含控制字符"
+    if not _CLIENT_VERSIONS_SAFE_RE.match(value.strip()):
+        return "clientVersions 含非法字符"
+    return None
 
 
 _dns_rotation = {}
@@ -1182,11 +1217,10 @@ def validate_item(m) -> tuple[bool, list[str]]:
     if "id" in m and (not isinstance(source_id, str) or not source_id.strip()
                        or len(source_id) > MAX_LEN_NAME or _has_control_chars(source_id)):
         problems.append("id 非字符串/为空/超长/含控制字符")
-    client_versions = m.get("clientVersions")
-    if "clientVersions" in m and (
-            not isinstance(client_versions, str)
-            or client_versions not in (">=6.3.0", "<6.3.0")):
-        problems.append("clientVersions 值非法")
+    if "clientVersions" in m:
+        client_versions_problem = _client_versions_problem(m.get("clientVersions"))
+        if client_versions_problem:
+            problems.append(client_versions_problem)
     factory_id = m.get("factoryId")
     version = m.get("version")
     if factory_id not in ALLOWED_FACTORY:
@@ -5538,6 +5572,37 @@ def run_selftests():
             self.assertTrue(bt_valid)
             self.assertEqual(len(bt_segment), 2)
             self.assertTrue(all(item[2]["factoryId"] == "rss" for item in bt_segment))
+
+        def test_client_versions_accepts_future_upstream_ranges(self):
+            # Regression guard for the 2026-10 outage. `clientVersions` is an
+            # upstream-owned range expression: 6.3.0 shipped ">=6.3.0" and 6.4.0 is
+            # already in beta, so validation has to check shape, never an allowlist
+            # of the literals that happened to exist when this code was written.
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                payload = json.loads(fixture.read())
+            base = next(m for m in payload["mediaSources"] if m.get("id") == "girigiri-ai-dongman")
+
+            def with_client_versions(value):
+                probe = json.loads(json.dumps(base))
+                probe["clientVersions"] = value
+                return validate_item(normalize_item(probe))
+
+            for accepted in (">=6.3.0", "<6.3.0", ">=6.4.0", ">=6.4.0-beta01",
+                             ">=6.3.0 <7.0.0", ">=6.3.0 || <6.0.0", "6.3",
+                             "1.2.3+build.5", "~6.3.0", "^6.4", "6.*"):
+                ok, problems = with_client_versions(accepted)
+                self.assertTrue(ok, f"{accepted!r} 应被接受，却报 {problems}")
+
+            for rejected in ({"unexpected": "shape"}, [">=6.3.0"], 630, None, True,
+                             "", "   ", ">=6.3.0\n<7.0.0", ">=6.3.0; rm -rf /",
+                             "<script>alert(1)</script>", "x" * 200):
+                ok, _ = with_client_versions(rejected)
+                self.assertFalse(ok, f"{rejected!r} 应被拒绝")
+
+            # The field stays optional, and an item without it is untouched.
+            ok, problems = validate_item(normalize_item(json.loads(json.dumps(base))))
+            self.assertTrue(ok, problems)
 
         def test_streaming_output_limit(self):
             import tempfile
