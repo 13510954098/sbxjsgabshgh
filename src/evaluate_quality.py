@@ -51,6 +51,7 @@ PINNED_SUBJECT_FORMATS = ("SelectorSubjectFormatA", "SelectorSubjectFormatIndexe
                           "SelectorSubjectFormatJsonPathIndexed")
 PINNED_CHANNEL_FORMATS = ("SelectorChannelFormatIndexGrouped", "SelectorChannelFormatNoChannel")
 MAX_UNSUPPORTED_FIELDS = 10
+MAX_WITHHELD_REPORTED = 25
 
 SCHEMA_VERSION = 1
 MAX_INPUT_SIZE = 25 * 1024 * 1024
@@ -1662,6 +1663,33 @@ def choose_sample(items: list[dict], state: dict, sample_size: int) -> list[dict
     return sorted(items, key=key)[:sample_size]
 
 
+def pinned_parser_withheld(summaries: list[dict]) -> list[dict]:
+    """Sources whose verdict is currently withheld because our parser is too old.
+
+    A source outside this run's rotating sample keeps the newest *stored*
+    observation as its `latest`, so a record written before a re-pin can outlive
+    the upgrade that fixed it. Tier recommendations already ignore history from
+    a foreign engine build; this must match, otherwise re-pinning the extraction
+    never clears the alarm it was supposed to clear and the warning decays into
+    noise operators learn to skip.
+    """
+    current = ENGINE_METHOD if ENGINE is not None else "legacy-python"
+    withheld = []
+    for summary in summaries:
+        latest = summary.get("latest") or {}
+        if not latest.get("pinnedParserVerdictWithheld"):
+            continue
+        if latest.get("engineMethod", "legacy-python") != current:
+            continue  # Written by an older parser; its verdict no longer applies.
+        withheld.append({
+            "sourceId": summary["sourceId"],
+            "name": summary["name"],
+            "fields": list(latest.get("engineUnsupported") or [])[:MAX_UNSUPPORTED_FIELDS],
+            "testedThisRun": bool(summary.get("testedThisRun")),
+        })
+    return withheld
+
+
 def build_report(items: list[dict], state: dict, observations: list[dict]) -> dict:
     current = {entry["sourceId"]: entry for entry in observations}
     summaries = []
@@ -1683,7 +1711,7 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
         })
     tested = len(observations)
     passed_transport = sum(entry.get("stages", {}).get("transportProbe") == "passed" for entry in observations)
-    withheld = {entry["sourceId"] for entry in observations if entry.get("pinnedParserVerdictWithheld")}
+    withheld = pinned_parser_withheld(summaries)
     return {
         "schemaVersion": SCHEMA_VERSION,
         "generatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
@@ -1713,6 +1741,9 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
             # execute. Non-zero means the engine is overdue for a re-pin, and
             # those verdicts are being withheld until it happens.
             "sourcesWithheldForPinnedParser": len(withheld),
+            # Same set, with the offending fields, so the workflow summary does
+            # not have to re-derive it from raw observations and drift away.
+            "pinnedParserWithheld": withheld[:MAX_WITHHELD_REPORTED],
         },
         "observations": observations,
         "sources": summaries,
@@ -2038,6 +2069,34 @@ def run_selftests():
             rec = recommendation(history, config_fingerprint(item))
             self.assertFalse(rec["ready"])
             self.assertIsNone(rec["recommendedTier"])
+
+        def test_withheld_report_drops_superseded_engine_records(self):
+            # Only a rotating sample is tested each run, so an untested source
+            # keeps its newest stored observation as `latest`. After a re-pin
+            # that record can still carry a field the *old* parser could not
+            # execute. Reporting it would mean the alarm never clears.
+            summaries = [
+                {"sourceId": "a", "name": "stale-girigiri", "testedThisRun": False,
+                 "latest": {"pinnedParserVerdictWithheld": True, "engineMethod": "animeko-extracted-v1",
+                            "engineUnsupported": ["selectorSubjectFormatJsonPathIndexed.linkTemplate"]}},
+                {"sourceId": "b", "name": "current-hanime", "testedThisRun": True,
+                 "latest": {"pinnedParserVerdictWithheld": True, "engineMethod": ENGINE_METHOD,
+                            "engineUnsupported": ["selectorSubjectFormatIndexed.selectCovers"]}},
+                {"sourceId": "c", "name": "healthy", "testedThisRun": True,
+                 "latest": {"engineMethod": ENGINE_METHOD}},
+                {"sourceId": "d", "name": "never-tested", "testedThisRun": False, "latest": None},
+            ]
+            with mock.patch.object(sys.modules[__name__], "ENGINE", object()):
+                withheld = pinned_parser_withheld(summaries)
+            self.assertEqual([entry["sourceId"] for entry in withheld], ["b"])
+            self.assertEqual(withheld[0]["fields"],
+                             ["selectorSubjectFormatIndexed.selectCovers"])
+            # Without an engine the legacy records are the current ones.
+            legacy = [{"sourceId": "e", "name": "legacy", "testedThisRun": True,
+                       "latest": {"pinnedParserVerdictWithheld": True, "engineUnsupported": ["x.y"]}}]
+            self.assertEqual([entry["sourceId"] for entry in pinned_parser_withheld(legacy)], ["e"])
+            self.assertEqual(pinned_parser_withheld(
+                [dict(legacy[0], latest=dict(legacy[0]["latest"], engineMethod=ENGINE_METHOD))]), [])
 
         def test_python_fallback_mirrors_pinned_url_rules(self):
             # girigiri's live shape: bare ids become /GV<id>/ detail pages.
