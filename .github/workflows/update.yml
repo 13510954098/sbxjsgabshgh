@@ -145,8 +145,14 @@ jobs:
           ]
           if failed:
               lines.append(f"#### 硬失败上游（{len(failed)}）")
-              lines += [f"- `{canon}` → `{(meta or {}).get('error')}`"
-                        for canon, meta in sorted(failed.items())[:25]]
+              for canon, meta in sorted(failed.items())[:25]:
+                  meta = meta or {}
+                  lines.append(f"- `{canon}` → `{meta.get('error')}`")
+                  # Without these, `fresh-content-invalid` says only "the body was
+                  # rejected" and the actual field never reaches anyone: the report
+                  # artifact is gitignored and has repeatedly been undownloadable.
+                  for detail in (meta.get("parse_diagnostics") or [])[:6]:
+                      lines.append(f"  - `{detail}`")
               lines.append("")
           if stale:
               lines.append(f"#### stale 缓存兜底（{len(stale)}）")
@@ -465,6 +471,95 @@ jobs:
                   check=False,
               )
               print(f"已关闭 issue #{number}", flush=True)
+          PY
+
+      - name: Warn on upstream schema drift
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+
+          TITLE = "⚠️ 上游 schema 漂移预警"
+          SEARCH = "schema 漂移 in:title"
+
+          report_path = pathlib.Path("reports/latest.json")
+          if not report_path.is_file():
+              print("reports/latest.json 缺失，跳过漂移检查")
+              raise SystemExit(0)
+          try:
+              report = json.loads(report_path.read_text(encoding="utf-8"))
+          except ValueError as exc:
+              print(f"reports/latest.json 解析失败，跳过漂移检查: {exc}")
+              raise SystemExit(0)
+          drift = report.get("schema_drift") or {}
+
+          listed = subprocess.run(
+              ["gh", "issue", "list", "--repo", os.environ["GH_REPO"],
+               "--state", "open", "--search", SEARCH, "--json", "number", "--limit", "5"],
+              capture_output=True, text=True, check=False,
+          )
+          try:
+              open_issues = json.loads(listed.stdout or "[]") if listed.returncode == 0 else []
+          except ValueError:
+              open_issues = []
+
+          if not drift:
+              # Upstream came back in line (or we widened the allowlist): retract.
+              for issue in open_issues:
+                  subprocess.run(
+                      ["gh", "issue", "close", str(issue.get("number")),
+                       "--repo", os.environ["GH_REPO"],
+                       "--comment", f"本轮未再检测到未知字段，漂移已消除，自动关闭。\n\n"
+                       f"- 运行详情：{os.environ['RUN_URL']}"],
+                      check=False,
+                  )
+                  print(f"漂移已消除，关闭 issue #{issue.get('number')}")
+              print("无 schema 漂移")
+              raise SystemExit(0)
+
+          lines = [
+              "### 上游 schema 漂移预警",
+              "",
+              "上游下发了白名单里没有的字段。相关源**本轮仍在正常出货**，这是预警而非故障——",
+              "但带新字段的条目一旦超过 10%，整源就会被判 `fresh-content-invalid`，",
+              "2026-10 的四天停摆就是这样开始的。请核对后扩充白名单。",
+              "",
+          ]
+          for canon, signals in sorted(drift.items()):
+              lines.append(f"- `{canon}`")
+              lines += [f"  - {signal}" for signal in signals[:8]]
+          body = "\n".join(lines)
+          print(body, flush=True)
+          print(f"::warning::上游 schema 漂移：{len(drift)} 个源出现未知字段，详见 step summary")
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as out:
+                  out.write(body + "\n")
+
+          # One standing issue: opened when drift appears, closed when it clears,
+          # never commented on in between — this workflow runs every 4 hours.
+          if open_issues:
+              print(f"漂移预警 issue 已存在（#{open_issues[0].get('number')}），不重复创建")
+          else:
+              subprocess.run(
+                  ["gh", "issue", "create", "--repo", os.environ["GH_REPO"],
+                   "--title", TITLE,
+                   "--body", body + f"\n- 运行详情：{os.environ['RUN_URL']}\n\n"
+                   "白名单位置：`ALLOWED_ITEM_FIELDS` / `ALLOWED_ARGUMENT_FIELDS` / "
+                   "`ALLOWED_SEARCH_CONFIG_FIELDS`（src/update_sources.py）。"],
+                  check=False,
+              )
+              print("已创建漂移预警 issue")
           PY
 
       - name: Upload updater report
