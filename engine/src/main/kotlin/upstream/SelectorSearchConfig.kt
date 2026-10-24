@@ -9,6 +9,7 @@
 
 package me.him188.ani.app.domain.mediasource.web
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
 import org.intellij.lang.annotations.Language
 import me.him188.ani.app.domain.mediasource.web.format.parseOrNull
@@ -36,6 +37,13 @@ class SelectorSearchConfig {
     @Serializable
     data class VideoHeaders(
         val referer: String = "",
+        /**
+         * 6.3 以前的配置只能设置播放器的 UA. 仅在 [SelectorSearchConfig.userAgent] 为空时使用, 保持旧配置的行为.
+         *
+         * 没改过时不写出: 旧客户端读不到这个键时使用同一个默认值.
+         */
+        @Deprecated("Use SelectorSearchConfig.userAgent")
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
         val userAgent: String = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
     )
 

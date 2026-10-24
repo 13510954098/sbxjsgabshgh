@@ -156,7 +156,7 @@ jobs:
               handle.write(f"- Mature tier disagreements: {len(disagreements)}\n")
               handle.write(f"- Verdicts withheld (config outruns pinned parser): {len(withheld)}\n")
               handle.write("- Parser: extracted Animeko Kotlin / Jsoup / JsonPath\n")
-              handle.write("- Upstream: cd0ad5ca8dc501fb06426d83870f49e7e3b0adef\n")
+              handle.write("- Upstream: 4809e6f501f17c7bd7c93ff8575db8cbb0ed6910\n")
               handle.write("- JavaScript/site programs executed: no\n")
               handle.write("- Missing browser-only URLs / challenge pages: inconclusive, not proof of a dead source\n")
               handle.write("- Real playback claimed: no\n")

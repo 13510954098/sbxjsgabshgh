@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 
-UPSTREAM = 'cd0ad5ca8dc501fb06426d83870f49e7e3b0adef'
+UPSTREAM = '4809e6f501f17c7bd7c93ff8575db8cbb0ed6910'
 class EngineError(ValueError):
     pass
 

@@ -33,7 +33,7 @@ from unittest import mock
 import update_sources as updater
 
 ENGINE = None  # Required by CI; None retains legacy offline fixtures only.
-ENGINE_METHOD = "animeko-extracted-v1"
+ENGINE_METHOD = "animeko-extracted-v2"
 
 ENGINE_SOURCE_DIR = Path(__file__).resolve().parents[1] / "engine/src/main/kotlin/upstream"
 # searchConfig section -> the Kotlin declaration that parses it. Main.kt decodes
@@ -709,32 +709,67 @@ def json_indexed_subjects(data: bytes, names_expr: str, links_expr: str) -> list
     return output
 
 
+def apply_link_template(link_template, raw_href: str) -> str:
+    """Mirror of upstream applyLinkTemplate: `{value}` receives the raw link."""
+    if not isinstance(link_template, str) or not link_template.strip():
+        return raw_href
+    return link_template.replace("{value}", raw_href)
+
+
+def compute_selector_url(base_url: str, raw_url: str) -> str:
+    """Mirror of UrlHelpers.computeSelectorUrl.
+
+    Sites hardcode absolute http links on https pages and rely on the browser's
+    301; upstream upgrades same-host default-port http links to https.
+    """
+    absolute = urljoin(base_url, raw_url)
+    base, target = urlsplit(base_url), urlsplit(absolute)
+    if base.scheme != "https" or target.scheme != "http":
+        return absolute
+    try:
+        if target.port not in (None, 80):
+            return absolute
+    except ValueError:
+        return absolute
+    def normalize(host):
+        return (host or "").lower().removeprefix("www.")
+    if normalize(base.hostname) != normalize(target.hostname):
+        return absolute
+    return urlunsplit(("https", target.hostname or "", target.path, target.query, target.fragment))
+
+
 def extract_subjects(data: bytes, config: dict, base_url: str) -> list[dict]:
     if ENGINE is not None:
         return ENGINE.subjects(data, config, base_url)
     format_id = str(config.get("subjectFormatId") or "a").lower()
     if "json" in format_id:
         fmt = config.get("selectorSubjectFormatJsonPathIndexed") or {}
+        template = fmt.get("linkTemplate")
         return [
-            {"name": row["name"], "url": urljoin(base_url, row["link"])}
+            {"name": row["name"],
+             "url": compute_selector_url(base_url, apply_link_template(template, row["link"]))}
             for row in json_indexed_subjects(
                 data, str(fmt.get("selectNames") or ""), str(fmt.get("selectLinks") or ""))
         ]
     root = parse_html_document(data)
     if format_id == "indexed":
         fmt = config.get("selectorSubjectFormatIndexed") or {}
+        template = fmt.get("linkTemplate")
         names = select_nodes(root, str(fmt.get("selectNames") or ""), MAX_SUBJECTS)
         links = select_nodes(root, str(fmt.get("selectLinks") or ""), MAX_SUBJECTS)
         output = []
         for name_node, link_node in zip(names, links):
             link = link_node.link()
             if link:
-                output.append({"name": name_node.text(), "url": urljoin(base_url, link)})
+                output.append({"name": name_node.text(),
+                               "url": compute_selector_url(base_url, apply_link_template(template, link))})
         return output
     fmt = config.get("selectorSubjectFormatA") or {}
+    template = fmt.get("linkTemplate")
     nodes = select_nodes(root, str(fmt.get("selectLists") or ""), MAX_SUBJECTS)
     return [
-        {"name": node.text(), "url": urljoin(base_url, link)}
+        {"name": node.text(),
+         "url": compute_selector_url(base_url, apply_link_template(template, link))}
         for node in nodes if (link := node.link())
     ]
 
@@ -758,7 +793,7 @@ def extract_episodes(data: bytes, config: dict, base_url: str) -> list[dict]:
                 link = node.link()
                 if link:
                     output.append({"channel": bounded_text(channel, 120), "name": node.text(),
-                                   "url": urljoin(base_url, link)})
+                                   "url": compute_selector_url(base_url, link)})
                     if len(output) >= MAX_EPISODES:
                         return output
     if output:
@@ -769,7 +804,7 @@ def extract_episodes(data: bytes, config: dict, base_url: str) -> list[dict]:
             link = node.link()
             if link:
                 output.append({"channel": "默认线路", "name": node.text(),
-                               "url": urljoin(base_url, link)})
+                               "url": compute_selector_url(base_url, link)})
     return output
 
 
@@ -1053,6 +1088,11 @@ def media_headers(config: dict, referer: str, resolved: str | None = None) -> di
                     headers["Referer"] = value or referer
                 elif key.casefold() == "useragent":
                     headers["User-Agent"] = value
+    # The 6.3 source-level userAgent wins over the legacy per-video header,
+    # matching matchWebVideo's `userAgent ?: addHeadersToVideo.userAgent`.
+    source_agent = config.get("userAgent")
+    if isinstance(source_agent, str) and source_agent.strip():
+        headers["User-Agent"] = source_agent.strip()
     cookies = matcher.get("cookies")
     if isinstance(cookies, str) and cookies and len(cookies) <= 4096:
         headers["Cookie"] = cookies
@@ -1273,7 +1313,7 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
     if ENGINE is not None:
         warnings = [w for w in warnings if not w.startswith(("evaluator-unsupported-selector:", "java-regex-not-python-checkable:"))]
         result["engineMethod"] = ENGINE_METHOD
-        result["engineCommit"] = "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef"
+        result["engineCommit"] = "4809e6f501f17c7bd7c93ff8575db8cbb0ed6910"
         ENGINE.headers.clear()
     result["warnings"].extend(warnings)
     result["metrics"]["capabilities"] = config_capabilities(config)
@@ -1479,7 +1519,7 @@ def degraded_observation(item: dict, error: str) -> dict:
         state["quality"] = "inconclusive"
     if ENGINE is not None:
         state.update(quality="inconclusive", engineMethod=ENGINE_METHOD,
-                     engineCommit="cd0ad5ca8dc501fb06426d83870f49e7e3b0adef",
+                     engineCommit="4809e6f501f17c7bd7c93ff8575db8cbb0ed6910",
                      evidenceLevel="inconclusive", realPlaybackVerified=False)
     return state
 
@@ -1653,7 +1693,7 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
             "executesThirdPartyPrograms": False,
             "executesSourceRegexAgainstNetworkData": ENGINE is not None,
             "parser": ENGINE_METHOD if ENGINE is not None else "legacy-python",
-            "upstreamCommit": "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef" if ENGINE is not None else None,
+            "upstreamCommit": "4809e6f501f17c7bd7c93ff8575db8cbb0ed6910" if ENGINE is not None else None,
             "regexIsolation": "disposable-JVM-12s-192MiB-heap" if ENGINE is not None else None,
             "browserRuntimeTested": False,
             "realPlaybackClaimed": False,
@@ -1912,7 +1952,13 @@ def run_selftests():
             self.assertEqual(caps["subjectFormatIds"], frozenset({"a", "indexed", "json-path-indexed"}))
             self.assertEqual(caps["channelFormatIds"], frozenset({"index-grouped", "no-channel"}))
             self.assertEqual(caps["fields"]["selectorSubjectFormatJsonPathIndexed"],
-                             frozenset({"selectLinks", "selectNames", "preferShorterName"}))
+                             frozenset({"selectLinks", "selectNames", "linkTemplate",
+                                        "preferShorterName"}))
+            # 6.3 added linkTemplate to all three subject formats; seeing it here is
+            # what proves the extraction is current rather than silently stale.
+            for section in ("selectorSubjectFormatA", "selectorSubjectFormatIndexed",
+                            "selectorSubjectFormatJsonPathIndexed"):
+                self.assertIn("linkTemplate", caps["fields"][section], section)
             self.assertIn("selectLists", caps["fields"]["selectorSubjectFormatA"])
             self.assertIn("selectEpisodesFromList", caps["fields"]["selectorChannelFormatFlattened"])
             # `by lazy` properties are not JSON fields and must not be harvested.
@@ -1920,14 +1966,22 @@ def run_selftests():
             self.assertNotIn("matchVideoUrlRegex", caps["fields"]["matchVideo"])
 
         def test_unsupported_config_detection(self):
-            # The live girigiri config: the pinned extraction predates linkTemplate.
+            # The live girigiri config. The extraction now implements linkTemplate,
+            # so the gate must stay silent — re-pinning relaxes it automatically.
             self.assertEqual(
                 unsupported_engine_config({
                     "subjectFormatId": "json-path-indexed",
                     "selectorSubjectFormatJsonPathIndexed": {
                         "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
                         "linkTemplate": "/GV{value}/", "preferShorterName": True}}),
-                ["selectorSubjectFormatJsonPathIndexed.linkTemplate"])
+                [])
+            # Fields no upstream release defines: subscription authors invent them.
+            self.assertEqual(
+                unsupported_engine_config({
+                    "subjectFormatId": "indexed",
+                    "selectorSubjectFormatIndexed": {
+                        "selectNames": ".n", "selectLinks": ".l", "selectCovers": ".c"}}),
+                ["selectorSubjectFormatIndexed.selectCovers"])
             self.assertEqual(
                 unsupported_engine_config({"subjectFormatId": "holographic"}),
                 ["subjectFormatId=holographic"])
@@ -1951,15 +2005,15 @@ def run_selftests():
                     "subjectFormatId": "json-path-indexed",
                     "selectorSubjectFormatJsonPathIndexed": {
                         "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
-                        "linkTemplate": "/GV{value}/"},
+                        "linkTemplate": "/GV{value}/", "selectCovers": "$.list[*]['pic']"},
                     "selectorChannelFormatNoChannel": {"selectEpisodes": "a"},
                     "channelFormatId": "no-channel",
                     "matchVideo": {"enableNestedUrl": False, "matchVideoUrl": ".+m3u8.+"},
                 }}}
 
         def test_failure_under_unexecutable_config_withholds_verdict(self):
-            # Names resolve (titleMatch passes) but ids never become /GV<id>/ urls,
-            # so every probe 404s. Without the gate this demotes a healthy tier-0.
+            # linkTemplate is understood now, but selectCovers is not: a failure
+            # under any unexecutable field stays ambiguous and must not demote.
             item = self._link_template_item()
             config = item["arguments"]["searchConfig"]
             sid = source_identity(item)
@@ -1971,7 +2025,7 @@ def run_selftests():
                 "application/json", 10)}
             result = evaluate_source(item, FakeFetcher(responses), today="2026-08-25")
             self.assertEqual(result["engineUnsupported"],
-                             ["selectorSubjectFormatJsonPathIndexed.linkTemplate"])
+                             ["selectorSubjectFormatJsonPathIndexed.selectCovers"])
             self.assertTrue(result["pinnedParserVerdictWithheld"])
             self.assertFalse(result["eligibleForTierRecommendation"])
             self.assertEqual(result["quality"], "inconclusive")
@@ -1984,6 +2038,32 @@ def run_selftests():
             rec = recommendation(history, config_fingerprint(item))
             self.assertFalse(rec["ready"])
             self.assertIsNone(rec["recommendedTier"])
+
+        def test_python_fallback_mirrors_pinned_url_rules(self):
+            # girigiri's live shape: bare ids become /GV<id>/ detail pages.
+            rows = extract_subjects(
+                json.dumps({"list": [{"id": "5395", "name": "N"}]}).encode(),
+                {"subjectFormatId": "json-path-indexed",
+                 "selectorSubjectFormatJsonPathIndexed": {
+                     "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
+                     "linkTemplate": "/GV{value}/"}},
+                "https://site.example/index.php/ajax/suggest")
+            self.assertEqual(rows, [{"name": "N", "url": "https://site.example/GV5395/"}])
+            # No template configured keeps the raw link.
+            rows = extract_subjects(
+                b'<h3><a href="/detail">T</a></h3>',
+                {"subjectFormatId": "a", "selectorSubjectFormatA": {"selectLists": "h3 > a"}},
+                "https://site.example/search")
+            self.assertEqual(rows, [{"name": "T", "url": "https://site.example/detail"}])
+            # computeSelectorUrl: same host (ignoring www.) on the default port only.
+            self.assertEqual(compute_selector_url("https://a.example/x", "http://a.example/y"),
+                             "https://a.example/y")
+            self.assertEqual(compute_selector_url("https://a.example/x", "http://www.a.example/y"),
+                             "https://www.a.example/y")
+            for base, raw in (("https://a.example/x", "http://b.example/y"),
+                              ("https://a.example/x", "http://a.example:8080/y"),
+                              ("http://a.example/x", "http://a.example/y")):
+                self.assertEqual(compute_selector_url(base, raw), raw, (base, raw))
 
         def test_passing_probe_under_unexecutable_config_still_counts(self):
             # Reaching working video while ignoring the field cannot be a false

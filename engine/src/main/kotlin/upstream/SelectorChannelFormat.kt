@@ -180,7 +180,7 @@ data object SelectorChannelFormatIndexGrouped :
                             text,
                             raw = matchEpisodeSortFromNameRegex.findGroupOrFullText(text, "ep"),
                         ),
-                        playUrl = SelectorHelpers.computeAbsoluteUrl(baseUrl, href),
+                        playUrl = SelectorHelpers.computeSelectorUrl(baseUrl, href),
                     )
                 }
                 SelectedChannelEpisodes.ChannelGroup(channelName, label, episodes)
@@ -290,7 +290,7 @@ data object SelectorChannelFormatNoChannel :
                         text,
                         raw = regex.findGroupOrFullText(text, "ep"),
                     ),
-                    playUrl = SelectorHelpers.computeAbsoluteUrl(baseUrl, href),
+                    playUrl = SelectorHelpers.computeSelectorUrl(baseUrl, href),
                 )
             },
         )
