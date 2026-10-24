@@ -345,6 +345,16 @@ def _has_control_chars(value: str) -> bool:
     return any(ord(ch) < 32 or ord(ch) == 127 for ch in value)
 
 
+def _has_control_chars_except_newline(value: str) -> bool:
+    """Same as _has_control_chars but tolerates \\n, never \\r.
+
+    json-api carries a few genuinely newline-separated strings (request headers,
+    episode type mappings). Allowing \\n there while still rejecting \\r keeps CRLF
+    request splitting off the table.
+    """
+    return any((ord(ch) < 32 and ch != "\n") or ord(ch) == 127 for ch in value)
+
+
 # Characters that can legitimately appear in a version-range expression:
 # digits, prerelease identifiers (6.4.0-beta01), comparators, wildcards and
 # the separators used to combine clauses (">=6.3.0 <7.0.0", ">=6.3.0 || <6.0.0").
@@ -1001,7 +1011,15 @@ def url_of(m):
     if not isinstance(sc, dict):
         return ""
     value = sc.get("searchUrl")
-    return value if isinstance(value, str) and value else ""
+    if isinstance(value, str) and value:
+        return value
+    if m.get("factoryId") == "json-api":
+        # json-api has no searchUrl; baseUrl is its stable identity for dedupe,
+        # ranking and the http-source audit.
+        base = sc.get("baseUrl")
+        if isinstance(base, str) and base:
+            return base
+    return ""
 
 
 def _reject_json_constant(value):
@@ -1199,11 +1217,95 @@ def normalize_item(item):
     return m
 
 
-ALLOWED_FACTORY = ("web-selector", "rss")
+ALLOWED_FACTORY = ("web-selector", "rss", "json-api")
 SUPPORTED_VERSIONS = {
     "web-selector": {1, 2},
     "rss": {1},
+    "json-api": {1},
 }
+
+# json-api arrived upstream in 2026-10 and exactly one source uses it today, so a
+# field-by-field allowlist of its nested request/response config would be built
+# from a single sample — brittle in precisely the way the web-selector allowlist
+# turned out to be. We pin the top-level sections (a new one is a real structural
+# change, worth a look) and validate everything below them structurally instead.
+ALLOWED_JSON_API_CONFIG_FIELDS = frozenset((
+    "baseUrl", "headers", "requestInterval", "searchCacheTtl",
+    "defaultResolution", "defaultSubtitleLanguage",
+    "autoMatch", "search", "subject", "play",
+))
+# Fields that are newline-separated by design; \r stays banned everywhere so a
+# subscription can never smuggle CRLF into a client's request headers.
+JSON_API_MULTILINE_FIELDS = frozenset(("headers", "typeMapping", "body"))
+JSON_API_MAX_DEPTH = 8
+JSON_API_MAX_NODES = 400
+MAX_LEN_JSON_API_STRING = 4096
+
+
+def validate_json_api_config(sc: dict, name, problems: list) -> None:
+    """Safety-check a json-api searchConfig without pretending to own its schema.
+
+    We never execute this config — the Animeko client does — so the useful
+    question is not "do we recognize every key" but "can any of it hurt the user
+    who installs the subscription". That means: every absolute URL goes through
+    the same policy as any other source (no bad scheme, no private host), control
+    characters stay out except where the format is newline-separated by design,
+    and the structure is bounded so a hostile upstream cannot ship a config bomb.
+
+    Unknown *nested* keys are allowed through deliberately: upstream owns this
+    shape and is still moving it. Unknown *top-level* sections are rejected,
+    which costs one entry out of ~19 — well inside MIN_SOURCE_ITEM_VALID_RATIO —
+    and raises a schema-drift warning so the gap gets noticed early.
+    """
+    unknown = sorted(set(sc) - ALLOWED_JSON_API_CONFIG_FIELDS)
+    if unknown:
+        problems.append(f"未知 searchConfig 字段 {name}: {', '.join(unknown)}")
+
+    base_url = sc.get("baseUrl")
+    ok_base, err_base = url_shallow_ok(base_url)
+    if not ok_base:
+        problems.append(f"json-api baseUrl 非法({err_base}) {name}")
+
+    nodes = 0
+
+    def walk(obj, path: str, depth: int, allow_newline: bool):
+        nonlocal nodes
+        nodes += 1
+        if nodes > JSON_API_MAX_NODES:
+            return
+        if depth > JSON_API_MAX_DEPTH:
+            problems.append(f"json-api 配置嵌套过深 {name}: {path}")
+            return
+        if isinstance(obj, str):
+            if len(obj) > MAX_LEN_JSON_API_STRING:
+                problems.append(f"json-api 字符串超长 {name}: {path}")
+            bad = (_has_control_chars_except_newline(obj) if allow_newline
+                   else _has_control_chars(obj))
+            if bad:
+                problems.append(f"json-api 字符串含控制字符 {name}: {path}")
+            # Absolute URLs are the part a hostile subscription could weaponize.
+            if obj[:8].lower().startswith(("http://", "https://")):
+                ok_url, err_url = url_shallow_ok(obj)
+                if not ok_url:
+                    problems.append(f"json-api URL 非法({err_url}) {name}: {path}")
+        elif isinstance(obj, dict):
+            for key, value in obj.items():
+                if not isinstance(key, str) or len(key) > MAX_LEN_NAME or _has_control_chars(key):
+                    problems.append(f"json-api 字段名非法 {name}: {path}")
+                    continue
+                if key == "method" and isinstance(value, str) and not re.fullmatch(r"[A-Z]{3,7}", value):
+                    problems.append(f"json-api method 非法 {name}: {path}.{key}")
+                walk(value, f"{path}.{key}", depth + 1,
+                     allow_newline=key in JSON_API_MULTILINE_FIELDS)
+        elif isinstance(obj, list):
+            for index, value in enumerate(obj):
+                walk(value, f"{path}[{index}]", depth + 1, allow_newline)
+        elif obj is not None and not isinstance(obj, (bool, int, float)):
+            problems.append(f"json-api 值类型非法 {name}: {path}")
+
+    walk(sc, "searchConfig", 0, False)
+    if nodes > JSON_API_MAX_NODES:
+        problems.append(f"json-api 配置节点过多 {name}: >{JSON_API_MAX_NODES}")
 
 
 def validate_item(m) -> tuple[bool, list[str]]:
@@ -1233,18 +1335,23 @@ def validate_item(m) -> tuple[bool, list[str]]:
     if not isinstance(a, dict):
         problems.append("arguments 非 dict")
         return False, problems
-    def reject_control_chars(obj, path):
+    is_json_api = factory_id == "json-api"
+
+    def reject_control_chars(obj, path, allow_newline=False):
         if isinstance(obj, str):
-            if _has_control_chars(obj):
+            bad = (_has_control_chars_except_newline(obj) if allow_newline
+                   else _has_control_chars(obj))
+            if bad:
                 problems.append(f"字符串含控制字符: {path}")
         elif isinstance(obj, dict):
             for key, value in obj.items():
                 if isinstance(key, str) and _has_control_chars(key):
                     problems.append(f"字段名含控制字符: {path}")
-                reject_control_chars(value, f"{path}.{key}")
+                reject_control_chars(value, f"{path}.{key}",
+                                     allow_newline=is_json_api and key in JSON_API_MULTILINE_FIELDS)
         elif isinstance(obj, list):
             for index, value in enumerate(obj):
-                reject_control_chars(value, f"{path}[{index}]")
+                reject_control_chars(value, f"{path}[{index}]", allow_newline)
 
     reject_control_chars(a, "arguments")
     unknown_argument_fields = sorted(set(a) - ALLOWED_ARGUMENT_FIELDS)
@@ -1270,10 +1377,13 @@ def validate_item(m) -> tuple[bool, list[str]]:
     sc = a.get("searchConfig")
     if not isinstance(sc, dict):
         problems.append("searchConfig 非 dict")
-    u = url_of(m)
-    ok_u, err_u = url_shallow_ok(u)
-    if not ok_u:
-        problems.append(f"searchUrl/rssUrl 非法({err_u}): {u[:80]}")
+    if is_json_api:
+        validate_json_api_config(sc if isinstance(sc, dict) else {}, name, problems)
+    else:
+        u = url_of(m)
+        ok_u, err_u = url_shallow_ok(u)
+        if not ok_u:
+            problems.append(f"searchUrl/rssUrl 非法({err_u}): {u[:80]}")
     def check_lengths(obj):
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -1316,7 +1426,10 @@ def validate_item(m) -> tuple[bool, list[str]]:
         elif isinstance(obj, list):
             for v in obj:
                 check_lengths(v)
-    check_lengths(sc)
+    if not is_json_api:
+        # check_lengths encodes the web-selector field model; json-api was already
+        # validated above against its own rules.
+        check_lengths(sc)
     t = a.get("tier")
     if t is not None and safe_tier(t) is None:
         problems.append(f"tier 非法: {t!r}")
@@ -3390,18 +3503,11 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
         return [], False
     out = []
     valid = 0
-    # json-api is a recognized upstream factory, but its request/response schema is
-    # not implemented by the vendored engine yet. Exclude it from both output and
-    # the source validity denominator rather than treating it as malformed.
     eligible_count = 0
-    unsupported_count = 0
     drift_signals: dict = {}
     for index, m in enumerate(ms):
         if not isinstance(m, dict):
             eligible_count += 1
-            continue
-        if m.get("factoryId") == "json-api":
-            unsupported_count += 1
             continue
         eligible_count += 1
         try:
@@ -3434,8 +3540,6 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
     if drift_signals and parsed_fail is not None:
         for signal, count in sorted(drift_signals.items()):
             parsed_fail.append((canon, f"schema-drift:{signal} ×{count}"))
-    if unsupported_count and parsed_fail is not None:
-        parsed_fail.append((canon, f"known-unsupported-factory:json-api:{unsupported_count} (TODO: implement schema and engine support)"))
     if valid == 0:
         if parsed_fail is not None:
             parsed_fail.append((canon, "no-valid-items"))
@@ -5605,9 +5709,9 @@ def run_selftests():
             self.assertEqual(len(css_segment), 18)
             by_id = {item[2].get("id"): item[2] for item in css_segment}
 
-            # The full source list includes a json-api entry, while the exported
-            # compatible list omits it. Exercise the source list path explicitly so
-            # that this known-but-deferred factory cannot poison the valid ratio.
+            # The full source list carries the json-api entry that upstream keeps
+            # out of the 6.3.0-compatible exported list. It is now validated and
+            # shipped like any other source, so the whole list must come through.
             source_payload = json.loads(css_payload)
             source_payload.pop("exportedMediaSourceDataList", None)
             source_failures = []
@@ -5615,12 +5719,16 @@ def run_selftests():
                 json.dumps(source_payload, ensure_ascii=False).encode(),
                 canon_base + "/css1.json", source_failures)
             self.assertTrue(source_valid, source_failures)
-            self.assertEqual(len(source_segment), 19)
+            self.assertEqual(len(source_segment), 20)
             source_by_id = {item[2].get("id"): item[2] for item in source_segment}
             self.assertIn("linkTemplate", source_by_id["girigiri-ai-dongman"]["arguments"]["searchConfig"][
                 "selectorSubjectFormatJsonPathIndexed"])
-            self.assertTrue(any("known-unsupported-factory:json-api" in str(x)
-                                for x in source_failures))
+            json_api = source_by_id["xifan-dongman-next"]
+            self.assertEqual(json_api["factoryId"], "json-api")
+            self.assertEqual(url_of(json_api), "https://api.xifanacg.com")
+            # Its newline-separated headers must survive the control-char sweep.
+            self.assertIn("\n", json_api["arguments"]["searchConfig"]["headers"])
+            self.assertFalse([x for x in source_failures if "json-api" in str(x)], source_failures)
 
             valid_item = source_by_id["girigiri-ai-dongman"]
             valid_client_versions = json.loads(json.dumps(valid_item))
@@ -5637,6 +5745,64 @@ def run_selftests():
             self.assertTrue(bt_valid)
             self.assertEqual(len(bt_segment), 2)
             self.assertTrue(all(item[2]["factoryId"] == "rss" for item in bt_segment))
+
+        def _json_api_item(self, **overrides):
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                payload = json.loads(fixture.read())
+            item = next(m for m in payload["mediaSources"] if m.get("factoryId") == "json-api")
+            item = json.loads(json.dumps(item))
+            item["arguments"]["searchConfig"].update(overrides)
+            return item
+
+        def test_json_api_source_is_accepted_and_shipped(self):
+            item = self._json_api_item()
+            ok, problems = validate_item(normalize_item(item))
+            self.assertTrue(ok, problems)
+            # Not rss, so it belongs in online.json alongside the web sources.
+            self.assertNotEqual(item["factoryId"], "rss")
+            self.assertEqual(url_of(item), "https://api.xifanacg.com")
+
+        def test_json_api_rejects_unsafe_payloads(self):
+            # Everything a hostile subscription could try to smuggle through a
+            # config we hand to the client but never execute ourselves.
+            cases = {
+                "私有地址": {"baseUrl": "http://127.0.0.1:8080"},
+                "非法协议": {"baseUrl": "file:///etc/passwd"},
+                "缺少 baseUrl": {"baseUrl": None},
+                "未知顶层段": {"somethingNew": {"a": 1}},
+                "嵌套 URL 指向内网": {"search": {"request": {
+                    "url": "https://169.254.169.254/latest/meta-data", "method": "GET"}}},
+                "CRLF 头注入": {"headers": "apikey: x\r\nX-Evil: 1"},
+                "method 非法": {"play": {"request": {
+                    "url": "https://api.example.com/x", "method": "DELETE!!"}}},
+            }
+            for label, override in cases.items():
+                item = self._json_api_item(**override)
+                if override.get("baseUrl", "") is None:
+                    item["arguments"]["searchConfig"].pop("baseUrl")
+                ok, problems = validate_item(normalize_item(item))
+                self.assertFalse(ok, f"{label} 应被拒绝")
+                self.assertTrue(problems, label)
+
+            # A plain \n inside the newline-separated fields stays legal.
+            ok, problems = validate_item(normalize_item(
+                self._json_api_item(headers="apikey: x\nOrigin: https://a.example")))
+            self.assertTrue(ok, problems)
+
+        def test_json_api_bounds_structure(self):
+            deep = cur = {}
+            for _ in range(JSON_API_MAX_DEPTH + 3):
+                cur["search"] = {}
+                cur = cur["search"]
+            ok, problems = validate_item(normalize_item(self._json_api_item(**deep)))
+            self.assertFalse(ok)
+            self.assertTrue(any("嵌套过深" in p for p in problems), problems)
+
+            ok, problems = validate_item(normalize_item(
+                self._json_api_item(defaultResolution="x" * (MAX_LEN_JSON_API_STRING + 1))))
+            self.assertFalse(ok)
+            self.assertTrue(any("超长" in p for p in problems), problems)
 
         def test_schema_drift_warns_while_source_still_publishes(self):
             # The 2026-10 failure mode in miniature: upstream adds a field we do not
