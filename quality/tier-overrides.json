@@ -1,41 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-24T07:57:38Z",
+  "generatedAt": "2026-10-24T08:20:05Z",
   "validUntil": "2026-11-07",
   "evidence": {
-    "reportSha256": "65fea87862512a9b0bdbece47011b83806f9dfb6933e3bd485faa6e488d06ee7",
-    "reportGeneratedAt": "2026-10-24T07:57:24+00:00"
+    "reportSha256": "af9b58a67281886f63e852b8abff7bf5152ca6803d201602c90a1259cf22d4a9",
+    "reportGeneratedAt": "2026-10-24T08:19:52+00:00"
   },
-  "overrides": [
-    {
-      "sourceId": "9294bb836551c1ba254d9ac5",
-      "configFingerprint": "c4dbde6375c2477c941c675ae59bdee43706c408ffaeb9e69fa235ab4820ecf7",
-      "officialTier": null,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 85,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "d7860c11fcae7d8e7f70e893",
-      "configFingerprint": "304f2e4009df29e33165e8bf3f659aa0425eacdd2ce392ab63b27ab1958947c1",
-      "officialTier": 3,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 5,
-      "medianScore": 85,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "ec0b6cffa15a446a26267248",
-      "configFingerprint": "96ef2045a566bc31f5b1ef9ad796bb9b5b8f5b652a7209f37c53c65ec9b5ad59",
-      "officialTier": null,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 4,
-      "medianScore": 90.0,
-      "transportSuccessRate": 0.5
-    }
-  ]
+  "overrides": []
 }
