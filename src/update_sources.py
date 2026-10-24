@@ -3262,6 +3262,7 @@ def main():
 
         "failed": failed,
         "parsed_fail": parsed_fail,
+        "schema_drift": collect_schema_drift(parsed_fail, failed),
     }
     try:
         _write_json_atomic(os.path.join(REPORT_DIR, "latest.json"), report)
@@ -3317,6 +3318,60 @@ def main():
         print(f"失败 {len(failed)} 个上游: {list(failed)[:8]}...")
 
 
+_SCHEMA_DRIFT_PREFIXES = ("未知条目字段", "未知 arguments 字段", "factoryId=")
+
+
+def _schema_drift_signal(problem: str) -> str | None:
+    """Pick out the problems that mean "upstream shipped something we don't know".
+
+    These differ in kind from a malformed value. A bad regex is one broken entry;
+    an unknown field is the first tremor of a schema bump, and it spreads. In
+    2026-10 upstream added a top-level ``id`` plus ``linkTemplate``: every entry
+    became invalid at once, the source fell below MIN_SOURCE_ITEM_VALID_RATIO and
+    the whole pipeline stopped for four days with nothing but a bare
+    ``fresh-content-invalid`` to go on.
+
+    Reported while the source still passes, the same signal is an early warning
+    instead of a cliff, so callers can widen the allowlist before the new field
+    reaches enough entries to fail the ratio.
+    """
+    if not isinstance(problem, str):
+        return None
+    # "未知 searchConfig 字段 {name}: {field}" carries the source name; drop it so the
+    # same new field aggregates into one signal instead of one per source.
+    if problem.startswith("未知 searchConfig 字段 "):
+        return f"未知 searchConfig 字段: {problem.rsplit(': ', 1)[-1]}"
+    for prefix in _SCHEMA_DRIFT_PREFIXES:
+        if problem.startswith(prefix):
+            return problem
+    return None
+
+
+def collect_schema_drift(parsed_fail, failed) -> dict:
+    """Aggregate drift signals from both parse paths into {canon: [signal, ...]}.
+
+    Sources that still publish record their signals in ``parsed_fail``; sources
+    that hard-failed carry theirs in ``failed[canon]["parse_diagnostics"]``.
+    """
+    drift: dict = {}
+
+    def add(canon, detail):
+        if not isinstance(detail, str) or not detail.startswith("schema-drift:"):
+            return
+        entries = drift.setdefault(canon, [])
+        signal = detail.split(":", 1)[1]
+        if signal not in entries:
+            entries.append(signal)
+
+    for row in parsed_fail or []:
+        if isinstance(row, (list, tuple)) and len(row) == 2:
+            add(row[0], row[1])
+    for canon, meta in (failed or {}).items():
+        for detail in (meta or {}).get("parse_diagnostics") or []:
+            add(canon, detail)
+    return drift
+
+
 def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple[list, bool]:
     try:
         obj = load_json_bytes(data)
@@ -3340,6 +3395,7 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
     # the source validity denominator rather than treating it as malformed.
     eligible_count = 0
     unsupported_count = 0
+    drift_signals: dict = {}
     for index, m in enumerate(ms):
         if not isinstance(m, dict):
             eligible_count += 1
@@ -3358,6 +3414,10 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
         if not ok_flag:
             if parsed_fail is not None:
                 parsed_fail.append((canon, f"item-{index}-invalid:{'; '.join(problems[:8])}"))
+            for problem in problems:
+                signal = _schema_drift_signal(problem)
+                if signal:
+                    drift_signals[signal] = drift_signals.get(signal, 0) + 1
             continue
         args = m2.get("arguments") or {}
         name = args.get("name")
@@ -3369,6 +3429,11 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
         rank = (quality, canon, u, sha256_json(m2))
         out.append((rank, key, m2, canon))
         valid += 1
+    # Emitted before the ratio verdict on purpose: drift has to be visible while
+    # the source is still publishing, which is the whole point of the warning.
+    if drift_signals and parsed_fail is not None:
+        for signal, count in sorted(drift_signals.items()):
+            parsed_fail.append((canon, f"schema-drift:{signal} ×{count}"))
     if unsupported_count and parsed_fail is not None:
         parsed_fail.append((canon, f"known-unsupported-factory:json-api:{unsupported_count} (TODO: implement schema and engine support)"))
     if valid == 0:
@@ -5572,6 +5637,61 @@ def run_selftests():
             self.assertTrue(bt_valid)
             self.assertEqual(len(bt_segment), 2)
             self.assertTrue(all(item[2]["factoryId"] == "rss" for item in bt_segment))
+
+        def test_schema_drift_warns_while_source_still_publishes(self):
+            # The 2026-10 failure mode in miniature: upstream adds a field we do not
+            # know. With only one entry carrying it the source stays above
+            # MIN_SOURCE_ITEM_VALID_RATIO and keeps shipping — and that is exactly
+            # when we want to hear about it, not days later when it has spread.
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                payload = json.loads(fixture.read())
+            base = next(m for m in payload["mediaSources"] if m.get("id") == "girigiri-ai-dongman")
+
+            items = []
+            for i in range(20):
+                clone = json.loads(json.dumps(base))
+                clone["id"] = f"drift-probe-{i}"
+                clone["arguments"]["name"] = f"漂移探针{i}"
+                items.append(clone)
+            items[0]["arguments"]["searchConfig"]["futureSelectorField"] = "x"
+            items[1]["someFutureTopLevelKey"] = "y"
+
+            canon = "https://sub.creamycake.org/v1/css1.json"
+            failures = []
+            segment, valid = try_parse(
+                json.dumps({"schemaVersion": 2, "mediaSources": items},
+                           ensure_ascii=False).encode(), canon, failures)
+
+            # 18/20 = 90% still clears the ratio, so the source publishes as normal.
+            self.assertTrue(valid, failures)
+            self.assertEqual(len(segment), 18)
+
+            drift = collect_schema_drift(failures, {})
+            self.assertIn(canon, drift)
+            joined = " | ".join(drift[canon])
+            self.assertIn("futureSelectorField", joined)
+            self.assertIn("someFutureTopLevelKey", joined)
+            # A broken value is not drift: it must not raise a schema alarm.
+            self.assertNotIn("tier", joined)
+
+        def test_schema_drift_collected_from_both_parse_paths(self):
+            drift = collect_schema_drift(
+                [("https://a/x.json", "schema-drift:未知 searchConfig 字段: linkTemplate ×3"),
+                 ("https://a/x.json", "schema-drift:未知 searchConfig 字段: linkTemplate ×3"),
+                 ("https://a/x.json", "item-4-invalid:name 超长"),
+                 ("https://a/x.json", "partial-invalid-items:1/20")],
+                {"https://b/y.json": {
+                    "error": "fresh-content-invalid",
+                    "parse_diagnostics": ["schema-drift:未知条目字段: ['id'] ×19",
+                                          "valid-items-ratio-too-low:0/19"]}})
+            self.assertEqual(sorted(drift), ["https://a/x.json", "https://b/y.json"])
+            # Deduplicated, and ordinary parse failures stay out of the drift channel.
+            self.assertEqual(drift["https://a/x.json"],
+                             ["未知 searchConfig 字段: linkTemplate ×3"])
+            self.assertEqual(drift["https://b/y.json"], ["未知条目字段: ['id'] ×19"])
+            self.assertEqual(collect_schema_drift([], {}), {})
+            self.assertEqual(collect_schema_drift(None, None), {})
 
         def test_client_versions_accepts_future_upstream_ranges(self):
             # Regression guard for the 2026-10 outage. `clientVersions` is an
