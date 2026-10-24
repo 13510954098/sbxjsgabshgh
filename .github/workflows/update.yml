@@ -104,6 +104,83 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python src/update_sources.py
 
+      - name: Explain updater abort
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+
+          report_path = pathlib.Path("reports/latest.json")
+          if not report_path.is_file():
+              raise SystemExit("reports/latest.json 缺失，无法生成中止摘要")
+          try:
+              report = json.loads(report_path.read_text(encoding="utf-8"))
+          except ValueError as exc:
+              raise SystemExit(f"reports/latest.json 解析失败: {exc}")
+          reason = report.get("aborted_reason")
+          if not reason:
+              raise SystemExit("本次失败不是 updater 主动中止，跳过摘要")
+
+          failed = report.get("failed") or {}
+          stale = report.get("stale_reasons") or {}
+          lines = [
+              "### Update 中止摘要",
+              "",
+              f"- 中止原因：`{reason}`",
+              f"- 完整性等级：`{report.get('integrity_level')}`"
+              f"（{report.get('integrity_reasons')}）",
+              f"- 上游：fresh {report.get('valid_sources_fresh')} /"
+              f" stale {report.get('valid_sources_stale')} /"
+              f" 硬失败 {len(failed)} / 共 {report.get('groups')}",
+              "",
+          ]
+          if failed:
+              lines.append(f"#### 硬失败上游（{len(failed)}）")
+              lines += [f"- `{canon}` → `{(meta or {}).get('error')}`"
+                        for canon, meta in sorted(failed.items())[:25]]
+              lines.append("")
+          if stale:
+              lines.append(f"#### stale 缓存兜底（{len(stale)}）")
+              lines += [f"- `{canon}` → `{why}`" for canon, why in sorted(stale.items())[:25]]
+              lines.append("")
+          body = "\n".join(lines)
+          print(body, flush=True)
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as out:
+                  out.write(body + "\n")
+
+          title = "⚠️ Update 中止：上游抓取不完整"
+          opened = subprocess.run(
+              ["gh", "issue", "list", "--repo", os.environ["GH_REPO"],
+               "--state", "open", "--search", "Update 中止 in:title",
+               "--json", "number", "--limit", "5"],
+              capture_output=True, text=True, check=False,
+          )
+          try:
+              existing = json.loads(opened.stdout or "[]")
+          except ValueError:
+              existing = []
+          if opened.returncode == 0 and not existing:
+              subprocess.run(
+                  ["gh", "issue", "create", "--repo", os.environ["GH_REPO"],
+                   "--title", title,
+                   "--body", body + f"\n- 运行详情：{os.environ['RUN_URL']}\n\n"
+                   "上游恢复后本 issue 可直接关闭；若某个源已长期死亡，"
+                   "请从 all_animeko_links.txt 移除或更换镜像。"],
+                  check=False,
+              )
+          PY
+
       - name: Validate generated outputs
         run: python src/update_sources.py --validate
 
@@ -122,7 +199,7 @@ jobs:
           report = json.loads(report_path.read_text(encoding="utf-8"))
           level = report.get("integrity_level")
           changed = report.get("changed")
-          if level not in {"strict", "degraded"}:
+          if level not in {"strict", "tolerated", "degraded"}:
               raise SystemExit(f"完整性等级非法: {level!r}")
           if level == "degraded" and changed is not False:
               raise SystemExit("degraded 运行不得标记 changed=true")
@@ -160,8 +237,8 @@ jobs:
           python - <<'PY'
           import json
           report = json.load(open("reports/latest.json", encoding="utf-8"))
-          if report.get("integrity_level") != "strict":
-              raise SystemExit("只有 strict 运行可以发布到 main")
+          if report.get("integrity_level") not in {"strict", "tolerated"}:
+              raise SystemExit("只有 strict/tolerated 运行可以发布到 main")
           if report.get("changed") is not True:
               raise SystemExit("dist/ 有变化但报告 changed 不是 true")
           PY

@@ -134,6 +134,16 @@ MAX_CUMULATIVE_DELETE_RATIO = 0.10
 NEW_ITEM_CONCENTRATION_MIN = 20
 MAX_NEW_ITEM_SOURCE_SHARE = 0.60
 MAX_STALE_RATIO = 0.50
+# 发布容差：抓取侧出现极少量非 fresh 上游时仍允许本轮出货，避免单个长期不可达的
+# 三方源把整条发布链路永久焊死（strict 要求 77/77 全 fresh，实践中必然长期卡死）。
+# 两类非 fresh 的危害不同，分别限额：
+#   - 硬失败（无缓存兜底）会真的从产物里丢条目 → 卡死在个位数且占比极低；
+#   - stale 兜底仍然供货（数据最多 STALE_MAX_AGE_DAYS 天旧）→ 只限占比。
+# 核心官方源 fresh 与 snapshot 完整性仍是硬门槛；条目删除另有 10% 熔断兜底。
+PUBLISH_TOLERANCE_MAX_FAILED = 4
+PUBLISH_TOLERANCE_MAX_FAILED_RATIO = 0.05
+PUBLISH_TOLERANCE_MAX_STALE_RATIO = 0.25
+PUBLISHABLE_INTEGRITY_LEVELS = frozenset({"strict", "tolerated"})
 GROUP_DEADLINE = 90
 SNAPSHOT_METHOD_TRUST = {
     "resolved-api": "strict",
@@ -2304,8 +2314,7 @@ def _metadata_ok(d: str, output_hash: str | None, counts: dict,
                         else float("inf"))
         snapshots_valid = (
             -300 <= snapshot_age <= HISTORICAL_SNAPSHOT_MAX_AGE_DAYS * 86400
-            and _snapshot_methods_valid(source_snapshots, snapshot_methods,
-                                        latest.get("integrity_level"))
+            and _snapshot_methods_valid(source_snapshots, snapshot_methods, "strict")
         )
         return (
             os.path.isfile(os.path.join(d, "log"))
@@ -2315,7 +2324,7 @@ def _metadata_ok(d: str, output_hash: str | None, counts: dict,
             and _guard_anchor_valid(guard_anchor)
             and snapshots_valid
             and (expected_snapshots is None or source_snapshots == expected_snapshots)
-            and latest.get("integrity_level") == "strict"
+            and latest.get("integrity_level") in PUBLISHABLE_INTEGRITY_LEVELS
         )
     except Exception:
         return False
@@ -2495,7 +2504,8 @@ def _load_source_snapshots(d: str, output_hash: str | None) -> dict[str, str]:
         methods = latest.get("source_snapshot_methods")
         created = latest.get("source_snapshots_created")
         if (latest.get("output_sha256") != output_hash or not isinstance(snapshots, dict)
-                or not isinstance(methods, dict) or latest.get("integrity_level") != "strict"):
+                or not isinstance(methods, dict)
+                or latest.get("integrity_level") not in PUBLISHABLE_INTEGRITY_LEVELS):
             return {}
         if isinstance(created, bool) or not isinstance(created, int):
             return {}
@@ -2532,6 +2542,36 @@ def _integrity_state(total_sources: int, fresh_sources: int, stale_sources: int,
     if failed_sources:
         reasons.append(f"failed {failed_sources}")
     return ("strict", []) if not reasons else ("degraded", reasons)
+
+
+def _publish_tolerance_problems(total_sources: int, stale_sources: int, failed_sources: int,
+                                core_fresh: bool, snapshot_integrity_level: str) -> list[str]:
+    """degraded 是否仍在发布容差内（可升级为 tolerated）。
+
+    返回空列表表示本轮虽未达 strict，但缺席的上游少到可以安全出货；
+    非空列表给出超出容差的原因，调用方必须继续按 degraded 只读处理。
+    """
+    problems = []
+    if snapshot_integrity_level != "strict":
+        problems.append(f"snapshot 完整性为 {snapshot_integrity_level}")
+    if not core_fresh:
+        problems.append("核心官方源非 fresh")
+    counts = (total_sources, stale_sources, failed_sources)
+    if (any(isinstance(value, bool) or not isinstance(value, int) for value in counts)
+            or total_sources <= 0 or stale_sources < 0 or failed_sources < 0
+            or stale_sources + failed_sources > total_sources):
+        problems.append(f"上游计数非法: total {total_sources} / stale {stale_sources} / "
+                        f"failed {failed_sources}")
+        return problems
+    if failed_sources > PUBLISH_TOLERANCE_MAX_FAILED:
+        problems.append(f"硬失败上游 {failed_sources} 个 > 容差 {PUBLISH_TOLERANCE_MAX_FAILED} 个")
+    if failed_sources > total_sources * PUBLISH_TOLERANCE_MAX_FAILED_RATIO:
+        problems.append(f"硬失败占比 {failed_sources / total_sources:.1%} > 容差 "
+                        f"{PUBLISH_TOLERANCE_MAX_FAILED_RATIO:.0%}")
+    if stale_sources > total_sources * PUBLISH_TOLERANCE_MAX_STALE_RATIO:
+        problems.append(f"stale 兜底占比 {stale_sources / total_sources:.1%} > 容差 "
+                        f"{PUBLISH_TOLERANCE_MAX_STALE_RATIO:.0%}")
+    return problems
 
 
 def _recover_stale_backup():
@@ -2873,6 +2913,18 @@ def main():
         _abort(f"[21] stale 占比 {stale_ratio:.0%} 超上限 {MAX_STALE_RATIO:.0%}，拒绝覆盖产物")
     if ratio < MIN_VALID_RATIO:
         _abort(f"[P0-2] 有效上游率 {ratio:.0%} < {MIN_VALID_RATIO:.0%}，拒绝覆盖现有产物")
+    if integrity_level == "degraded":
+        tolerance_problems = _publish_tolerance_problems(
+            len(groups), len(stale_valid_canons), len(failed), core_fresh,
+            snapshot_integrity_level)
+        if tolerance_problems:
+            print("完整性降级且超出发布容差，本轮只读：" + "；".join(tolerance_problems))
+        else:
+            integrity_level = "tolerated"
+            integrity_reasons = integrity_reasons + [
+                f"publish-tolerance stale {len(stale_valid_canons)} / "
+                f"failed {len(failed)} / total {len(groups)}"]
+            print(f"完整性降级但在发布容差内，按 tolerated 放行（{', '.join(integrity_reasons)}）")
 
     sel_full = build_merged(candidates, "full")
     sel_name = build_merged(candidates, "name")
@@ -2975,10 +3027,10 @@ def main():
     swap_old_existed = False
     swap_completed = False
     content_changed = old_hash is None or old_hash != new_hash
-    if integrity_level != "strict" and content_changed:
+    if integrity_level not in PUBLISHABLE_INTEGRITY_LEVELS and content_changed:
         _remove_path(newdir)
         _abort(f"完整性等级 {integrity_level} 不允许修改产物: {integrity_reasons}")
-    if integrity_level != "strict":
+    if integrity_level not in PUBLISHABLE_INTEGRITY_LEVELS:
         changed_any = False
         _remove_path(newdir)
         print("完整性降级但产物内容不变，禁止提交并保留旧元数据")
@@ -2986,10 +3038,10 @@ def main():
         changed_any = not (
             old_hash and old_hash == new_hash
             and _metadata_ok("dist", old_hash, new_counts, snapshot_shas))
-    if integrity_level == "strict" and not changed_any:
+    if integrity_level in PUBLISHABLE_INTEGRITY_LEVELS and not changed_any:
         shutil.rmtree(newdir, ignore_errors=True)
         print("产物无变化，跳过提交")
-    elif integrity_level == "strict":
+    elif integrity_level in PUBLISHABLE_INTEGRITY_LEVELS:
         updated = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
         transaction_id = os.urandom(16).hex()
         source_base_commit = os.environ.get("GITHUB_SHA", "")
@@ -3008,7 +3060,7 @@ def main():
                     "source_snapshots": snapshot_shas,
                     "source_snapshots_created": int(time.time()),
                     "source_snapshot_methods": sha_status,
-                    "integrity_level": "strict",
+                    "integrity_level": integrity_level,
                 }, f, ensure_ascii=False, indent=1, allow_nan=False)
             with open(os.path.join(newdir, ".txn-pending"), "w", encoding="utf-8") as f:
                 f.write(transaction_id + "\n")
@@ -5899,6 +5951,139 @@ def run_selftests():
             level, reasons = _integrity_state(10, 9, 0, 1)
             self.assertEqual(level, "degraded")
             self.assertTrue(any("failed" in reason for reason in reasons))
+
+        def test_publish_tolerance_thresholds(self):
+            # 容差内：硬失败数量与占比同时达标
+            self.assertEqual(_publish_tolerance_problems(20, 0, 1, True, "strict"), [])
+            self.assertEqual(_publish_tolerance_problems(100, 0, 4, True, "strict"), [])
+            self.assertEqual(_publish_tolerance_problems(77, 0, 0, True, "strict"), [])
+            # 硬失败占比超标
+            self.assertTrue(_publish_tolerance_problems(20, 0, 2, True, "strict"))
+            self.assertTrue(_publish_tolerance_problems(10, 0, 1, True, "strict"))
+            # 硬失败绝对数量超标（占比达标也不放行）
+            self.assertTrue(_publish_tolerance_problems(200, 0, 5, True, "strict"))
+            # stale 兜底不丢条目，限额更宽，但越线同样拒绝
+            self.assertEqual(_publish_tolerance_problems(20, 5, 0, True, "strict"), [])
+            self.assertTrue(_publish_tolerance_problems(20, 6, 0, True, "strict"))
+            # 核心官方源与 snapshot 完整性仍是硬门槛
+            self.assertTrue(_publish_tolerance_problems(20, 0, 1, False, "strict"))
+            self.assertTrue(_publish_tolerance_problems(20, 0, 1, True, "degraded"))
+            # 计数非法一律拒绝
+            self.assertTrue(_publish_tolerance_problems(0, 0, 0, True, "strict"))
+            self.assertTrue(_publish_tolerance_problems(5, 3, 3, True, "strict"))
+            self.assertTrue(_publish_tolerance_problems(5, -1, 0, True, "strict"))
+
+        def _tolerance_fixture(self, canon_items):
+            """按 canon 分配条目，返回 (links, bodies, resolve_return)。"""
+            core = "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"
+            bodies = {}
+            index = 0
+            sha_map, status = {}, {}
+            for position, (canon, count) in enumerate(canon_items):
+                items = []
+                for _ in range(count):
+                    if index == 0:
+                        items.append({"factoryId": "rss", "version": 1,
+                                      "arguments": {"name": "R0", "description": "", "iconUrl": "",
+                                                    "searchConfig": {"searchUrl": "https://r0.com/rss"}}})
+                    else:
+                        items.append({"factoryId": "web-selector", "version": 2,
+                                      "arguments": {"name": f"N{index}", "description": "",
+                                                    "iconUrl": "",
+                                                    "searchConfig": {
+                                                        "searchUrl": f"https://n{index}.com"}}})
+                    index += 1
+                bodies[canon] = json.dumps(
+                    {"exportedMediaSourceDataList": {"mediaSources": items}}).encode()
+                if canon == core:
+                    sha_map[canon] = canon.replace("/main/", "/" + "a" * 40 + "/")
+                    status[canon] = "resolved-api"
+                else:
+                    sha_map[canon] = canon
+                    status[canon] = "not-github"
+                del position
+            return bodies, (sha_map, status)
+
+        def _run_main_once(self, bodies, resolve_return, broken=()):
+            def fetch(canon, urls, cache_meta, expected=None, budget=None):
+                del urls, cache_meta, expected, budget
+                if canon in broken:
+                    return None, {"error": "simulated-upstream-down"}
+                return bodies[canon], {"url": canon, "final_url": canon}
+
+            with mock.patch(__name__ + ".acquire_run_lock"), \
+                 mock.patch(__name__ + ".resolve_commit_shas", return_value=resolve_return), \
+                 mock.patch(__name__ + ".load_cache", return_value=None), \
+                 mock.patch(__name__ + ".fetch_group_worker", side_effect=fetch), \
+                 mock.patch(__name__ + ".save_cache", return_value=True), \
+                 mock.patch(__name__ + ".MIN_OUTPUT_COUNT", 1), \
+                 mock.patch("builtins.print"):
+                main()
+
+        def test_tolerated_degraded_publishes_changed_output(self):
+            import tempfile
+            d = tempfile.mkdtemp()
+            cwd = os.getcwd()
+            core = "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"
+            canons = [core] + [f"https://s{i}.example.com/a.json" for i in range(1, 20)]
+            bodies, resolve_return = self._tolerance_fixture([(c, 5) for c in canons])
+            try:
+                os.chdir(d)
+                with open("all_animeko_links.txt", "w", encoding="utf-8") as f:
+                    f.write("\n".join(canons) + "\n")
+                # 第一轮：全部 fresh → strict 发布基线
+                self._run_main_once(bodies, resolve_return)
+                baseline = load_json_file(os.path.join("reports", "latest.json"))
+                self.assertEqual(baseline["integrity_level"], "strict")
+                self.assertEqual(len(extract(load_json_file(os.path.join("dist", "all.json")))), 100)
+                self.assertEqual(
+                    load_json_file(os.path.join("dist", "latest.json"))["integrity_level"],
+                    "strict")
+                # 第二轮：1/20 上游彻底失联且无缓存兜底 → 仍在容差内，必须照常出货
+                self._run_main_once(bodies, resolve_return, broken={canons[-1]})
+                report = load_json_file(os.path.join("reports", "latest.json"))
+                self.assertEqual(report["integrity_level"], "tolerated")
+                self.assertTrue(report["changed"])
+                self.assertIsNone(report["aborted_reason"])
+                self.assertTrue(any("publish-tolerance" in reason
+                                    for reason in report["integrity_reasons"]))
+                self.assertEqual(len(extract(load_json_file(os.path.join("dist", "all.json")))), 95)
+                self.assertTrue(_output_dir_valid("dist"))
+                self.assertFalse(os.path.exists(os.path.join("dist", ".txn-pending")))
+                self.assertEqual(
+                    load_json_file(os.path.join("dist", "latest.json"))["integrity_level"],
+                    "tolerated")
+            finally:
+                os.chdir(cwd)
+                shutil.rmtree(d, ignore_errors=True)
+
+        def test_degraded_beyond_tolerance_still_blocks_changed_output(self):
+            import tempfile
+            d = tempfile.mkdtemp()
+            cwd = os.getcwd()
+            core = "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"
+            canons = [core] + [f"https://s{i}.example.com/a.json" for i in range(1, 5)]
+            # 失联源只贡献 1 条，确保删除比例不触发 count/content 熔断，
+            # 从而精确验证“超出容差必须拒绝改产物”这一条门禁。
+            bodies, resolve_return = self._tolerance_fixture(
+                list(zip(canons, (50, 24, 24, 1, 1))))
+            try:
+                os.chdir(d)
+                with open("all_animeko_links.txt", "w", encoding="utf-8") as f:
+                    f.write("\n".join(canons) + "\n")
+                self._run_main_once(bodies, resolve_return)
+                self.assertEqual(len(extract(load_json_file(os.path.join("dist", "all.json")))), 100)
+                before = _dir_hash("dist")
+                # 1/5 缺席 = 20% > 5% 容差 → 必须拒绝覆盖
+                with self.assertRaises(SystemExit):
+                    self._run_main_once(bodies, resolve_return, broken={canons[-1]})
+                report = load_json_file(os.path.join("reports", "latest.json"))
+                self.assertEqual(report["integrity_level"], "degraded")
+                self.assertIn("不允许修改产物", report["aborted_reason"])
+                self.assertEqual(_dir_hash("dist"), before)
+            finally:
+                os.chdir(cwd)
+                shutil.rmtree(d, ignore_errors=True)
 
         def test_first_generation_absolute_minimum(self):
             low = {fn: 1 for fn in OUTPUT_FILES}
