@@ -147,14 +147,16 @@ jobs:
           report = json.loads(report_path.read_text(encoding="utf-8"))
           run = report["run"]
           disagreements = [source for source in report["sources"] if source.get("tierDisagreement")]
-          withheld = [source for source in report["sources"]
-                      if (source.get("latest") or {}).get("pinnedParserVerdictWithheld")]
+          # Computed by the evaluator so this stays in step with the filter tier
+          # recommendations use: observations from a superseded engine build are
+          # not evidence that the *current* parser is behind upstream.
+          withheld = run.get("pinnedParserWithheld") or []
           with open(summary_path, "a", encoding="utf-8") as handle:
               handle.write("## Animeko source quality\n\n")
               handle.write(f"- Tested this run: {run['testedSources']}/{run['totalSources']}\n")
               handle.write(f"- Static transport passed: {run['transportPassed']}\n")
               handle.write(f"- Mature tier disagreements: {len(disagreements)}\n")
-              handle.write(f"- Verdicts withheld (config outruns pinned parser): {len(withheld)}\n")
+              handle.write(f"- Verdicts withheld (config outruns pinned parser): {run['sourcesWithheldForPinnedParser']}\n")
               handle.write("- Parser: extracted Animeko Kotlin / Jsoup / JsonPath\n")
               handle.write("- Upstream: 4809e6f501f17c7bd7c93ff8575db8cbb0ed6910\n")
               handle.write("- JavaScript/site programs executed: no\n")
@@ -166,10 +168,11 @@ jobs:
               # rather than demoting a source our own parser is too old to drive.
               detail = "; ".join(sorted(
                   "{}: {}".format(
-                      (source.get("name") or "?")[:40],
-                      ",".join(((source.get("latest") or {}).get("engineUnsupported") or [])[:3]),
-                  ) for source in withheld)[:6]).replace("\n", " ")[:600]
-              print(f"::warning title=Pinned parser is behind upstream::{len(withheld)} "
+                      (entry.get("name") or "?")[:40],
+                      ",".join((entry.get("fields") or [])[:3]),
+                  ) for entry in withheld)[:6]).replace("\n", " ")[:600]
+              print(f"::warning title=Pinned parser is behind upstream::"
+                    f"{run['sourcesWithheldForPinnedParser']} "
                     f"source(s) withheld from tier recommendations: {detail}")
           PY
 
