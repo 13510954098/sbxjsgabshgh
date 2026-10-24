@@ -1,13 +1,13 @@
 {
- "updated": "2026-10-24 07:29:54 UTC",
- "source_base_commit": "4086c8e9661f850e1ab4843f3abb847fabd2e8ab",
- "output_sha256": "d6cff09d7a36c045ceb9d6ee60c4d0bb9c50ee7f59f1042b2f0aa6f38f65278d",
+ "updated": "2026-10-24 07:33:32 UTC",
+ "source_base_commit": "01a62f0c5623b846dd2b74e7a2d866f7cb38af6a",
+ "output_sha256": "50d334dab34439804a2122cbf372bba230c732134945124ca771844da42c321e",
  "counts": {
-  "all.json": 209,
-  "online.json": 191,
+  "all.json": 212,
+  "online.json": 194,
   "bt.json": 18,
-  "all-name.json": 165,
-  "online-name.json": 149,
+  "all-name.json": 166,
+  "online-name.json": 150,
   "bt-name.json": 16
  },
  "guard_anchor": {
@@ -43,6 +43,7 @@
    "1d57def1f2b730850f26e76189e216627b04da127ee976b2b1454d03fda93436",
    "214976b0c53af553e7f98f1961fc67d44a536f40cce8d740dc51631c9d0c8f63",
    "22f7e7286816274c917cec6b0d1b43923a54a06a5a9f16c890ec459b84f73a77",
+   "23b255b8adc704798974e2465ab822a583b0a4150f4470152ce8650dbac8770e",
    "266a5fb9d06435e07ea5a3f23c90cbcd16fa5ccc0c84221ac7a4ecb52e46ad3c",
    "272762ea53a678de1e3db3f5ea2a57eaa8259d8cecbe9f9dac6d220264e566c5",
    "29a2362f7a241b07216d9d5316ad0c284dcaf81e3216d158db9af2329b5cbd9e",
@@ -76,7 +77,6 @@
    "46a0025ac5e9b93438288402b71bc1fdef1389d0ab82ce5c9c11cec29a0488f5",
    "473008d2e90a7a6eaaa84e46fe8384d381e764b01d9c6dc4534b679bff924144",
    "474232e4511c4aa1fd5fb74558695811dd629836b82835d8b79eb236bd0edb0f",
-   "4bb16b1108178fa69b0bb4fb38284fe4adb414d95e0ef74ab353c4f5eaad5f41",
    "4f28dcda293d1a5e928f90765d205ac129569e5b03086d2e2e25601e72ce2fba",
    "4ff43b9ed6dbb92963f93fdf1dc22e0622e3f0fdeb5501c24a3a87c1ed28902d",
    "508ac4691678e61f6df673e68e2e37a867d2b0f127ba03de8a4dda761611e6b0",
@@ -286,7 +286,7 @@
   "https://raw.githubusercontent.com/2016YYy/animeko-source/main/dist/bt.json": "b4667409ea2c53ec6bf504ee33ae912a69ea8831",
   "https://raw.githubusercontent.com/becausemadoka/animeko-source/main/dist/bt.json": "93457b9dfd1a0558e59203875f225bb1c368b3ce"
  },
- "source_snapshots_created": 1792826994,
+ "source_snapshots_created": 1792827212,
  "source_snapshot_methods": {
   "https://sub.creamycake.org/v1/css1.json": "not-github",
   "https://sub.creamycake.org/v1/bt1.json": "not-github",

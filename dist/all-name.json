@@ -770,6 +770,78 @@
         }
       },
       {
+        "id": "xifan-dongman-next",
+        "factoryId": "json-api",
+        "version": 1,
+        "arguments": {
+          "name": "稀饭动漫 Next",
+          "description": "",
+          "iconUrl": "https://next.xifanacg.com/favicon.ico",
+          "tier": 0,
+          "searchConfig": {
+            "baseUrl": "https://api.xifanacg.com",
+            "headers": "apikey: sb_publishable_OBIVAWACIX6lPXrO98_z24_HcsmalkA\nAuthorization: Bearer sb_publishable_OBIVAWACIX6lPXrO98_z24_HcsmalkA\nOrigin: https://next.xifanacg.com",
+            "requestInterval": 1000,
+            "searchCacheTtl": 7200000,
+            "defaultResolution": "1080P",
+            "defaultSubtitleLanguage": "CHS",
+            "autoMatch": {
+              "enabled": true,
+              "searchUseSubjectNamesCount": 3
+            },
+            "search": {
+              "request": {
+                "url": "https://api.xifanacg.com/rest/v1/rpc/search_animes",
+                "method": "POST",
+                "body": "{\"search_term\":\"{keyword}\",\"page_number\":{page},\"items_per_page\":{pageSize},\"sort_by\":\"bangumi_score\",\"sort_order\":\"desc\",\"filter_only_published\":true}",
+                "headers": ""
+              },
+              "pageSize": 50,
+              "selectItems": "$[*]",
+              "selectName": "$.title",
+              "selectId": "$.id",
+              "subjectUrlTemplate": "https://next.xifanacg.com/anime/{id}"
+            },
+            "subject": {
+              "request": {
+                "url": "https://api.xifanacg.com/rest/v1/rpc/get_anime_detail",
+                "method": "POST",
+                "body": "{\"p_id\":{id}}",
+                "headers": ""
+              },
+              "channelFormatId": "grouped",
+              "channelFormatGrouped": {
+                "selectChannels": "$.sources[*]",
+                "selectChannelName": "$.name"
+              },
+              "episodes": {
+                "selectEpisodes": "$.episodes[*]",
+                "selectName": "$.title",
+                "selectId": "$.id",
+                "selectSort": "$.episode_number",
+                "selectType": "$.kind",
+                "typeMapping": "main=MainStory\nsp=SP\nova=OVA\noad=OAD\nmovie=MainStory\nex=SP",
+                "nameTemplate": "{sort} {name}",
+                "episodeUrlTemplate": "https://next.xifanacg.com/anime/{subjectId}/play/{id}"
+              }
+            },
+            "play": {
+              "request": {
+                "url": "https://api.xifanacg.com/functions/v1/issue-web-playback",
+                "method": "POST",
+                "body": "{\"action\":\"fallback\",\"episode_id\":{id}}",
+                "headers": ""
+              },
+              "selectCandidates": "$.candidates[*]",
+              "selectCandidateChannel": "$.source_name",
+              "selectVideoUrl": "$.url",
+              "fallbackToFirstCandidate": false,
+              "referer": ""
+            }
+          }
+        }
+      },
+      {
         "factoryId": "web-selector",
         "version": 2,
         "arguments": {
@@ -1568,6 +1640,71 @@
             }
           },
           "tier": 1
+        }
+      },
+      {
+        "id": "2k-dongman",
+        "factoryId": "web-selector",
+        "version": 2,
+        "arguments": {
+          "name": "2k动漫",
+          "description": "",
+          "iconUrl": "https://www.2kdm.com/favicon.ico",
+          "searchConfig": {
+            "searchUrl": "https://www.2kdm.com/index.php/ajax/suggest?mid=1&wd={keyword}",
+            "searchUseOnlyFirstWord": true,
+            "searchRemoveSpecial": true,
+            "rawBaseUrl": "",
+            "subjectFormatId": "json-path-indexed",
+            "selectorSubjectFormatA": {
+              "selectLists": "div.video-info-header > a",
+              "preferShorterName": true
+            },
+            "selectorSubjectFormatIndexed": {
+              "selectNames": "",
+              "selectLinks": "",
+              "preferShorterName": true
+            },
+            "selectorSubjectFormatJsonPathIndexed": {
+              "selectLinks": "$.list[*]['id']",
+              "selectNames": "$.list[*]['name']",
+              "linkTemplate": "/voddetail/{value}.html",
+              "preferShorterName": true
+            },
+            "channelFormatId": "index-grouped",
+            "selectorChannelFormatFlattened": {
+              "selectChannelNames": "#y-playList .module-tab-item:first-child span",
+              "matchChannelName": "",
+              "selectEpisodeLists": ".module-play-list-content",
+              "selectEpisodesFromList": "a",
+              "selectEpisodeLinksFromList": "",
+              "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
+            },
+            "selectorChannelFormatNoChannel": {
+              "selectEpisodes": ".module-play-list-content a.module-play-list-link",
+              "selectEpisodeLinks": "",
+              "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
+            },
+            "filterByEpisodeSort": true,
+            "selectMedia": {
+              "distinguishSubjectName": true,
+              "distinguishChannelName": true
+            },
+            "matchVideo": {
+              "enableNestedUrl": true,
+              "matchNestedUrl": "^https?://[^/]+/addons/dp/player/[^?]*\\.php\\?",
+              "matchVideoUrl": "(?<v>^https?://[^\\s]+\\.(mp4|m3u8)(\\?.*)?$)",
+              "addHeadersToVideo": {
+                "referer": ""
+              }
+            },
+            "defaultResolution": "1080P",
+            "defaultSubtitleLanguage": "CHS"
+          },
+          "tier": 1,
+          "channelTiers": {
+            "网页专线": 1
+          }
         }
       },
       {
@@ -7038,50 +7175,6 @@
             "看吧⑤": 6,
             "看吧备用": 6
           }
-        }
-      },
-      {
-        "factoryId": "web-selector",
-        "version": 2,
-        "arguments": {
-          "name": "2k动漫",
-          "description": "直连，来自2k动漫，导航：https://www.2kdm.org/",
-          "iconUrl": "https://www.2kdm.org/favicon.ico",
-          "searchConfig": {
-            "searchUrl": "https://www.2kdm.org/search.php?searchword={keyword}",
-            "searchUseOnlyFirstWord": true,
-            "subjectFormatId": "a",
-            "selectorSubjectFormatA": {
-              "selectLists": "#cont_pub > dl> dd:nth-child(2) > div > a",
-              "preferShorterName": true
-            },
-            "channelFormatId": "index-grouped",
-            "selectorChannelFormatFlattened": {
-              "selectChannelNames": "#liebiao > font:nth-child(1)",
-              "matchChannelName": "^(?<ch>.+?)(\\d+)?$",
-              "selectEpisodeLists": ".playList",
-              "selectEpisodesFromList": "a",
-              "selectEpisodeLinksFromList": "",
-              "matchEpisodeSortFromName": "第\\s*(?<ep>.+)\\s*[话集]"
-            },
-            "defaultResolution": "1080P",
-            "defaultSubtitleLanguage": "CHS",
-            "onlySupportsPlayers": [],
-            "selectMedia": {
-              "distinguishSubjectName": true,
-              "distinguishChannelName": true
-            },
-            "matchVideo": {
-              "enableNestedUrl": true,
-              "matchNestedUrl": "$^",
-              "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http).+\\.(mp4|m3u8|flv|mkv))|(url=(?<v>http(s)?:\\/\\/.+\\.(mp4|m3u8|flv|mkv)))|(^http(s)?:\\/\\/(?!.*http).+(sign\\.bytetos|sign\\.byteimg|mcloud\\.139|cloudflarestorage|tos-cn)\\.com(?!.*\\.ts).+(-expires|-signature))|((bilivideo|akamaized|szbdyd)\\.com(?!.*\\.ts))|(\\/video\\/tos\\/alisg\\/)|(\\/video\\/.*mime_type=video)",
-              "cookies": "quality=1080",
-              "addHeadersToVideo": {
-                "referer": ""
-              }
-            }
-          },
-          "tier": 3
         }
       },
       {
