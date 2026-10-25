@@ -1,20 +1,20 @@
 {
   "repository": "https://github.com/open-ani/animeko",
-  "commit": "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef",
+  "commit": "4809e6f501f17c7bd7c93ff8575db8cbb0ed6910",
   "license": "AGPL-3.0-only",
   "files": [
     {
       "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/format/SelectorSubjectFormat.kt",
       "file": "src/main/kotlin/upstream/SelectorSubjectFormat.kt",
-      "originalSha256": "31641068a0a383c0af8ff52bf11373dafa4e2ac2b317bea21a65631404efe1a5",
-      "sha256": "7e98e2399a5593c7f8ee99dbf3696bfdc3e0143ef39e9d382e0d6265024d28f9",
+      "originalSha256": "8450ff3cacd30095123941b831876c59c963c86f03789511f2f255543373921c",
+      "sha256": "be4f6f624be9563a33c7106b81f44559a8a5a99d6f9c136b9807b612231e0719",
       "adaptation": "Remove UI-only Immutable annotation and unused documentation import; parser bodies unchanged; normalize trailing whitespace only"
     },
     {
       "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/format/SelectorChannelFormat.kt",
       "file": "src/main/kotlin/upstream/SelectorChannelFormat.kt",
-      "originalSha256": "b5187929a1a0b884a265e4406c7b1ee0a4e01ab9f7742419c1490786b405da98",
-      "sha256": "93a9eb41a6c5519719194a4ffde9efa165f0c1b22c2720c879f4fe4f1f309879",
+      "originalSha256": "a8b68be3b77bc2f171e6bae523af6ee375657fd6aa5002b36c6399bcc2ec1501",
+      "sha256": "62686e23d3372c0570419fb5b59307c963c1c31f89ed7cf50e8374488a3b44c8",
       "adaptation": "Remove UI-only Immutable annotation and unused documentation import; parser bodies unchanged; normalize trailing whitespace only"
     },
     {
@@ -34,8 +34,8 @@
     {
       "source": "utils/ktor-client/src/commonMain/kotlin/UrlHelpers.kt",
       "file": "src/main/kotlin/upstream/UrlHelpers.kt",
-      "originalSha256": "70bfb8d67e51a60a421f270c1c0f188feac272ae14232953047de825975a6eb0",
-      "sha256": "70bfb8d67e51a60a421f270c1c0f188feac272ae14232953047de825975a6eb0",
+      "originalSha256": "b3d1b4425f3f67b923ce7bd1fc87433a87e854ffb4533db90a9fc916d6a58dcc",
+      "sha256": "b3d1b4425f3f67b923ce7bd1fc87433a87e854ffb4533db90a9fc916d6a58dcc",
       "adaptation": "verbatim; normalize trailing whitespace only"
     },
     {
@@ -69,21 +69,21 @@
     {
       "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/SelectorMediaSourceEngine.kt",
       "file": "src/main/kotlin/upstream/SelectorMediaSourceEngine.kt",
-      "originalSha256": "e5a284a28d93d35e6927a4259cf55205e7ea0f7dc8a48997e57895b7020185c4",
-      "sha256": "6eaac6d82d8eb14ab54e34f2736146ef7526b356596bb6d93e8bce5c36d14c0f",
-      "adaptation": "Extract shouldLoadPage + matchWebVideo verbatim into standalone class; normalize trailing whitespace only"
+      "originalSha256": "f37dbf13fe6b27a7dbf743f742d06a878017162ecede28681842c43121135d62",
+      "sha256": "72b8ec26142c16f701dd10599ad01d8331333b29abd4bac009e4254a97af36ec",
+      "adaptation": "Extract shouldLoadPage + matchWebVideo verbatim into standalone class (matchWebVideo takes the 6.3 userAgent parameter); normalize trailing whitespace only"
     },
     {
       "source": "app/shared/app-data/src/commonMain/kotlin/domain/mediasource/web/SelectorSearchConfig.kt",
       "file": "src/main/kotlin/upstream/SelectorSearchConfig.kt",
-      "originalSha256": "c2db07ede67d7d585def9c85cc3f635e7108da42f6c5e1d6a55b046a02591e68",
-      "sha256": "991860db1038d551767f388d6c5003451ac672908f1ae42feb2599e4ebad7d3e",
-      "adaptation": "Extract MatchVideoConfig + VideoHeaders defaults/regex/header semantics unchanged; normalize trailing whitespace only"
+      "originalSha256": "f323f240e81c3ce0611304b310bb4561bf5d5e0b91d49d7f1278259f37b481d7",
+      "sha256": "d7115af915c3a39cf6b4c2783cba86c7ffdc8a57b376c3f6ec6c95349f38c571",
+      "adaptation": "Extract MatchVideoConfig + VideoHeaders defaults/regex/header semantics unchanged; the 6.3 top-level userAgent and userAgentOrNull belong to the unextracted config class, so Main.kt applies the same trim-to-null rule; normalize trailing whitespace only"
     },
     {
       "source": "datasource/api/src/commonMain/kotlin/matcher/WebVideoMatcher.kt",
       "file": "src/main/kotlin/upstream/WebVideoMatcher.kt",
-      "originalSha256": "31c5db326cb6e59473d817cc379d4faa715c22f1c49a2e1a84c4903cee580183",
+      "originalSha256": "9276c20eb81b5642f48984b0235409f6affbc262e5ca0ee46a2f7aa2a49d58f3",
       "sha256": "785d03b64b4eecfbcda97fc356b5cc4cb80bb03247685881f02cc86e4c688fa3",
       "adaptation": "Extract MatchResult and WebVideo DTOs; exclude app Media and flow loader dependencies; normalize trailing whitespace only"
     }

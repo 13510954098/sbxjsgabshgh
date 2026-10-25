@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 2,
+  "mediaSources": [
+    {
+      "id": "nyaa-land",
+      "factoryId": "rss",
+      "version": 1,
+      "arguments": {
+        "name": "nyaa.land",
+        "description": "BT 资源聚合站",
+        "iconUrl": "https://nyaa.land/static/favicon.png",
+        "searchConfig": {
+          "searchUrl": "https://nyaa.land/?page=rss&q={keyword}&c=0_0&f=0",
+          "filterByEpisodeSort": true,
+          "filterBySubjectName": true
+        }
+      }
+    },
+    {
+      "id": "animegarden",
+      "factoryId": "rss",
+      "version": 1,
+      "arguments": {
+        "name": "AnimeGarden",
+        "description": "动画 BT 资源聚合站",
+        "iconUrl": "https://garden.breadio.wiki/favicon.ico",
+        "searchConfig": {
+          "searchUrl": "https://garden.breadio.wiki/feed.xml?filter=[{\"type\":\"动画\",\"search\":[\"{keyword}\"]}]",
+          "filterByEpisodeSort": true,
+          "filterBySubjectName": true
+        }
+      }
+    }
+  ],
+  "exportedMediaSourceDataList": {
+    "mediaSources": [
+      {
+        "id": "nyaa-land",
+        "factoryId": "rss",
+        "version": 1,
+        "arguments": {
+          "name": "nyaa.land",
+          "description": "BT 资源聚合站",
+          "iconUrl": "https://nyaa.land/static/favicon.png",
+          "searchConfig": {
+            "searchUrl": "https://nyaa.land/?page=rss&q={keyword}&c=0_0&f=0",
+            "filterByEpisodeSort": true,
+            "filterBySubjectName": true
+          }
+        }
+      },
+      {
+        "id": "animegarden",
+        "factoryId": "rss",
+        "version": 1,
+        "arguments": {
+          "name": "AnimeGarden",
+          "description": "动画 BT 资源聚合站",
+          "iconUrl": "https://garden.breadio.wiki/favicon.ico",
+          "searchConfig": {
+            "searchUrl": "https://garden.breadio.wiki/feed.xml?filter=[{\"type\":\"动画\",\"search\":[\"{keyword}\"]}]",
+            "filterByEpisodeSort": true,
+            "filterBySubjectName": true
+          }
+        }
+      }
+    ]
+  }
+}

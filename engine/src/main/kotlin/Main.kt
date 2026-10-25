@@ -46,13 +46,16 @@ private fun episodes(c: JsonObject, page: String, base: String): JsonArray {
 private fun match(c: JsonObject, urls: JsonArray): JsonArray {
     val config = json.decodeFromJsonElement<SelectorSearchConfig.MatchVideoConfig>(c.obj("matchVideo"))
     require(config.matchVideoUrlRegex != null && (!config.enableNestedUrl || config.matchNestedUrlRegex != null))
+    // Same rule as SelectorSearchConfig.userAgentOrNull; the real config class is
+    // not extracted, so the bridge reads the raw field.
+    val userAgent = c.text("userAgent").trim().ifEmpty { null }
     val matcher = ExtractedVideoMatcher()
     return buildJsonArray { urls.take(100).forEach { raw ->
         val url = raw.jsonPrimitive.content
         require(url.length <= 8192)
         add(buildJsonObject {
             put("input", url)
-            when(val result = matcher.matchWebVideo(url, config)) {
+            when(val result = matcher.matchWebVideo(url, config, userAgent)) {
                 WebVideoMatcher.MatchResult.Continue -> put("kind", "ignore")
                 WebVideoMatcher.MatchResult.LoadPage -> { put("kind", "nested"); put("url", url) }
                 is WebVideoMatcher.MatchResult.Matched -> {
@@ -71,7 +74,7 @@ private fun handle(input: JsonObject): JsonElement {
         "subjects" -> subjects(config, page, base)
         "episodes" -> episodes(config, page, base)
         "match" -> match(config, input["urls"] as? JsonArray ?: JsonArray(emptyList()))
-        "health" -> buildJsonObject { put("upstream", "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef"); put("network", false) }
+        "health" -> buildJsonObject { put("upstream", "4809e6f501f17c7bd7c93ff8575db8cbb0ed6910"); put("network", false) }
         else -> error("unknown operation")
     }
 }

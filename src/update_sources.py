@@ -134,6 +134,16 @@ MAX_CUMULATIVE_DELETE_RATIO = 0.10
 NEW_ITEM_CONCENTRATION_MIN = 20
 MAX_NEW_ITEM_SOURCE_SHARE = 0.60
 MAX_STALE_RATIO = 0.50
+# 发布容差：抓取侧出现极少量非 fresh 上游时仍允许本轮出货，避免单个长期不可达的
+# 三方源把整条发布链路永久焊死（strict 要求 77/77 全 fresh，实践中必然长期卡死）。
+# 两类非 fresh 的危害不同，分别限额：
+#   - 硬失败（无缓存兜底）会真的从产物里丢条目 → 卡死在个位数且占比极低；
+#   - stale 兜底仍然供货（数据最多 STALE_MAX_AGE_DAYS 天旧）→ 只限占比。
+# 核心官方源 fresh 与 snapshot 完整性仍是硬门槛；条目删除另有 10% 熔断兜底。
+PUBLISH_TOLERANCE_MAX_FAILED = 4
+PUBLISH_TOLERANCE_MAX_FAILED_RATIO = 0.05
+PUBLISH_TOLERANCE_MAX_STALE_RATIO = 0.25
+PUBLISHABLE_INTEGRITY_LEVELS = frozenset({"strict", "tolerated"})
 GROUP_DEADLINE = 90
 SNAPSHOT_METHOD_TRUST = {
     "resolved-api": "strict",
@@ -170,8 +180,8 @@ KNOWN_OBJECT_FIELDS = ("selectorSubjectFormatA", "selectorSubjectFormatIndexed",
                        "addHeadersToVideo")
 KNOWN_PLAIN_STRING_FIELDS = ("rawBaseUrl", "subjectFormatId", "channelFormatId",
                              "defaultResolution", "defaultSubtitleLanguage", "cookies",
-                             "referer", "userAgent")
-ALLOWED_ITEM_FIELDS = frozenset(("factoryId", "version", "arguments"))
+                             "referer", "userAgent", "linkTemplate")
+ALLOWED_ITEM_FIELDS = frozenset(("id", "clientVersions", "factoryId", "version", "arguments"))
 ALLOWED_ARGUMENT_FIELDS = frozenset(("name", "description", "iconUrl", "searchConfig", "tier",
                                      "channelTiers", "rssUrl", "searchUrl"))
 ALLOWED_SEARCH_CONFIG_FIELDS = frozenset(
@@ -181,6 +191,7 @@ ALLOWED_SEARCH_CONFIG_FIELDS = frozenset(
 )
 
 MAX_LEN_NAME = 200
+MAX_LEN_CLIENT_VERSIONS = 100
 MAX_LEN_DESC = 1000
 MAX_LEN_SELECTOR = 500
 MAX_LEN_REGEX = 500
@@ -332,6 +343,50 @@ def is_private_hostname(host: str) -> bool:
 
 def _has_control_chars(value: str) -> bool:
     return any(ord(ch) < 32 or ord(ch) == 127 for ch in value)
+
+
+def _has_control_chars_except_newline(value: str) -> bool:
+    """Same as _has_control_chars but tolerates \\n, never \\r.
+
+    json-api carries a few genuinely newline-separated strings (request headers,
+    episode type mappings). Allowing \\n there while still rejecting \\r keeps CRLF
+    request splitting off the table.
+    """
+    return any((ord(ch) < 32 and ch != "\n") or ord(ch) == 127 for ch in value)
+
+
+# Characters that can legitimately appear in a version-range expression:
+# digits, prerelease identifiers (6.4.0-beta01), comparators, wildcards and
+# the separators used to combine clauses (">=6.3.0 <7.0.0", ">=6.3.0 || <6.0.0").
+_CLIENT_VERSIONS_SAFE_RE = re.compile(r"^[0-9A-Za-z.\-+_<>=~^*|, ]+$")
+
+
+def _client_versions_problem(value) -> str | None:
+    """Check the upstream ``clientVersions`` range expression by shape, not grammar.
+
+    The comparator syntax belongs to upstream Animeko and is still moving: 6.3.0
+    introduced ``clientVersions`` with values like ``>=6.3.0`` and 6.4.0 is already
+    in beta, so tomorrow's subscriptions may legitimately carry ``>=6.4.0``,
+    ``>=6.3.0 <7.0.0`` or an ``||`` union. Pinning an allowlist of literal values
+    here would repeat the 2026-10 outage, where a perfectly valid upstream schema
+    bump was rejected field-by-field until the whole source fell below
+    MIN_SOURCE_ITEM_VALID_RATIO.
+
+    We never act on this field — it is carried through as metadata — so the only
+    things worth rejecting are values that are unusable or unsafe to propagate.
+    Anything well-formed but unrecognized is allowed through on purpose.
+    """
+    if not isinstance(value, str):
+        return "clientVersions 非字符串"
+    if not value.strip():
+        return "clientVersions 为空"
+    if len(value) > MAX_LEN_CLIENT_VERSIONS:
+        return "clientVersions 超长"
+    if _has_control_chars(value):
+        return "clientVersions 含控制字符"
+    if not _CLIENT_VERSIONS_SAFE_RE.match(value.strip()):
+        return "clientVersions 含非法字符"
+    return None
 
 
 _dns_rotation = {}
@@ -938,6 +993,15 @@ def file_order_key(canon: str) -> int:
 
 def extract(obj):
     if isinstance(obj, dict):
+        # A schemaVersion>=2 document carries the authoritative, complete list at
+        # the top level. `exportedMediaSourceDataList` is the trimmed mirror
+        # upstream keeps for pre-6.3.0 clients, and it deliberately omits sources
+        # that need newer client features — reading it first silently dropped
+        # creamycake's `2k-dongman` and the whole json-api source.
+        schema_version = obj.get("schemaVersion")
+        if (isinstance(schema_version, int) and not isinstance(schema_version, bool)
+                and schema_version >= 2 and isinstance(obj.get("mediaSources"), list)):
+            return obj["mediaSources"]
         if "exportedMediaSourceDataList" in obj:
             edsl = obj["exportedMediaSourceDataList"]
             return edsl.get("mediaSources") if isinstance(edsl, dict) and isinstance(edsl.get("mediaSources"), list) else None
@@ -956,7 +1020,15 @@ def url_of(m):
     if not isinstance(sc, dict):
         return ""
     value = sc.get("searchUrl")
-    return value if isinstance(value, str) and value else ""
+    if isinstance(value, str) and value:
+        return value
+    if m.get("factoryId") == "json-api":
+        # json-api has no searchUrl; baseUrl is its stable identity for dedupe,
+        # ranking and the http-source audit.
+        base = sc.get("baseUrl")
+        if isinstance(base, str) and base:
+            return base
+    return ""
 
 
 def _reject_json_constant(value):
@@ -1154,11 +1226,95 @@ def normalize_item(item):
     return m
 
 
-ALLOWED_FACTORY = ("web-selector", "rss")
+ALLOWED_FACTORY = ("web-selector", "rss", "json-api")
 SUPPORTED_VERSIONS = {
     "web-selector": {1, 2},
     "rss": {1},
+    "json-api": {1},
 }
+
+# json-api arrived upstream in 2026-10 and exactly one source uses it today, so a
+# field-by-field allowlist of its nested request/response config would be built
+# from a single sample — brittle in precisely the way the web-selector allowlist
+# turned out to be. We pin the top-level sections (a new one is a real structural
+# change, worth a look) and validate everything below them structurally instead.
+ALLOWED_JSON_API_CONFIG_FIELDS = frozenset((
+    "baseUrl", "headers", "requestInterval", "searchCacheTtl",
+    "defaultResolution", "defaultSubtitleLanguage",
+    "autoMatch", "search", "subject", "play",
+))
+# Fields that are newline-separated by design; \r stays banned everywhere so a
+# subscription can never smuggle CRLF into a client's request headers.
+JSON_API_MULTILINE_FIELDS = frozenset(("headers", "typeMapping", "body"))
+JSON_API_MAX_DEPTH = 8
+JSON_API_MAX_NODES = 400
+MAX_LEN_JSON_API_STRING = 4096
+
+
+def validate_json_api_config(sc: dict, name, problems: list) -> None:
+    """Safety-check a json-api searchConfig without pretending to own its schema.
+
+    We never execute this config — the Animeko client does — so the useful
+    question is not "do we recognize every key" but "can any of it hurt the user
+    who installs the subscription". That means: every absolute URL goes through
+    the same policy as any other source (no bad scheme, no private host), control
+    characters stay out except where the format is newline-separated by design,
+    and the structure is bounded so a hostile upstream cannot ship a config bomb.
+
+    Unknown *nested* keys are allowed through deliberately: upstream owns this
+    shape and is still moving it. Unknown *top-level* sections are rejected,
+    which costs one entry out of ~19 — well inside MIN_SOURCE_ITEM_VALID_RATIO —
+    and raises a schema-drift warning so the gap gets noticed early.
+    """
+    unknown = sorted(set(sc) - ALLOWED_JSON_API_CONFIG_FIELDS)
+    if unknown:
+        problems.append(f"未知 searchConfig 字段 {name}: {', '.join(unknown)}")
+
+    base_url = sc.get("baseUrl")
+    ok_base, err_base = url_shallow_ok(base_url)
+    if not ok_base:
+        problems.append(f"json-api baseUrl 非法({err_base}) {name}")
+
+    nodes = 0
+
+    def walk(obj, path: str, depth: int, allow_newline: bool):
+        nonlocal nodes
+        nodes += 1
+        if nodes > JSON_API_MAX_NODES:
+            return
+        if depth > JSON_API_MAX_DEPTH:
+            problems.append(f"json-api 配置嵌套过深 {name}: {path}")
+            return
+        if isinstance(obj, str):
+            if len(obj) > MAX_LEN_JSON_API_STRING:
+                problems.append(f"json-api 字符串超长 {name}: {path}")
+            bad = (_has_control_chars_except_newline(obj) if allow_newline
+                   else _has_control_chars(obj))
+            if bad:
+                problems.append(f"json-api 字符串含控制字符 {name}: {path}")
+            # Absolute URLs are the part a hostile subscription could weaponize.
+            if obj[:8].lower().startswith(("http://", "https://")):
+                ok_url, err_url = url_shallow_ok(obj)
+                if not ok_url:
+                    problems.append(f"json-api URL 非法({err_url}) {name}: {path}")
+        elif isinstance(obj, dict):
+            for key, value in obj.items():
+                if not isinstance(key, str) or len(key) > MAX_LEN_NAME or _has_control_chars(key):
+                    problems.append(f"json-api 字段名非法 {name}: {path}")
+                    continue
+                if key == "method" and isinstance(value, str) and not re.fullmatch(r"[A-Z]{3,7}", value):
+                    problems.append(f"json-api method 非法 {name}: {path}.{key}")
+                walk(value, f"{path}.{key}", depth + 1,
+                     allow_newline=key in JSON_API_MULTILINE_FIELDS)
+        elif isinstance(obj, list):
+            for index, value in enumerate(obj):
+                walk(value, f"{path}[{index}]", depth + 1, allow_newline)
+        elif obj is not None and not isinstance(obj, (bool, int, float)):
+            problems.append(f"json-api 值类型非法 {name}: {path}")
+
+    walk(sc, "searchConfig", 0, False)
+    if nodes > JSON_API_MAX_NODES:
+        problems.append(f"json-api 配置节点过多 {name}: >{JSON_API_MAX_NODES}")
 
 
 def validate_item(m) -> tuple[bool, list[str]]:
@@ -1168,6 +1324,14 @@ def validate_item(m) -> tuple[bool, list[str]]:
     unknown_item_fields = sorted(set(m) - ALLOWED_ITEM_FIELDS)
     if unknown_item_fields:
         problems.append(f"未知条目字段: {unknown_item_fields}")
+    source_id = m.get("id")
+    if "id" in m and (not isinstance(source_id, str) or not source_id.strip()
+                       or len(source_id) > MAX_LEN_NAME or _has_control_chars(source_id)):
+        problems.append("id 非字符串/为空/超长/含控制字符")
+    if "clientVersions" in m:
+        client_versions_problem = _client_versions_problem(m.get("clientVersions"))
+        if client_versions_problem:
+            problems.append(client_versions_problem)
     factory_id = m.get("factoryId")
     version = m.get("version")
     if factory_id not in ALLOWED_FACTORY:
@@ -1180,18 +1344,23 @@ def validate_item(m) -> tuple[bool, list[str]]:
     if not isinstance(a, dict):
         problems.append("arguments 非 dict")
         return False, problems
-    def reject_control_chars(obj, path):
+    is_json_api = factory_id == "json-api"
+
+    def reject_control_chars(obj, path, allow_newline=False):
         if isinstance(obj, str):
-            if _has_control_chars(obj):
+            bad = (_has_control_chars_except_newline(obj) if allow_newline
+                   else _has_control_chars(obj))
+            if bad:
                 problems.append(f"字符串含控制字符: {path}")
         elif isinstance(obj, dict):
             for key, value in obj.items():
                 if isinstance(key, str) and _has_control_chars(key):
                     problems.append(f"字段名含控制字符: {path}")
-                reject_control_chars(value, f"{path}.{key}")
+                reject_control_chars(value, f"{path}.{key}",
+                                     allow_newline=is_json_api and key in JSON_API_MULTILINE_FIELDS)
         elif isinstance(obj, list):
             for index, value in enumerate(obj):
-                reject_control_chars(value, f"{path}[{index}]")
+                reject_control_chars(value, f"{path}[{index}]", allow_newline)
 
     reject_control_chars(a, "arguments")
     unknown_argument_fields = sorted(set(a) - ALLOWED_ARGUMENT_FIELDS)
@@ -1217,10 +1386,13 @@ def validate_item(m) -> tuple[bool, list[str]]:
     sc = a.get("searchConfig")
     if not isinstance(sc, dict):
         problems.append("searchConfig 非 dict")
-    u = url_of(m)
-    ok_u, err_u = url_shallow_ok(u)
-    if not ok_u:
-        problems.append(f"searchUrl/rssUrl 非法({err_u}): {u[:80]}")
+    if is_json_api:
+        validate_json_api_config(sc if isinstance(sc, dict) else {}, name, problems)
+    else:
+        u = url_of(m)
+        ok_u, err_u = url_shallow_ok(u)
+        if not ok_u:
+            problems.append(f"searchUrl/rssUrl 非法({err_u}): {u[:80]}")
     def check_lengths(obj):
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -1263,7 +1435,10 @@ def validate_item(m) -> tuple[bool, list[str]]:
         elif isinstance(obj, list):
             for v in obj:
                 check_lengths(v)
-    check_lengths(sc)
+    if not is_json_api:
+        # check_lengths encodes the web-selector field model; json-api was already
+        # validated above against its own rules.
+        check_lengths(sc)
     t = a.get("tier")
     if t is not None and safe_tier(t) is None:
         problems.append(f"tier 非法: {t!r}")
@@ -1913,12 +2088,15 @@ def fetch_group_worker(canon: str, urls: list[str], cache_meta,
         data, meta = fetch_url(
             url, cache_meta, deadline, expected_snapshot, input_budget=input_budget)
         if data is not None:
-            _, valid = try_parse(data, canon)
+            parse_diagnostics = []
+            _, valid = try_parse(data, canon, parse_diagnostics)
             if valid:
                 if attempts:
                     meta["previous_attempts"] = attempts
                 return data, meta
             meta["error"] = "fresh-content-invalid"
+            if parse_diagnostics:
+                meta["parse_diagnostics"] = [detail for _, detail in parse_diagnostics]
         attempts.append({"url": url, "status": meta.get("status"), "error": meta.get("error")})
         last_meta = meta
         error = meta.get("error") or ""
@@ -2304,8 +2482,7 @@ def _metadata_ok(d: str, output_hash: str | None, counts: dict,
                         else float("inf"))
         snapshots_valid = (
             -300 <= snapshot_age <= HISTORICAL_SNAPSHOT_MAX_AGE_DAYS * 86400
-            and _snapshot_methods_valid(source_snapshots, snapshot_methods,
-                                        latest.get("integrity_level"))
+            and _snapshot_methods_valid(source_snapshots, snapshot_methods, "strict")
         )
         return (
             os.path.isfile(os.path.join(d, "log"))
@@ -2315,7 +2492,7 @@ def _metadata_ok(d: str, output_hash: str | None, counts: dict,
             and _guard_anchor_valid(guard_anchor)
             and snapshots_valid
             and (expected_snapshots is None or source_snapshots == expected_snapshots)
-            and latest.get("integrity_level") == "strict"
+            and latest.get("integrity_level") in PUBLISHABLE_INTEGRITY_LEVELS
         )
     except Exception:
         return False
@@ -2495,7 +2672,8 @@ def _load_source_snapshots(d: str, output_hash: str | None) -> dict[str, str]:
         methods = latest.get("source_snapshot_methods")
         created = latest.get("source_snapshots_created")
         if (latest.get("output_sha256") != output_hash or not isinstance(snapshots, dict)
-                or not isinstance(methods, dict) or latest.get("integrity_level") != "strict"):
+                or not isinstance(methods, dict)
+                or latest.get("integrity_level") not in PUBLISHABLE_INTEGRITY_LEVELS):
             return {}
         if isinstance(created, bool) or not isinstance(created, int):
             return {}
@@ -2532,6 +2710,36 @@ def _integrity_state(total_sources: int, fresh_sources: int, stale_sources: int,
     if failed_sources:
         reasons.append(f"failed {failed_sources}")
     return ("strict", []) if not reasons else ("degraded", reasons)
+
+
+def _publish_tolerance_problems(total_sources: int, stale_sources: int, failed_sources: int,
+                                core_fresh: bool, snapshot_integrity_level: str) -> list[str]:
+    """degraded 是否仍在发布容差内（可升级为 tolerated）。
+
+    返回空列表表示本轮虽未达 strict，但缺席的上游少到可以安全出货；
+    非空列表给出超出容差的原因，调用方必须继续按 degraded 只读处理。
+    """
+    problems = []
+    if snapshot_integrity_level != "strict":
+        problems.append(f"snapshot 完整性为 {snapshot_integrity_level}")
+    if not core_fresh:
+        problems.append("核心官方源非 fresh")
+    counts = (total_sources, stale_sources, failed_sources)
+    if (any(isinstance(value, bool) or not isinstance(value, int) for value in counts)
+            or total_sources <= 0 or stale_sources < 0 or failed_sources < 0
+            or stale_sources + failed_sources > total_sources):
+        problems.append(f"上游计数非法: total {total_sources} / stale {stale_sources} / "
+                        f"failed {failed_sources}")
+        return problems
+    if failed_sources > PUBLISH_TOLERANCE_MAX_FAILED:
+        problems.append(f"硬失败上游 {failed_sources} 个 > 容差 {PUBLISH_TOLERANCE_MAX_FAILED} 个")
+    if failed_sources > total_sources * PUBLISH_TOLERANCE_MAX_FAILED_RATIO:
+        problems.append(f"硬失败占比 {failed_sources / total_sources:.1%} > 容差 "
+                        f"{PUBLISH_TOLERANCE_MAX_FAILED_RATIO:.0%}")
+    if stale_sources > total_sources * PUBLISH_TOLERANCE_MAX_STALE_RATIO:
+        problems.append(f"stale 兜底占比 {stale_sources / total_sources:.1%} > 容差 "
+                        f"{PUBLISH_TOLERANCE_MAX_STALE_RATIO:.0%}")
+    return problems
 
 
 def _recover_stale_backup():
@@ -2873,6 +3081,18 @@ def main():
         _abort(f"[21] stale 占比 {stale_ratio:.0%} 超上限 {MAX_STALE_RATIO:.0%}，拒绝覆盖产物")
     if ratio < MIN_VALID_RATIO:
         _abort(f"[P0-2] 有效上游率 {ratio:.0%} < {MIN_VALID_RATIO:.0%}，拒绝覆盖现有产物")
+    if integrity_level == "degraded":
+        tolerance_problems = _publish_tolerance_problems(
+            len(groups), len(stale_valid_canons), len(failed), core_fresh,
+            snapshot_integrity_level)
+        if tolerance_problems:
+            print("完整性降级且超出发布容差，本轮只读：" + "；".join(tolerance_problems))
+        else:
+            integrity_level = "tolerated"
+            integrity_reasons = integrity_reasons + [
+                f"publish-tolerance stale {len(stale_valid_canons)} / "
+                f"failed {len(failed)} / total {len(groups)}"]
+            print(f"完整性降级但在发布容差内，按 tolerated 放行（{', '.join(integrity_reasons)}）")
 
     sel_full = build_merged(candidates, "full")
     sel_name = build_merged(candidates, "name")
@@ -2975,10 +3195,10 @@ def main():
     swap_old_existed = False
     swap_completed = False
     content_changed = old_hash is None or old_hash != new_hash
-    if integrity_level != "strict" and content_changed:
+    if integrity_level not in PUBLISHABLE_INTEGRITY_LEVELS and content_changed:
         _remove_path(newdir)
         _abort(f"完整性等级 {integrity_level} 不允许修改产物: {integrity_reasons}")
-    if integrity_level != "strict":
+    if integrity_level not in PUBLISHABLE_INTEGRITY_LEVELS:
         changed_any = False
         _remove_path(newdir)
         print("完整性降级但产物内容不变，禁止提交并保留旧元数据")
@@ -2986,10 +3206,10 @@ def main():
         changed_any = not (
             old_hash and old_hash == new_hash
             and _metadata_ok("dist", old_hash, new_counts, snapshot_shas))
-    if integrity_level == "strict" and not changed_any:
+    if integrity_level in PUBLISHABLE_INTEGRITY_LEVELS and not changed_any:
         shutil.rmtree(newdir, ignore_errors=True)
         print("产物无变化，跳过提交")
-    elif integrity_level == "strict":
+    elif integrity_level in PUBLISHABLE_INTEGRITY_LEVELS:
         updated = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
         transaction_id = os.urandom(16).hex()
         source_base_commit = os.environ.get("GITHUB_SHA", "")
@@ -3008,7 +3228,7 @@ def main():
                     "source_snapshots": snapshot_shas,
                     "source_snapshots_created": int(time.time()),
                     "source_snapshot_methods": sha_status,
-                    "integrity_level": "strict",
+                    "integrity_level": integrity_level,
                 }, f, ensure_ascii=False, indent=1, allow_nan=False)
             with open(os.path.join(newdir, ".txn-pending"), "w", encoding="utf-8") as f:
                 f.write(transaction_id + "\n")
@@ -3164,6 +3384,7 @@ def main():
 
         "failed": failed,
         "parsed_fail": parsed_fail,
+        "schema_drift": collect_schema_drift(parsed_fail, failed),
     }
     try:
         _write_json_atomic(os.path.join(REPORT_DIR, "latest.json"), report)
@@ -3219,6 +3440,60 @@ def main():
         print(f"失败 {len(failed)} 个上游: {list(failed)[:8]}...")
 
 
+_SCHEMA_DRIFT_PREFIXES = ("未知条目字段", "未知 arguments 字段", "factoryId=")
+
+
+def _schema_drift_signal(problem: str) -> str | None:
+    """Pick out the problems that mean "upstream shipped something we don't know".
+
+    These differ in kind from a malformed value. A bad regex is one broken entry;
+    an unknown field is the first tremor of a schema bump, and it spreads. In
+    2026-10 upstream added a top-level ``id`` plus ``linkTemplate``: every entry
+    became invalid at once, the source fell below MIN_SOURCE_ITEM_VALID_RATIO and
+    the whole pipeline stopped for four days with nothing but a bare
+    ``fresh-content-invalid`` to go on.
+
+    Reported while the source still passes, the same signal is an early warning
+    instead of a cliff, so callers can widen the allowlist before the new field
+    reaches enough entries to fail the ratio.
+    """
+    if not isinstance(problem, str):
+        return None
+    # "未知 searchConfig 字段 {name}: {field}" carries the source name; drop it so the
+    # same new field aggregates into one signal instead of one per source.
+    if problem.startswith("未知 searchConfig 字段 "):
+        return f"未知 searchConfig 字段: {problem.rsplit(': ', 1)[-1]}"
+    for prefix in _SCHEMA_DRIFT_PREFIXES:
+        if problem.startswith(prefix):
+            return problem
+    return None
+
+
+def collect_schema_drift(parsed_fail, failed) -> dict:
+    """Aggregate drift signals from both parse paths into {canon: [signal, ...]}.
+
+    Sources that still publish record their signals in ``parsed_fail``; sources
+    that hard-failed carry theirs in ``failed[canon]["parse_diagnostics"]``.
+    """
+    drift: dict = {}
+
+    def add(canon, detail):
+        if not isinstance(detail, str) or not detail.startswith("schema-drift:"):
+            return
+        entries = drift.setdefault(canon, [])
+        signal = detail.split(":", 1)[1]
+        if signal not in entries:
+            entries.append(signal)
+
+    for row in parsed_fail or []:
+        if isinstance(row, (list, tuple)) and len(row) == 2:
+            add(row[0], row[1])
+    for canon, meta in (failed or {}).items():
+        for detail in (meta or {}).get("parse_diagnostics") or []:
+            add(canon, detail)
+    return drift
+
+
 def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple[list, bool]:
     try:
         obj = load_json_bytes(data)
@@ -3237,9 +3512,13 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
         return [], False
     out = []
     valid = 0
+    eligible_count = 0
+    drift_signals: dict = {}
     for index, m in enumerate(ms):
         if not isinstance(m, dict):
+            eligible_count += 1
             continue
+        eligible_count += 1
         try:
             m2 = normalize_item(m)
             ok_flag, problems = validate_item(m2)
@@ -3248,6 +3527,12 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
                 parsed_fail.append((canon, f"item-{index}-exception:{type(exc).__name__}"))
             continue
         if not ok_flag:
+            if parsed_fail is not None:
+                parsed_fail.append((canon, f"item-{index}-invalid:{'; '.join(problems[:8])}"))
+            for problem in problems:
+                signal = _schema_drift_signal(problem)
+                if signal:
+                    drift_signals[signal] = drift_signals.get(signal, 0) + 1
             continue
         args = m2.get("arguments") or {}
         name = args.get("name")
@@ -3259,17 +3544,22 @@ def try_parse(data: bytes, canon: str, parsed_fail: list | None = None) -> tuple
         rank = (quality, canon, u, sha256_json(m2))
         out.append((rank, key, m2, canon))
         valid += 1
+    # Emitted before the ratio verdict on purpose: drift has to be visible while
+    # the source is still publishing, which is the whole point of the warning.
+    if drift_signals and parsed_fail is not None:
+        for signal, count in sorted(drift_signals.items()):
+            parsed_fail.append((canon, f"schema-drift:{signal} ×{count}"))
     if valid == 0:
         if parsed_fail is not None:
             parsed_fail.append((canon, "no-valid-items"))
         return [], False
-    valid_ratio = valid / len(ms)
+    valid_ratio = valid / eligible_count if eligible_count else 0
     if valid_ratio < MIN_SOURCE_ITEM_VALID_RATIO:
         if parsed_fail is not None:
-            parsed_fail.append((canon, f"valid-items-ratio-too-low:{valid}/{len(ms)}"))
+            parsed_fail.append((canon, f"valid-items-ratio-too-low:{valid}/{eligible_count}"))
         return [], False
-    if valid < len(ms) and parsed_fail is not None:
-        parsed_fail.append((canon, f"partial-invalid-items:{len(ms) - valid}/{len(ms)}"))
+    if valid < eligible_count and parsed_fail is not None:
+        parsed_fail.append((canon, f"partial-invalid-items:{eligible_count - valid}/{eligible_count}"))
     return out, True
 
 
@@ -5414,6 +5704,225 @@ def run_selftests():
             self.assertTrue(valid)
             self.assertEqual(len(seg), 90)
 
+        def test_animeko_live_format_fixtures(self):
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            canon_base = "https://sub.creamycake.org/v1"
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                css_payload = fixture.read()
+            with open(os.path.join(fixture_dir, "animeko-bt1-schema-v2.json"), "rb") as fixture:
+                bt_payload = fixture.read()
+
+            # schemaVersion 2 means the complete list lives at the top level; the
+            # exportedMediaSourceDataList mirror is upstream's trimmed build for
+            # pre-6.3.0 clients and omits sources needing newer client features.
+            source_failures = []
+            source_segment, source_valid = try_parse(
+                css_payload, canon_base + "/css1.json", source_failures)
+            self.assertTrue(source_valid, source_failures)
+            self.assertEqual(len(source_segment), 20)
+            source_by_id = {item[2].get("id"): item[2] for item in source_segment}
+            # Exactly the two entries upstream withholds from the compatible list.
+            self.assertIn("2k-dongman", source_by_id)
+            self.assertIn("xifan-dongman-next", source_by_id)
+
+            # Dropping schemaVersion must fall back to the compatible list.
+            legacy_payload = json.loads(css_payload)
+            legacy_payload.pop("schemaVersion", None)
+            legacy_segment, legacy_valid = try_parse(
+                json.dumps(legacy_payload, ensure_ascii=False).encode(),
+                canon_base + "/css1.json", [])
+            self.assertTrue(legacy_valid)
+            self.assertEqual(len(legacy_segment), 18)
+            self.assertNotIn("xifan-dongman-next",
+                             {item[2].get("id") for item in legacy_segment})
+            self.assertIn("linkTemplate", source_by_id["girigiri-ai-dongman"]["arguments"]["searchConfig"][
+                "selectorSubjectFormatJsonPathIndexed"])
+            json_api = source_by_id["xifan-dongman-next"]
+            self.assertEqual(json_api["factoryId"], "json-api")
+            self.assertEqual(url_of(json_api), "https://api.xifanacg.com")
+            # Its newline-separated headers must survive the control-char sweep.
+            self.assertIn("\n", json_api["arguments"]["searchConfig"]["headers"])
+            self.assertFalse([x for x in source_failures if "json-api" in str(x)], source_failures)
+
+            valid_item = source_by_id["girigiri-ai-dongman"]
+            valid_client_versions = json.loads(json.dumps(valid_item))
+            valid_client_versions["clientVersions"] = ">=6.3.0"
+            self.assertTrue(validate_item(valid_client_versions)[0])
+            malformed_client_versions = json.loads(json.dumps(valid_item))
+            malformed_client_versions["clientVersions"] = {"unexpected": "shape"}
+            self.assertFalse(validate_item(malformed_client_versions)[0])
+            unknown_field = json.loads(json.dumps(valid_item))
+            unknown_field["unexpectedPayload"] = "must remain rejected"
+            self.assertFalse(validate_item(unknown_field)[0])
+
+            bt_segment, bt_valid = try_parse(bt_payload, canon_base + "/bt1.json", [])
+            self.assertTrue(bt_valid)
+            self.assertEqual(len(bt_segment), 2)
+            self.assertTrue(all(item[2]["factoryId"] == "rss" for item in bt_segment))
+
+        def _json_api_item(self, **overrides):
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                payload = json.loads(fixture.read())
+            item = next(m for m in payload["mediaSources"] if m.get("factoryId") == "json-api")
+            item = json.loads(json.dumps(item))
+            item["arguments"]["searchConfig"].update(overrides)
+            return item
+
+        def test_extract_prefers_complete_list_on_schema_v2(self):
+            modern = {"schemaVersion": 2, "mediaSources": [1, 2, 3, 4, 5],
+                      "exportedMediaSourceDataList": {"mediaSources": [1, 2, 3]}}
+            self.assertEqual(extract(modern), [1, 2, 3, 4, 5])
+            # Older envelopes keep the previous precedence exactly as before.
+            self.assertEqual(extract({"schemaVersion": 1, "mediaSources": [1, 2, 3, 4, 5],
+                                      "exportedMediaSourceDataList": {"mediaSources": [1, 2, 3]}}),
+                             [1, 2, 3])
+            self.assertEqual(extract({"exportedMediaSourceDataList": {"mediaSources": [1, 2]}}),
+                             [1, 2])
+            self.assertEqual(extract({"mediaSources": [7]}), [7])
+            self.assertEqual(extract([9]), [9])
+            # A bogus schemaVersion must not route around the compatible list.
+            for bad in (True, "2", 2.0, None):
+                self.assertEqual(
+                    extract({"schemaVersion": bad, "mediaSources": [1, 2, 3, 4, 5],
+                             "exportedMediaSourceDataList": {"mediaSources": [1, 2, 3]}}),
+                    [1, 2, 3], f"schemaVersion={bad!r}")
+
+        def test_json_api_source_is_accepted_and_shipped(self):
+            item = self._json_api_item()
+            ok, problems = validate_item(normalize_item(item))
+            self.assertTrue(ok, problems)
+            # Not rss, so it belongs in online.json alongside the web sources.
+            self.assertNotEqual(item["factoryId"], "rss")
+            self.assertEqual(url_of(item), "https://api.xifanacg.com")
+
+        def test_json_api_rejects_unsafe_payloads(self):
+            # Everything a hostile subscription could try to smuggle through a
+            # config we hand to the client but never execute ourselves.
+            cases = {
+                "私有地址": {"baseUrl": "http://127.0.0.1:8080"},
+                "非法协议": {"baseUrl": "file:///etc/passwd"},
+                "缺少 baseUrl": {"baseUrl": None},
+                "未知顶层段": {"somethingNew": {"a": 1}},
+                "嵌套 URL 指向内网": {"search": {"request": {
+                    "url": "https://169.254.169.254/latest/meta-data", "method": "GET"}}},
+                "CRLF 头注入": {"headers": "apikey: x\r\nX-Evil: 1"},
+                "method 非法": {"play": {"request": {
+                    "url": "https://api.example.com/x", "method": "DELETE!!"}}},
+            }
+            for label, override in cases.items():
+                item = self._json_api_item(**override)
+                if override.get("baseUrl", "") is None:
+                    item["arguments"]["searchConfig"].pop("baseUrl")
+                ok, problems = validate_item(normalize_item(item))
+                self.assertFalse(ok, f"{label} 应被拒绝")
+                self.assertTrue(problems, label)
+
+            # A plain \n inside the newline-separated fields stays legal.
+            ok, problems = validate_item(normalize_item(
+                self._json_api_item(headers="apikey: x\nOrigin: https://a.example")))
+            self.assertTrue(ok, problems)
+
+        def test_json_api_bounds_structure(self):
+            deep = cur = {}
+            for _ in range(JSON_API_MAX_DEPTH + 3):
+                cur["search"] = {}
+                cur = cur["search"]
+            ok, problems = validate_item(normalize_item(self._json_api_item(**deep)))
+            self.assertFalse(ok)
+            self.assertTrue(any("嵌套过深" in p for p in problems), problems)
+
+            ok, problems = validate_item(normalize_item(
+                self._json_api_item(defaultResolution="x" * (MAX_LEN_JSON_API_STRING + 1))))
+            self.assertFalse(ok)
+            self.assertTrue(any("超长" in p for p in problems), problems)
+
+        def test_schema_drift_warns_while_source_still_publishes(self):
+            # The 2026-10 failure mode in miniature: upstream adds a field we do not
+            # know. With only one entry carrying it the source stays above
+            # MIN_SOURCE_ITEM_VALID_RATIO and keeps shipping — and that is exactly
+            # when we want to hear about it, not days later when it has spread.
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                payload = json.loads(fixture.read())
+            base = next(m for m in payload["mediaSources"] if m.get("id") == "girigiri-ai-dongman")
+
+            items = []
+            for i in range(20):
+                clone = json.loads(json.dumps(base))
+                clone["id"] = f"drift-probe-{i}"
+                clone["arguments"]["name"] = f"漂移探针{i}"
+                items.append(clone)
+            items[0]["arguments"]["searchConfig"]["futureSelectorField"] = "x"
+            items[1]["someFutureTopLevelKey"] = "y"
+
+            canon = "https://sub.creamycake.org/v1/css1.json"
+            failures = []
+            segment, valid = try_parse(
+                json.dumps({"schemaVersion": 2, "mediaSources": items},
+                           ensure_ascii=False).encode(), canon, failures)
+
+            # 18/20 = 90% still clears the ratio, so the source publishes as normal.
+            self.assertTrue(valid, failures)
+            self.assertEqual(len(segment), 18)
+
+            drift = collect_schema_drift(failures, {})
+            self.assertIn(canon, drift)
+            joined = " | ".join(drift[canon])
+            self.assertIn("futureSelectorField", joined)
+            self.assertIn("someFutureTopLevelKey", joined)
+            # A broken value is not drift: it must not raise a schema alarm.
+            self.assertNotIn("tier", joined)
+
+        def test_schema_drift_collected_from_both_parse_paths(self):
+            drift = collect_schema_drift(
+                [("https://a/x.json", "schema-drift:未知 searchConfig 字段: linkTemplate ×3"),
+                 ("https://a/x.json", "schema-drift:未知 searchConfig 字段: linkTemplate ×3"),
+                 ("https://a/x.json", "item-4-invalid:name 超长"),
+                 ("https://a/x.json", "partial-invalid-items:1/20")],
+                {"https://b/y.json": {
+                    "error": "fresh-content-invalid",
+                    "parse_diagnostics": ["schema-drift:未知条目字段: ['id'] ×19",
+                                          "valid-items-ratio-too-low:0/19"]}})
+            self.assertEqual(sorted(drift), ["https://a/x.json", "https://b/y.json"])
+            # Deduplicated, and ordinary parse failures stay out of the drift channel.
+            self.assertEqual(drift["https://a/x.json"],
+                             ["未知 searchConfig 字段: linkTemplate ×3"])
+            self.assertEqual(drift["https://b/y.json"], ["未知条目字段: ['id'] ×19"])
+            self.assertEqual(collect_schema_drift([], {}), {})
+            self.assertEqual(collect_schema_drift(None, None), {})
+
+        def test_client_versions_accepts_future_upstream_ranges(self):
+            # Regression guard for the 2026-10 outage. `clientVersions` is an
+            # upstream-owned range expression: 6.3.0 shipped ">=6.3.0" and 6.4.0 is
+            # already in beta, so validation has to check shape, never an allowlist
+            # of the literals that happened to exist when this code was written.
+            fixture_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "fixtures")
+            with open(os.path.join(fixture_dir, "animeko-css1-schema-v2.json"), "rb") as fixture:
+                payload = json.loads(fixture.read())
+            base = next(m for m in payload["mediaSources"] if m.get("id") == "girigiri-ai-dongman")
+
+            def with_client_versions(value):
+                probe = json.loads(json.dumps(base))
+                probe["clientVersions"] = value
+                return validate_item(normalize_item(probe))
+
+            for accepted in (">=6.3.0", "<6.3.0", ">=6.4.0", ">=6.4.0-beta01",
+                             ">=6.3.0 <7.0.0", ">=6.3.0 || <6.0.0", "6.3",
+                             "1.2.3+build.5", "~6.3.0", "^6.4", "6.*"):
+                ok, problems = with_client_versions(accepted)
+                self.assertTrue(ok, f"{accepted!r} 应被接受，却报 {problems}")
+
+            for rejected in ({"unexpected": "shape"}, [">=6.3.0"], 630, None, True,
+                             "", "   ", ">=6.3.0\n<7.0.0", ">=6.3.0; rm -rf /",
+                             "<script>alert(1)</script>", "x" * 200):
+                ok, _ = with_client_versions(rejected)
+                self.assertFalse(ok, f"{rejected!r} 应被拒绝")
+
+            # The field stays optional, and an item without it is untouched.
+            ok, problems = validate_item(normalize_item(json.loads(json.dumps(base))))
+            self.assertTrue(ok, problems)
+
         def test_streaming_output_limit(self):
             import tempfile
             d = tempfile.mkdtemp()
@@ -5899,6 +6408,139 @@ def run_selftests():
             level, reasons = _integrity_state(10, 9, 0, 1)
             self.assertEqual(level, "degraded")
             self.assertTrue(any("failed" in reason for reason in reasons))
+
+        def test_publish_tolerance_thresholds(self):
+            # 容差内：硬失败数量与占比同时达标
+            self.assertEqual(_publish_tolerance_problems(20, 0, 1, True, "strict"), [])
+            self.assertEqual(_publish_tolerance_problems(100, 0, 4, True, "strict"), [])
+            self.assertEqual(_publish_tolerance_problems(77, 0, 0, True, "strict"), [])
+            # 硬失败占比超标
+            self.assertTrue(_publish_tolerance_problems(20, 0, 2, True, "strict"))
+            self.assertTrue(_publish_tolerance_problems(10, 0, 1, True, "strict"))
+            # 硬失败绝对数量超标（占比达标也不放行）
+            self.assertTrue(_publish_tolerance_problems(200, 0, 5, True, "strict"))
+            # stale 兜底不丢条目，限额更宽，但越线同样拒绝
+            self.assertEqual(_publish_tolerance_problems(20, 5, 0, True, "strict"), [])
+            self.assertTrue(_publish_tolerance_problems(20, 6, 0, True, "strict"))
+            # 核心官方源与 snapshot 完整性仍是硬门槛
+            self.assertTrue(_publish_tolerance_problems(20, 0, 1, False, "strict"))
+            self.assertTrue(_publish_tolerance_problems(20, 0, 1, True, "degraded"))
+            # 计数非法一律拒绝
+            self.assertTrue(_publish_tolerance_problems(0, 0, 0, True, "strict"))
+            self.assertTrue(_publish_tolerance_problems(5, 3, 3, True, "strict"))
+            self.assertTrue(_publish_tolerance_problems(5, -1, 0, True, "strict"))
+
+        def _tolerance_fixture(self, canon_items):
+            """按 canon 分配条目，返回 (links, bodies, resolve_return)。"""
+            core = "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"
+            bodies = {}
+            index = 0
+            sha_map, status = {}, {}
+            for position, (canon, count) in enumerate(canon_items):
+                items = []
+                for _ in range(count):
+                    if index == 0:
+                        items.append({"factoryId": "rss", "version": 1,
+                                      "arguments": {"name": "R0", "description": "", "iconUrl": "",
+                                                    "searchConfig": {"searchUrl": "https://r0.com/rss"}}})
+                    else:
+                        items.append({"factoryId": "web-selector", "version": 2,
+                                      "arguments": {"name": f"N{index}", "description": "",
+                                                    "iconUrl": "",
+                                                    "searchConfig": {
+                                                        "searchUrl": f"https://n{index}.com"}}})
+                    index += 1
+                bodies[canon] = json.dumps(
+                    {"exportedMediaSourceDataList": {"mediaSources": items}}).encode()
+                if canon == core:
+                    sha_map[canon] = canon.replace("/main/", "/" + "a" * 40 + "/")
+                    status[canon] = "resolved-api"
+                else:
+                    sha_map[canon] = canon
+                    status[canon] = "not-github"
+                del position
+            return bodies, (sha_map, status)
+
+        def _run_main_once(self, bodies, resolve_return, broken=()):
+            def fetch(canon, urls, cache_meta, expected=None, budget=None):
+                del urls, cache_meta, expected, budget
+                if canon in broken:
+                    return None, {"error": "simulated-upstream-down"}
+                return bodies[canon], {"url": canon, "final_url": canon}
+
+            with mock.patch(__name__ + ".acquire_run_lock"), \
+                 mock.patch(__name__ + ".resolve_commit_shas", return_value=resolve_return), \
+                 mock.patch(__name__ + ".load_cache", return_value=None), \
+                 mock.patch(__name__ + ".fetch_group_worker", side_effect=fetch), \
+                 mock.patch(__name__ + ".save_cache", return_value=True), \
+                 mock.patch(__name__ + ".MIN_OUTPUT_COUNT", 1), \
+                 mock.patch("builtins.print"):
+                main()
+
+        def test_tolerated_degraded_publishes_changed_output(self):
+            import tempfile
+            d = tempfile.mkdtemp()
+            cwd = os.getcwd()
+            core = "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"
+            canons = [core] + [f"https://s{i}.example.com/a.json" for i in range(1, 20)]
+            bodies, resolve_return = self._tolerance_fixture([(c, 5) for c in canons])
+            try:
+                os.chdir(d)
+                with open("all_animeko_links.txt", "w", encoding="utf-8") as f:
+                    f.write("\n".join(canons) + "\n")
+                # 第一轮：全部 fresh → strict 发布基线
+                self._run_main_once(bodies, resolve_return)
+                baseline = load_json_file(os.path.join("reports", "latest.json"))
+                self.assertEqual(baseline["integrity_level"], "strict")
+                self.assertEqual(len(extract(load_json_file(os.path.join("dist", "all.json")))), 100)
+                self.assertEqual(
+                    load_json_file(os.path.join("dist", "latest.json"))["integrity_level"],
+                    "strict")
+                # 第二轮：1/20 上游彻底失联且无缓存兜底 → 仍在容差内，必须照常出货
+                self._run_main_once(bodies, resolve_return, broken={canons[-1]})
+                report = load_json_file(os.path.join("reports", "latest.json"))
+                self.assertEqual(report["integrity_level"], "tolerated")
+                self.assertTrue(report["changed"])
+                self.assertIsNone(report["aborted_reason"])
+                self.assertTrue(any("publish-tolerance" in reason
+                                    for reason in report["integrity_reasons"]))
+                self.assertEqual(len(extract(load_json_file(os.path.join("dist", "all.json")))), 95)
+                self.assertTrue(_output_dir_valid("dist"))
+                self.assertFalse(os.path.exists(os.path.join("dist", ".txn-pending")))
+                self.assertEqual(
+                    load_json_file(os.path.join("dist", "latest.json"))["integrity_level"],
+                    "tolerated")
+            finally:
+                os.chdir(cwd)
+                shutil.rmtree(d, ignore_errors=True)
+
+        def test_degraded_beyond_tolerance_still_blocks_changed_output(self):
+            import tempfile
+            d = tempfile.mkdtemp()
+            cwd = os.getcwd()
+            core = "https://raw.githubusercontent.com/MajoSissi/animeko-source/main/dist/all.json"
+            canons = [core] + [f"https://s{i}.example.com/a.json" for i in range(1, 5)]
+            # 失联源只贡献 1 条，确保删除比例不触发 count/content 熔断，
+            # 从而精确验证“超出容差必须拒绝改产物”这一条门禁。
+            bodies, resolve_return = self._tolerance_fixture(
+                list(zip(canons, (50, 24, 24, 1, 1))))
+            try:
+                os.chdir(d)
+                with open("all_animeko_links.txt", "w", encoding="utf-8") as f:
+                    f.write("\n".join(canons) + "\n")
+                self._run_main_once(bodies, resolve_return)
+                self.assertEqual(len(extract(load_json_file(os.path.join("dist", "all.json")))), 100)
+                before = _dir_hash("dist")
+                # 1/5 缺席 = 20% > 5% 容差 → 必须拒绝覆盖
+                with self.assertRaises(SystemExit):
+                    self._run_main_once(bodies, resolve_return, broken={canons[-1]})
+                report = load_json_file(os.path.join("reports", "latest.json"))
+                self.assertEqual(report["integrity_level"], "degraded")
+                self.assertIn("不允许修改产物", report["aborted_reason"])
+                self.assertEqual(_dir_hash("dist"), before)
+            finally:
+                os.chdir(cwd)
+                shutil.rmtree(d, ignore_errors=True)
 
         def test_first_generation_absolute_minimum(self):
             low = {fn: 1 for fn in OUTPUT_FILES}

@@ -1,71 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-22T08:57:29Z",
-  "validUntil": "2026-11-05",
+  "generatedAt": "2026-10-24T08:35:55Z",
+  "validUntil": "2026-11-07",
   "evidence": {
-    "reportSha256": "c449d9a3f266876a6fbe41e8561f45d058c7a0b35b9fac2a7834dc6733ce3aec",
-    "reportGeneratedAt": "2026-10-22T08:57:15+00:00"
+    "reportSha256": "46ad17f0e82a3476280168d88362cb165d0c3bada587b7d759e8935d132bfce5",
+    "reportGeneratedAt": "2026-10-24T08:35:40+00:00"
   },
-  "overrides": [
-    {
-      "sourceId": "4ab988cdce236378e0edba4d",
-      "configFingerprint": "7583bf5aa9909f11b4213bd3c399b4ea8237bb09a681d331f282f6c38909a08c",
-      "officialTier": 4,
-      "tier": 3,
-      "direction": "promote",
-      "evidenceCount": 3,
-      "medianScore": 90,
-      "transportSuccessRate": 0.667
-    },
-    {
-      "sourceId": "82a27ba0cd584a005261829d",
-      "configFingerprint": "c71990bb789ef92baf39a9a6d1d0bdf22b2fe47736d1e6f7cef355e6c7b22ce0",
-      "officialTier": 3,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 85,
-      "transportSuccessRate": 0.333
-    },
-    {
-      "sourceId": "9294bb836551c1ba254d9ac5",
-      "configFingerprint": "c4dbde6375c2477c941c675ae59bdee43706c408ffaeb9e69fa235ab4820ecf7",
-      "officialTier": null,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 4,
-      "medianScore": 85.0,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "bc01dfcb99ac852311bc70ec",
-      "configFingerprint": "fa0e99e5f861c2be03034aea7a99047a9a31e0b6478f42ed595cd991b5f6c282",
-      "officialTier": 4,
-      "tier": 3,
-      "direction": "promote",
-      "evidenceCount": 3,
-      "medianScore": 95,
-      "transportSuccessRate": 0.667
-    },
-    {
-      "sourceId": "d7860c11fcae7d8e7f70e893",
-      "configFingerprint": "304f2e4009df29e33165e8bf3f659aa0425eacdd2ce392ab63b27ab1958947c1",
-      "officialTier": 3,
-      "tier": 4,
-      "direction": "demote",
-      "evidenceCount": 4,
-      "medianScore": 85.0,
-      "transportSuccessRate": 0.0
-    },
-    {
-      "sourceId": "ec0b6cffa15a446a26267248",
-      "configFingerprint": "96ef2045a566bc31f5b1ef9ad796bb9b5b8f5b652a7209f37c53c65ec9b5ad59",
-      "officialTier": null,
-      "tier": 3,
-      "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 95,
-      "transportSuccessRate": 0.667
-    }
-  ]
+  "overrides": []
 }

@@ -33,7 +33,25 @@ from unittest import mock
 import update_sources as updater
 
 ENGINE = None  # Required by CI; None retains legacy offline fixtures only.
-ENGINE_METHOD = "animeko-extracted-v1"
+ENGINE_METHOD = "animeko-extracted-v2"
+
+ENGINE_SOURCE_DIR = Path(__file__).resolve().parents[1] / "engine/src/main/kotlin/upstream"
+# searchConfig section -> the Kotlin declaration that parses it. Main.kt decodes
+# exactly these; `selectorChannelFormatFlattened` keeps its historical JSON name
+# while the parser object is SelectorChannelFormatIndexGrouped.
+PINNED_PARSER_SECTIONS = {
+    "selectorSubjectFormatA": "SelectorSubjectFormatA",
+    "selectorSubjectFormatIndexed": "SelectorSubjectFormatIndexed",
+    "selectorSubjectFormatJsonPathIndexed": "SelectorSubjectFormatJsonPathIndexed",
+    "selectorChannelFormatFlattened": "SelectorChannelFormatIndexGrouped",
+    "selectorChannelFormatNoChannel": "SelectorChannelFormatNoChannel",
+    "matchVideo": "MatchVideoConfig",
+}
+PINNED_SUBJECT_FORMATS = ("SelectorSubjectFormatA", "SelectorSubjectFormatIndexed",
+                          "SelectorSubjectFormatJsonPathIndexed")
+PINNED_CHANNEL_FORMATS = ("SelectorChannelFormatIndexGrouped", "SelectorChannelFormatNoChannel")
+MAX_UNSUPPORTED_FIELDS = 10
+MAX_WITHHELD_REPORTED = 25
 
 SCHEMA_VERSION = 1
 MAX_INPUT_SIZE = 25 * 1024 * 1024
@@ -692,32 +710,67 @@ def json_indexed_subjects(data: bytes, names_expr: str, links_expr: str) -> list
     return output
 
 
+def apply_link_template(link_template, raw_href: str) -> str:
+    """Mirror of upstream applyLinkTemplate: `{value}` receives the raw link."""
+    if not isinstance(link_template, str) or not link_template.strip():
+        return raw_href
+    return link_template.replace("{value}", raw_href)
+
+
+def compute_selector_url(base_url: str, raw_url: str) -> str:
+    """Mirror of UrlHelpers.computeSelectorUrl.
+
+    Sites hardcode absolute http links on https pages and rely on the browser's
+    301; upstream upgrades same-host default-port http links to https.
+    """
+    absolute = urljoin(base_url, raw_url)
+    base, target = urlsplit(base_url), urlsplit(absolute)
+    if base.scheme != "https" or target.scheme != "http":
+        return absolute
+    try:
+        if target.port not in (None, 80):
+            return absolute
+    except ValueError:
+        return absolute
+    def normalize(host):
+        return (host or "").lower().removeprefix("www.")
+    if normalize(base.hostname) != normalize(target.hostname):
+        return absolute
+    return urlunsplit(("https", target.hostname or "", target.path, target.query, target.fragment))
+
+
 def extract_subjects(data: bytes, config: dict, base_url: str) -> list[dict]:
     if ENGINE is not None:
         return ENGINE.subjects(data, config, base_url)
     format_id = str(config.get("subjectFormatId") or "a").lower()
     if "json" in format_id:
         fmt = config.get("selectorSubjectFormatJsonPathIndexed") or {}
+        template = fmt.get("linkTemplate")
         return [
-            {"name": row["name"], "url": urljoin(base_url, row["link"])}
+            {"name": row["name"],
+             "url": compute_selector_url(base_url, apply_link_template(template, row["link"]))}
             for row in json_indexed_subjects(
                 data, str(fmt.get("selectNames") or ""), str(fmt.get("selectLinks") or ""))
         ]
     root = parse_html_document(data)
     if format_id == "indexed":
         fmt = config.get("selectorSubjectFormatIndexed") or {}
+        template = fmt.get("linkTemplate")
         names = select_nodes(root, str(fmt.get("selectNames") or ""), MAX_SUBJECTS)
         links = select_nodes(root, str(fmt.get("selectLinks") or ""), MAX_SUBJECTS)
         output = []
         for name_node, link_node in zip(names, links):
             link = link_node.link()
             if link:
-                output.append({"name": name_node.text(), "url": urljoin(base_url, link)})
+                output.append({"name": name_node.text(),
+                               "url": compute_selector_url(base_url, apply_link_template(template, link))})
         return output
     fmt = config.get("selectorSubjectFormatA") or {}
+    template = fmt.get("linkTemplate")
     nodes = select_nodes(root, str(fmt.get("selectLists") or ""), MAX_SUBJECTS)
     return [
-        {"name": node.text(), "url": urljoin(base_url, link)}
+        {"name": node.text(),
+         "url": compute_selector_url(base_url, apply_link_template(template, link))}
         for node in nodes if (link := node.link())
     ]
 
@@ -741,7 +794,7 @@ def extract_episodes(data: bytes, config: dict, base_url: str) -> list[dict]:
                 link = node.link()
                 if link:
                     output.append({"channel": bounded_text(channel, 120), "name": node.text(),
-                                   "url": urljoin(base_url, link)})
+                                   "url": compute_selector_url(base_url, link)})
                     if len(output) >= MAX_EPISODES:
                         return output
     if output:
@@ -752,7 +805,7 @@ def extract_episodes(data: bytes, config: dict, base_url: str) -> list[dict]:
             link = node.link()
             if link:
                 output.append({"channel": "默认线路", "name": node.text(),
-                               "url": urljoin(base_url, link)})
+                               "url": compute_selector_url(base_url, link)})
     return output
 
 
@@ -826,6 +879,95 @@ def validate_css_fields(config: dict) -> tuple[list[str], list[str]]:
     if isinstance(episode_pattern, str) and "(?<ep>" not in episode_pattern:
         warnings.append("集数正则缺少ep命名组")
     return errors, warnings
+
+
+def _kotlin_parameter_names(text: str, open_paren: int) -> frozenset:
+    depth = 0
+    for index in range(open_paren, len(text)):
+        if text[index] == "(":
+            depth += 1
+        elif text[index] == ")":
+            depth -= 1
+            if depth == 0:
+                return frozenset(re.findall(r"\bval\s+(\w+)\s*:", text[open_paren:index]))
+    return frozenset()
+
+
+def _pinned_config_fields(text: str, declaration: str) -> frozenset:
+    direct = re.search(rf"\bdata class {re.escape(declaration)}\s*\(", text)
+    if direct:
+        return _kotlin_parameter_names(text, direct.end() - 1)
+    owner = re.search(rf"\bobject {re.escape(declaration)}\b", text)
+    if not owner:
+        return frozenset()
+    nested = re.search(r"\bdata class Config\s*\(", text[owner.end():])
+    return _kotlin_parameter_names(text, owner.end() + nested.end() - 1) if nested else frozenset()
+
+
+def _pinned_format_id(text: str, declaration: str) -> str | None:
+    owner = re.search(rf"\bobject {re.escape(declaration)}\b", text)
+    if not owner:
+        return None
+    found = re.search(r'SelectorFormatId\("([^"]+)"\)', text[owner.end():owner.end() + 400])
+    return found.group(1) if found else None
+
+
+_PINNED_CAPABILITIES: dict | None = None
+
+
+def pinned_parser_capabilities() -> dict:
+    """What the *extracted* parsers in engine/ actually understand.
+
+    Read from the Kotlin sources rather than hardcoded, so re-pinning the
+    extraction to a newer upstream commit relaxes the gate automatically
+    instead of leaving a stale list behind.
+    """
+    global _PINNED_CAPABILITIES
+    if _PINNED_CAPABILITIES is None:
+        text = ""
+        if ENGINE_SOURCE_DIR.is_dir():
+            for path in sorted(ENGINE_SOURCE_DIR.glob("*.kt")):
+                text += path.read_text(encoding="utf-8") + "\n"
+        _PINNED_CAPABILITIES = {
+            "fields": {section: _pinned_config_fields(text, declaration)
+                       for section, declaration in PINNED_PARSER_SECTIONS.items()},
+            "subjectFormatIds": frozenset(
+                value for value in (_pinned_format_id(text, name) for name in PINNED_SUBJECT_FORMATS)
+                if value),
+            "channelFormatIds": frozenset(
+                value for value in (_pinned_format_id(text, name) for name in PINNED_CHANNEL_FORMATS)
+                if value),
+        }
+    return _PINNED_CAPABILITIES
+
+
+def unsupported_engine_config(config: dict) -> list:
+    """Config features the pinned extraction cannot reproduce.
+
+    The bridge decodes with ignoreUnknownKeys, so a field upstream added after
+    the pinned commit is dropped silently rather than rejected: the parser then
+    returns plausible-but-wrong output. girigiri's `linkTemplate` is the live
+    example — without it the bare ids from the suggest API never become
+    `/GV<id>/` detail URLs, so every transport probe 404s and a healthy tier-0
+    source looks dead. Scoring a source on output we know to be wrong would
+    demote it, so such observations must never reach a tier recommendation.
+    """
+    capabilities = pinned_parser_capabilities()
+    if not capabilities["subjectFormatIds"]:
+        return []  # Extraction unreadable; stay silent rather than block everything.
+    problems = []
+    subject_id = str(config.get("subjectFormatId") or "a")
+    if subject_id not in capabilities["subjectFormatIds"]:
+        problems.append(f"subjectFormatId={subject_id}")
+    channel_id = str(config.get("channelFormatId") or "")
+    if channel_id and channel_id not in capabilities["channelFormatIds"]:
+        problems.append(f"channelFormatId={channel_id}")
+    for section, known in sorted(capabilities["fields"].items()):
+        value = config.get(section)
+        if not isinstance(value, dict) or not known:
+            continue
+        problems.extend(f"{section}.{key}" for key in sorted(value) if key not in known)
+    return problems[:MAX_UNSUPPORTED_FIELDS]
 
 
 def config_capabilities(config: dict) -> dict:
@@ -947,6 +1089,11 @@ def media_headers(config: dict, referer: str, resolved: str | None = None) -> di
                     headers["Referer"] = value or referer
                 elif key.casefold() == "useragent":
                     headers["User-Agent"] = value
+    # The 6.3 source-level userAgent wins over the legacy per-video header,
+    # matching matchWebVideo's `userAgent ?: addHeadersToVideo.userAgent`.
+    source_agent = config.get("userAgent")
+    if isinstance(source_agent, str) and source_agent.strip():
+        headers["User-Agent"] = source_agent.strip()
     cookies = matcher.get("cookies")
     if isinstance(cookies, str) and cookies and len(cookies) <= 4096:
         headers["Cookie"] = cookies
@@ -1167,10 +1314,14 @@ def evaluate_source(item: dict, fetcher=None, *, today: str | None = None) -> di
     if ENGINE is not None:
         warnings = [w for w in warnings if not w.startswith(("evaluator-unsupported-selector:", "java-regex-not-python-checkable:"))]
         result["engineMethod"] = ENGINE_METHOD
-        result["engineCommit"] = "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef"
+        result["engineCommit"] = "4809e6f501f17c7bd7c93ff8575db8cbb0ed6910"
         ENGINE.headers.clear()
     result["warnings"].extend(warnings)
     result["metrics"]["capabilities"] = config_capabilities(config)
+    unsupported = unsupported_engine_config(config)
+    if unsupported:
+        result["engineUnsupported"] = unsupported
+        result["warnings"].append("pinned-parser-cannot-execute:" + ",".join(unsupported))
     if errors:
         result["errors"].extend(errors)
         result["stages"]["L0"] = "failed"
@@ -1324,6 +1475,15 @@ def finalize_result(result: dict, started: float) -> dict:
         result["realPlaybackVerified"] = False
         if not result["eligibleForTierRecommendation"]:
             result["quality"] = "inconclusive"
+    if result.get("engineUnsupported") and result["stages"].get("transportProbe") != "passed":
+        # A probe that passed needs no protection: we reached working video while
+        # ignoring the field, so the verdict cannot be a false negative. Only
+        # failure is ambiguous — "the site is dead" and "our parser predates this
+        # config" look identical — and only failure can demote. Applies with or
+        # without the JVM bridge; the Python fallback is the same vintage.
+        result["pinnedParserVerdictWithheld"] = True
+        result["eligibleForTierRecommendation"] = False
+        result["quality"] = "inconclusive"
     result["totalDurationMs"] = round((time.monotonic() - started) * 1000)
     return result
 
@@ -1351,9 +1511,16 @@ def degraded_observation(item: dict, error: str) -> dict:
         "totalDurationMs": 0,
     }
     state["metrics"]["capabilities"] = config_capabilities(config)
+    unsupported = unsupported_engine_config(config)
+    if unsupported:
+        # A degraded observation never reached a transport probe, so the
+        # ambiguity in finalize_result applies here unconditionally.
+        state["engineUnsupported"] = unsupported
+        state["pinnedParserVerdictWithheld"] = True
+        state["quality"] = "inconclusive"
     if ENGINE is not None:
         state.update(quality="inconclusive", engineMethod=ENGINE_METHOD,
-                     engineCommit="cd0ad5ca8dc501fb06426d83870f49e7e3b0adef",
+                     engineCommit="4809e6f501f17c7bd7c93ff8575db8cbb0ed6910",
                      evidenceLevel="inconclusive", realPlaybackVerified=False)
     return state
 
@@ -1496,6 +1663,33 @@ def choose_sample(items: list[dict], state: dict, sample_size: int) -> list[dict
     return sorted(items, key=key)[:sample_size]
 
 
+def pinned_parser_withheld(summaries: list[dict]) -> list[dict]:
+    """Sources whose verdict is currently withheld because our parser is too old.
+
+    A source outside this run's rotating sample keeps the newest *stored*
+    observation as its `latest`, so a record written before a re-pin can outlive
+    the upgrade that fixed it. Tier recommendations already ignore history from
+    a foreign engine build; this must match, otherwise re-pinning the extraction
+    never clears the alarm it was supposed to clear and the warning decays into
+    noise operators learn to skip.
+    """
+    current = ENGINE_METHOD if ENGINE is not None else "legacy-python"
+    withheld = []
+    for summary in summaries:
+        latest = summary.get("latest") or {}
+        if not latest.get("pinnedParserVerdictWithheld"):
+            continue
+        if latest.get("engineMethod", "legacy-python") != current:
+            continue  # Written by an older parser; its verdict no longer applies.
+        withheld.append({
+            "sourceId": summary["sourceId"],
+            "name": summary["name"],
+            "fields": list(latest.get("engineUnsupported") or [])[:MAX_UNSUPPORTED_FIELDS],
+            "testedThisRun": bool(summary.get("testedThisRun")),
+        })
+    return withheld
+
+
 def build_report(items: list[dict], state: dict, observations: list[dict]) -> dict:
     current = {entry["sourceId"]: entry for entry in observations}
     summaries = []
@@ -1517,6 +1711,7 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
         })
     tested = len(observations)
     passed_transport = sum(entry.get("stages", {}).get("transportProbe") == "passed" for entry in observations)
+    withheld = pinned_parser_withheld(summaries)
     return {
         "schemaVersion": SCHEMA_VERSION,
         "generatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
@@ -1526,7 +1721,7 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
             "executesThirdPartyPrograms": False,
             "executesSourceRegexAgainstNetworkData": ENGINE is not None,
             "parser": ENGINE_METHOD if ENGINE is not None else "legacy-python",
-            "upstreamCommit": "cd0ad5ca8dc501fb06426d83870f49e7e3b0adef" if ENGINE is not None else None,
+            "upstreamCommit": "4809e6f501f17c7bd7c93ff8575db8cbb0ed6910" if ENGINE is not None else None,
             "regexIsolation": "disposable-JVM-12s-192MiB-heap" if ENGINE is not None else None,
             "browserRuntimeTested": False,
             "realPlaybackClaimed": False,
@@ -1542,6 +1737,13 @@ def build_report(items: list[dict], state: dict, observations: list[dict]) -> di
             "testedSources": tested,
             "transportPassed": passed_transport,
             "transportPassRate": round(passed_transport / tested, 3) if tested else None,
+            # Sources that failed while using config the pinned extraction cannot
+            # execute. Non-zero means the engine is overdue for a re-pin, and
+            # those verdicts are being withheld until it happens.
+            "sourcesWithheldForPinnedParser": len(withheld),
+            # Same set, with the offending fields, so the workflow summary does
+            # not have to re-derive it from raw observations and drift away.
+            "pinnedParserWithheld": withheld[:MAX_WITHHELD_REPORTED],
         },
         "observations": observations,
         "sources": summaries,
@@ -1775,6 +1977,164 @@ def run_selftests():
             self.assertEqual(result["quality"], "excellent")
             self.assertEqual(result["score"], 100)
             self.assertNotIn("entries", result["probe"])
+
+        def test_pinned_capabilities_are_read_from_extracted_kotlin(self):
+            caps = pinned_parser_capabilities()
+            self.assertEqual(caps["subjectFormatIds"], frozenset({"a", "indexed", "json-path-indexed"}))
+            self.assertEqual(caps["channelFormatIds"], frozenset({"index-grouped", "no-channel"}))
+            self.assertEqual(caps["fields"]["selectorSubjectFormatJsonPathIndexed"],
+                             frozenset({"selectLinks", "selectNames", "linkTemplate",
+                                        "preferShorterName"}))
+            # 6.3 added linkTemplate to all three subject formats; seeing it here is
+            # what proves the extraction is current rather than silently stale.
+            for section in ("selectorSubjectFormatA", "selectorSubjectFormatIndexed",
+                            "selectorSubjectFormatJsonPathIndexed"):
+                self.assertIn("linkTemplate", caps["fields"][section], section)
+            self.assertIn("selectLists", caps["fields"]["selectorSubjectFormatA"])
+            self.assertIn("selectEpisodesFromList", caps["fields"]["selectorChannelFormatFlattened"])
+            # `by lazy` properties are not JSON fields and must not be harvested.
+            self.assertIn("matchVideoUrl", caps["fields"]["matchVideo"])
+            self.assertNotIn("matchVideoUrlRegex", caps["fields"]["matchVideo"])
+
+        def test_unsupported_config_detection(self):
+            # The live girigiri config. The extraction now implements linkTemplate,
+            # so the gate must stay silent — re-pinning relaxes it automatically.
+            self.assertEqual(
+                unsupported_engine_config({
+                    "subjectFormatId": "json-path-indexed",
+                    "selectorSubjectFormatJsonPathIndexed": {
+                        "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
+                        "linkTemplate": "/GV{value}/", "preferShorterName": True}}),
+                [])
+            # Fields no upstream release defines: subscription authors invent them.
+            self.assertEqual(
+                unsupported_engine_config({
+                    "subjectFormatId": "indexed",
+                    "selectorSubjectFormatIndexed": {
+                        "selectNames": ".n", "selectLinks": ".l", "selectCovers": ".c"}}),
+                ["selectorSubjectFormatIndexed.selectCovers"])
+            self.assertEqual(
+                unsupported_engine_config({"subjectFormatId": "holographic"}),
+                ["subjectFormatId=holographic"])
+            self.assertEqual(
+                unsupported_engine_config({"subjectFormatId": "a", "channelFormatId": "quantum"}),
+                ["channelFormatId=quantum"])
+            # Ordinary configs must not be flagged: a false positive freezes a tier.
+            self.assertEqual(unsupported_engine_config({
+                "searchUrl": "https://site.example/s?q={keyword}", "subjectFormatId": "a",
+                "channelFormatId": "index-grouped",
+                "selectorSubjectFormatA": {"selectLists": "h3 > a", "preferShorterName": True},
+                "selectorChannelFormatFlattened": {"selectEpisodeLists": ".l",
+                                                   "selectEpisodesFromList": "a"},
+                "matchVideo": {"enableNestedUrl": False, "matchVideoUrl": ".+m3u8.+",
+                               "addHeadersToVideo": {"referer": "https://site.example"}}}), [])
+
+        def _link_template_item(self, tier=0):
+            return {"factoryId": "web-selector", "version": 2, "arguments": {
+                "name": "girigiri", "description": "", "iconUrl": "", "tier": tier, "searchConfig": {
+                    "searchUrl": "https://site.example/ajax/suggest?wd={keyword}",
+                    "subjectFormatId": "json-path-indexed",
+                    "selectorSubjectFormatJsonPathIndexed": {
+                        "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
+                        "linkTemplate": "/GV{value}/", "selectCovers": "$.list[*]['pic']"},
+                    "selectorChannelFormatNoChannel": {"selectEpisodes": "a"},
+                    "channelFormatId": "no-channel",
+                    "matchVideo": {"enableNestedUrl": False, "matchVideoUrl": ".+m3u8.+"},
+                }}}
+
+        def test_failure_under_unexecutable_config_withholds_verdict(self):
+            # linkTemplate is understood now, but selectCovers is not: a failure
+            # under any unexecutable field stays ambiguous and must not demote.
+            item = self._link_template_item()
+            config = item["arguments"]["searchConfig"]
+            sid = source_identity(item)
+            query = source_query("girigiri", sid, "2026-08-25")
+            search_url = build_search_url(config, query)
+            responses = {search_url: FetchResult(
+                True, redact_url(search_url) or "", 200,
+                json.dumps({"list": [{"id": "5395", "name": query}]}).encode(),
+                "application/json", 10)}
+            result = evaluate_source(item, FakeFetcher(responses), today="2026-08-25")
+            self.assertEqual(result["engineUnsupported"],
+                             ["selectorSubjectFormatJsonPathIndexed.selectCovers"])
+            self.assertTrue(result["pinnedParserVerdictWithheld"])
+            self.assertFalse(result["eligibleForTierRecommendation"])
+            self.assertEqual(result["quality"], "inconclusive")
+            self.assertTrue(validate_observation(result))
+            # Three failing days must still produce no tier recommendation.
+            history = []
+            for day in ("2026-08-25", "2026-08-26", "2026-08-27"):
+                entry = dict(result, testedAt=f"{day}T00:00:00+00:00")
+                history.append(entry)
+            rec = recommendation(history, config_fingerprint(item))
+            self.assertFalse(rec["ready"])
+            self.assertIsNone(rec["recommendedTier"])
+
+        def test_withheld_report_drops_superseded_engine_records(self):
+            # Only a rotating sample is tested each run, so an untested source
+            # keeps its newest stored observation as `latest`. After a re-pin
+            # that record can still carry a field the *old* parser could not
+            # execute. Reporting it would mean the alarm never clears.
+            summaries = [
+                {"sourceId": "a", "name": "stale-girigiri", "testedThisRun": False,
+                 "latest": {"pinnedParserVerdictWithheld": True, "engineMethod": "animeko-extracted-v1",
+                            "engineUnsupported": ["selectorSubjectFormatJsonPathIndexed.linkTemplate"]}},
+                {"sourceId": "b", "name": "current-hanime", "testedThisRun": True,
+                 "latest": {"pinnedParserVerdictWithheld": True, "engineMethod": ENGINE_METHOD,
+                            "engineUnsupported": ["selectorSubjectFormatIndexed.selectCovers"]}},
+                {"sourceId": "c", "name": "healthy", "testedThisRun": True,
+                 "latest": {"engineMethod": ENGINE_METHOD}},
+                {"sourceId": "d", "name": "never-tested", "testedThisRun": False, "latest": None},
+            ]
+            with mock.patch.object(sys.modules[__name__], "ENGINE", object()):
+                withheld = pinned_parser_withheld(summaries)
+            self.assertEqual([entry["sourceId"] for entry in withheld], ["b"])
+            self.assertEqual(withheld[0]["fields"],
+                             ["selectorSubjectFormatIndexed.selectCovers"])
+            # Without an engine the legacy records are the current ones.
+            legacy = [{"sourceId": "e", "name": "legacy", "testedThisRun": True,
+                       "latest": {"pinnedParserVerdictWithheld": True, "engineUnsupported": ["x.y"]}}]
+            self.assertEqual([entry["sourceId"] for entry in pinned_parser_withheld(legacy)], ["e"])
+            self.assertEqual(pinned_parser_withheld(
+                [dict(legacy[0], latest=dict(legacy[0]["latest"], engineMethod=ENGINE_METHOD))]), [])
+
+        def test_python_fallback_mirrors_pinned_url_rules(self):
+            # girigiri's live shape: bare ids become /GV<id>/ detail pages.
+            rows = extract_subjects(
+                json.dumps({"list": [{"id": "5395", "name": "N"}]}).encode(),
+                {"subjectFormatId": "json-path-indexed",
+                 "selectorSubjectFormatJsonPathIndexed": {
+                     "selectLinks": "$.list[*]['id']", "selectNames": "$.list[*]['name']",
+                     "linkTemplate": "/GV{value}/"}},
+                "https://site.example/index.php/ajax/suggest")
+            self.assertEqual(rows, [{"name": "N", "url": "https://site.example/GV5395/"}])
+            # No template configured keeps the raw link.
+            rows = extract_subjects(
+                b'<h3><a href="/detail">T</a></h3>',
+                {"subjectFormatId": "a", "selectorSubjectFormatA": {"selectLists": "h3 > a"}},
+                "https://site.example/search")
+            self.assertEqual(rows, [{"name": "T", "url": "https://site.example/detail"}])
+            # computeSelectorUrl: same host (ignoring www.) on the default port only.
+            self.assertEqual(compute_selector_url("https://a.example/x", "http://a.example/y"),
+                             "https://a.example/y")
+            self.assertEqual(compute_selector_url("https://a.example/x", "http://www.a.example/y"),
+                             "https://www.a.example/y")
+            for base, raw in (("https://a.example/x", "http://b.example/y"),
+                              ("https://a.example/x", "http://a.example:8080/y"),
+                              ("http://a.example/x", "http://a.example/y")):
+                self.assertEqual(compute_selector_url(base, raw), raw, (base, raw))
+
+        def test_passing_probe_under_unexecutable_config_still_counts(self):
+            # Reaching working video while ignoring the field cannot be a false
+            # negative, so these verdicts must not be withheld.
+            result = finalize_result({
+                "stages": {"L0": "passed", "titleMatch": "passed", "transportProbe": "passed"},
+                "warnings": [], "errors": [], "probe": {"ok": True},
+                "engineUnsupported": ["selectorSubjectFormatIndexed.selectCovers"],
+            }, time.monotonic())
+            self.assertNotIn("pinnedParserVerdictWithheld", result)
+            self.assertTrue(result["eligibleForTierRecommendation"])
+            self.assertNotEqual(result["quality"], "inconclusive")
 
         def test_safe_fetch_header_filter(self):
             cleaned = SafeFetcher._clean_headers({"Authorization": "secret", "Referer": "https://a.example",
