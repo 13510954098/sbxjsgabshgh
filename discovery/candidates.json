@@ -109,8 +109,52 @@
       "redundant": false,
       "sha256": "e727aa8af06e55c11e574a5e40d923aaf354fe370f6e7fe52bc134ae3490ad1d",
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
+    },
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "6740d7d2ce0b5125abfc69cd628d072bfc4c3521a65fdac6c502e8ae3e02cd59",
+      "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/dev.json"
+    },
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:memory1031/animeko-extra-sources"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-10-05",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "6740d7d2ce0b5125abfc69cd628d072bfc4c3521a65fdac6c502e8ae3e02cd59",
+      "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/web.json"
     }
   ],
-  "updated": "2026-10-23T07:59:49Z",
+  "updated": "2026-10-25T07:52:09Z",
   "version": 1
 }

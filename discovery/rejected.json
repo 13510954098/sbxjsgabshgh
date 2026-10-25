@@ -235,44 +235,6 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "6740d7d2ce0b5125abfc69cd628d072bfc4c3521a65fdac6c502e8ae3e02cd59",
-      "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/dev.json"
-    },
-    {
-      "error": "invalid-animeko-source",
-      "observed_by": [
-        "github:memory1031/animeko-extra-sources"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-10-05",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "sha256": "6740d7d2ce0b5125abfc69cd628d072bfc4c3521a65fdac6c502e8ae3e02cd59",
-      "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/web.json"
-    },
-    {
-      "error": "invalid-animeko-source",
-      "observed_by": [
-        "github:memory1031/animeko-extra-sources"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-10-05",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
       "sha256": "6a07fd92f0262e48365996e0c6e21c5b246ff24024a22e0a6826e24a6b4e82cd",
       "url": "https://raw.githubusercontent.com/Predidit/KazumiRules/main/sorani.json"
     },
@@ -292,7 +254,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "cf2b4ce497975ff17ce04dcd22a269d524b7a7852c302735709b19086a94f919",
+      "sha256": "a8429b4747c29e6dbee9c433c968529656dc6fa35d26deccbdd02dbf2e666ba9",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -311,7 +273,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "dbe2ca122d69f96f6a630354816c0fca5653b465d63592f5dda5fb5b767b15e9",
+      "sha256": "0606503aeeab1c470c92015e58a54e1f2d2bb11d990102424c58faff5795b277",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -330,7 +292,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "2032e632224442c005a26fa5ad5496416830f3bf484757713c14fa6efa289cbb",
+      "sha256": "85fa09b5661be75f120cfa535042cba4c3877e72a3a67369710bc112c6ae43f7",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -349,7 +311,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "8d192cc9fdf7adcce3c2d03e80ba298042ace0258de0366b31ef69f11bf74dda",
+      "sha256": "f9f89f4ce8e18d976f4cc1402641749658404019eb00cd338fb80cd17becd3cf",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -443,7 +405,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "65b7190b6ba7f33f760a5b1ab3827baa0e8c2b3d873c156f3ee7b47ff77d51af",
+      "sha256": "bab993cc04c2b37d660c5707d7bc51b88335541195d0bebfc7c8d9ff03d8405e",
       "url": "https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
     },
     {
@@ -617,6 +579,6 @@
       "url": "https://sub.example.org/v1/css1.json"
     }
   ],
-  "updated": "2026-10-23T07:59:49Z",
+  "updated": "2026-10-25T07:52:09Z",
   "version": 1
 }

@@ -2873,8 +2873,58 @@
         "web-selector"
       ],
       "url": "https://github.com/Zero-wyc/ZViewer"
+    },
+    {
+      "categories": [
+        "subscription"
+      ],
+      "commit": "f9ccc984d575017c52f40d57fb00b3bdaa9a669e",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "deepseek_json_20261023_315e8bf.json",
+          "score": 6
+        },
+        {
+          "path": "deepseek_json_20261023_9b77f9.json",
+          "score": 6
+        },
+        {
+          "path": "deepseek_json_20261023_9b77f9a.json",
+          "score": 6
+        },
+        {
+          "path": "deepseek_json_20261023_9b77f9b.json",
+          "score": 6
+        },
+        {
+          "path": "deepseek_json_20261023_9b77f9c.json",
+          "score": 6
+        },
+        {
+          "path": "deepseek_json_20261023_9b77f9d.json",
+          "score": 6
+        },
+        {
+          "path": "deepseek_json_20261023_9b77f9e.json",
+          "score": 6
+        }
+      ],
+      "extracted_url_count": 0,
+      "files_scanned": 7,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "zzq-zigong/animeko-source",
+      "score": 42,
+      "signals": [
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/zzq-zigong/animeko-source"
     }
   ],
-  "updated": "2026-10-23T07:59:49Z",
+  "updated": "2026-10-25T07:52:09Z",
   "version": 1
 }
