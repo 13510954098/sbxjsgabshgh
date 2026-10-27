@@ -2,11 +2,11 @@
   "analysis_mode": "static-only",
   "candidates_checked": 48,
   "candidates_extracted": 99,
-  "duration_s": 138.73,
+  "duration_s": 135.43,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 837115,
-    "platform_static_analysis": 3667896
+    "candidate_network": 837808,
+    "platform_static_analysis": 3479582
   },
   "programs_identified": 33,
   "promoted": [],
@@ -45,15 +45,15 @@
       "repository": "qwerzxcva/pilinara-animeko-features"
     }
   ],
-  "redundant_candidates": 10,
+  "redundant_candidates": 11,
   "regex_validations": 14,
-  "rejected_candidates": 31,
+  "rejected_candidates": 30,
   "repositories_discovered": 21,
-  "run_identity": "github:40174232589:1",
+  "run_identity": "github:40473171996:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-10-25T07:52:09Z",
+  "updated": "2026-10-27T08:26:06Z",
   "valid_candidates": 7,
   "version": 1
 }

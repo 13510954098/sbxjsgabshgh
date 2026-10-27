@@ -202,24 +202,6 @@
       "url": "https://gitee.com/wan0ge/extract-pure-links"
     },
     {
-      "error": "http-404",
-      "observed_by": [
-        "github:masofod/anidatasource"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "url": "https://masofod.github.io/anibt.json%5D(https://masofod.github.io/anibt.json"
-    },
-    {
       "error": "invalid-animeko-source",
       "observed_by": [
         "github:memory1031/animeko-extra-sources"
@@ -254,7 +236,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "a8429b4747c29e6dbee9c433c968529656dc6fa35d26deccbdd02dbf2e666ba9",
+      "sha256": "2be63d499c93d3a1f78b86c1c52612ea179dd3c3af746bcb993140ed6553d0ac",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -273,7 +255,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "0606503aeeab1c470c92015e58a54e1f2d2bb11d990102424c58faff5795b277",
+      "sha256": "1f46cbcaaa4f42b6585904b41c02b428723fe78ce1fdce20f4073c7593648b13",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -292,7 +274,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "85fa09b5661be75f120cfa535042cba4c3877e72a3a67369710bc112c6ae43f7",
+      "sha256": "b39edc241a82288573db9681d7c495695b31616589480f73b8e91eadf8c62a20",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -311,7 +293,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "f9f89f4ce8e18d976f4cc1402641749658404019eb00cd338fb80cd17becd3cf",
+      "sha256": "d7cbcfaa0d851d53ded87fd3e42f98f4510df8ed51893362c8e734540d75c58a",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -579,6 +561,6 @@
       "url": "https://sub.example.org/v1/css1.json"
     }
   ],
-  "updated": "2026-10-25T07:52:09Z",
+  "updated": "2026-10-27T08:26:06Z",
   "version": 1
 }
