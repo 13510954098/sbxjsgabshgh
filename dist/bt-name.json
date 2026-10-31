@@ -63,7 +63,7 @@
         "version": 1,
         "arguments": {
           "name": "AnimeGarden.CN",
-          "description": "直连，动漫花园镜像站，网址：https://animes.garden/",
+          "description": "直连,动漫花园镜像站,网址:https://animes.garden/。2026-09-19 实测 RSS 正常返回。",
           "iconUrl": "https://gitee.com/JOJOC2H4/ani-source/raw/master/icon/AnimeGarden.svg",
           "searchConfig": {
             "searchUrl": "https://api.animes.garden/feed.xml?include={keyword}&type=动画",
