@@ -153,8 +153,30 @@
       "redundant": false,
       "sha256": "6740d7d2ce0b5125abfc69cd628d072bfc4c3521a65fdac6c502e8ae3e02cd59",
       "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/web.json"
+    },
+    {
+      "items": 4,
+      "new_items": 3,
+      "observed_by": [
+        "github:sxp-simon/animeko-sources"
+      ],
+      "ok": true,
+      "overlap_items": 1,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-11-01",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "18289c4682de7206d9ec85804f65f31c2773d791a79350efd83d18187cd240c2",
+      "url": "https://raw.githubusercontent.com/SXP-Simon/animeko-sources/main/helian.json"
     }
   ],
-  "updated": "2026-10-31T08:59:07Z",
+  "updated": "2026-11-01T09:49:52Z",
   "version": 1
 }

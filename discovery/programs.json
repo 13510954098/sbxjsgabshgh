@@ -2340,6 +2340,46 @@
     {
       "categories": [
         "converter",
+        "generator",
+        "subscription"
+      ],
+      "commit": "afdb84981bf9f6261061daad4afbb65ac4b95f59",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "helian.json",
+          "score": 12
+        }
+      ],
+      "extracted_url_count": 2,
+      "files_scanned": 2,
+      "generated_source_files": [
+        {
+          "items": 4,
+          "path": "helian.json",
+          "url": "https://raw.githubusercontent.com/SXP-Simon/animeko-sources/main/helian.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "SXP-Simon/animeko-sources",
+      "score": 15,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/SXP-Simon/animeko-sources"
+    },
+    {
+      "categories": [
+        "converter",
         "mirror-sync"
       ],
       "commit": "b2ff96a98aa3771f6dd085db7eee3154a44b75de",
@@ -2925,6 +2965,6 @@
       "url": "https://github.com/zzq-zigong/animeko-source"
     }
   ],
-  "updated": "2026-10-31T08:59:07Z",
+  "updated": "2026-11-01T09:49:52Z",
   "version": 1
 }
