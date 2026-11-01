@@ -1068,7 +1068,8 @@
             "defaultSubtitleLanguage": "CHS",
             "autoMatch": {
               "enabled": true,
-              "searchUseSubjectNamesCount": 3
+              "searchUseSubjectNamesCount": 3,
+              "filterByEpisodeSort": false
             },
             "search": {
               "request": {
