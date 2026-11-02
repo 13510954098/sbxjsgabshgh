@@ -1,10 +1,21 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-01T10:50:25Z",
-  "validUntil": "2026-11-15",
+  "generatedAt": "2026-11-02T11:44:18Z",
+  "validUntil": "2026-11-16",
   "evidence": {
-    "reportSha256": "d5b332bf2d1a48575a92d97401b0d0a20179379b420ae6db10edac4bb1362326",
-    "reportGeneratedAt": "2026-11-01T10:50:13+00:00"
+    "reportSha256": "a645535a63e18f23a17156294bd7418a2efef4279eef0bb570ed425e134833c6",
+    "reportGeneratedAt": "2026-11-02T11:44:07+00:00"
   },
-  "overrides": []
+  "overrides": [
+    {
+      "sourceId": "9294bb836551c1ba254d9ac5",
+      "configFingerprint": "c4dbde6375c2477c941c675ae59bdee43706c408ffaeb9e69fa235ab4820ecf7",
+      "officialTier": null,
+      "tier": 4,
+      "direction": "demote",
+      "evidenceCount": 3,
+      "medianScore": 85,
+      "transportSuccessRate": 0.0
+    }
+  ]
 }
