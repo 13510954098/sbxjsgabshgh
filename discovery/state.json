@@ -3,19 +3,18 @@
     "https://animeko.org/": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "html",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:open-ani/animeko"
       ],
       "observed_dates": [
-        "2026-08-31",
         "2026-09-01",
         "2026-09-02",
         "2026-09-03",
@@ -44,11 +43,12 @@
         "2026-10-07",
         "2026-10-10",
         "2026-10-12",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -56,19 +56,18 @@
     "https://animeko.org/downloads/": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "html",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:open-ani/animeko"
       ],
       "observed_dates": [
-        "2026-08-31",
         "2026-09-01",
         "2026-09-02",
         "2026-09-03",
@@ -97,11 +96,12 @@
         "2026-10-07",
         "2026-10-10",
         "2026-10-12",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -114,14 +114,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:maxchang3/ani-altstore-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -150,7 +149,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -167,14 +167,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:maxchang3/ani-altstore-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -203,7 +202,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -215,12 +215,12 @@
     "https://deepwiki.com/open-ani/animeko": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "http-429",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -228,7 +228,6 @@
         "github:open-ani/animeko"
       ],
       "observed_dates": [
-        "2026-08-31",
         "2026-09-01",
         "2026-09-02",
         "2026-09-03",
@@ -257,11 +256,12 @@
         "2026-10-07",
         "2026-10-10",
         "2026-10-12",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -274,14 +274,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -310,7 +309,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -327,14 +327,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -363,7 +362,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -380,14 +380,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -416,7 +415,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -428,12 +428,12 @@
     "https://gitee.com/edicl/online-subscription/raw/master/online.json": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -468,11 +468,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -485,14 +486,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:wan0ge/extract-pure-links"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -521,7 +521,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -538,14 +539,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:wan0ge/extract-pure-links"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -574,7 +574,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -591,14 +592,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:wan0ge/extract-pure-links"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -627,7 +627,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -644,14 +645,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:wan0ge/extract-pure-links"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -680,7 +680,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -697,14 +698,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -733,7 +733,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -750,14 +751,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -786,7 +786,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -803,14 +804,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:masofod/anidatasource"
       ],
       "observed_dates": [
-        "2026-10-01",
         "2026-10-02",
         "2026-10-03",
         "2026-10-04",
@@ -839,7 +839,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -851,12 +852,12 @@
     "https://next.bgm.tv/p1/openapi.json": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -891,11 +892,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -932,14 +934,13 @@
       "last_latency": null,
       "last_new_items": 1,
       "last_overlap_items": 0,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": "1a11883303037280f04efa369bbc4c9d8ec74ea72247bbe376145f99185c77fd",
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -968,7 +969,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -985,14 +987,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1021,7 +1022,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1038,14 +1040,13 @@
       "last_latency": null,
       "last_new_items": 1,
       "last_overlap_items": 0,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": "2c44264251038010d4a97b621e3c62a364c15243b4521765ff3055886ff468bd",
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1074,7 +1075,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -1091,14 +1093,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1127,7 +1128,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1144,14 +1146,13 @@
       "last_latency": null,
       "last_new_items": 1,
       "last_overlap_items": 0,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": "259c1b1d6fe0a21e54c45c837fd0573318d136a9a28728890d6612f3c2837c38",
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1180,7 +1181,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -1197,14 +1199,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1233,7 +1234,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1250,14 +1252,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1286,7 +1287,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1303,14 +1305,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1339,7 +1340,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1356,14 +1358,13 @@
       "last_latency": null,
       "last_new_items": 1,
       "last_overlap_items": 0,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": "825cea909d588b68e4c907d897b595239fde07bb136cca2bf3a37eac91b99772",
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1392,7 +1393,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -1409,14 +1411,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1445,7 +1446,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1462,14 +1464,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1498,7 +1499,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1515,14 +1517,13 @@
       "last_latency": null,
       "last_new_items": 1,
       "last_overlap_items": 0,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": "e727aa8af06e55c11e574a5e40d923aaf354fe370f6e7fe52bc134ae3490ad1d",
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1551,7 +1552,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -1568,14 +1570,13 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:dragonheartlx/animeko-subs"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -1604,7 +1605,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -1621,7 +1623,7 @@
       "last_latency": null,
       "last_new_items": 1,
       "last_overlap_items": 0,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -1654,7 +1656,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -1671,7 +1674,7 @@
       "last_latency": null,
       "last_new_items": 1,
       "last_overlap_items": 0,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -1704,7 +1707,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -1770,12 +1774,12 @@
     "https://raw.githubusercontent.com/Predidit/Kazumi/main/assets/plugins/DM84.json": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "http-404",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -1783,7 +1787,6 @@
         "github:zero-wyc/zviewer"
       ],
       "observed_dates": [
-        "2026-08-27",
         "2026-08-28",
         "2026-09-01",
         "2026-09-02",
@@ -1812,11 +1815,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -1878,12 +1882,12 @@
     "https://raw.githubusercontent.com/Predidit/KazumiRules/main/DM84.json": {
       "consecutive_successes": 0,
       "first_seen": "2026-09-28",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -1899,11 +1903,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -1982,7 +1987,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2015,7 +2020,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -2065,7 +2071,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2073,7 +2079,8 @@
       ],
       "observed_dates": [
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -2085,12 +2092,12 @@
     "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/bt.json": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": null,
       "last_items": 1,
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 1,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2114,11 +2121,12 @@
         "2026-09-18",
         "2026-09-20",
         "2026-09-21",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
-      "redundant": false,
+      "redundant": true,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "redundant",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2126,12 +2134,12 @@
     "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": null,
       "last_items": 1,
       "last_latency": null,
-      "last_new_items": 0,
-      "last_overlap_items": 1,
-      "last_seen": "2026-10-22",
+      "last_new_items": 1,
+      "last_overlap_items": 0,
+      "last_seen": "2026-11-03",
       "last_sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
       "max_program_score": 0,
       "observed_by": [
@@ -2155,11 +2163,12 @@
         "2026-09-18",
         "2026-09-20",
         "2026-09-21",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "valid",
       "successful_runs": 1,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2221,7 +2230,7 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 2,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2234,7 +2243,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -2387,12 +2397,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20260930211758831.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2403,11 +2413,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2415,12 +2426,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20261003200643035.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2431,11 +2442,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2443,12 +2455,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20261003200707122.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2459,11 +2471,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2471,12 +2484,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20261003200715093.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2487,11 +2500,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2499,12 +2513,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20261003200919255.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2515,11 +2529,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2527,12 +2542,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20261003200942428.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2543,11 +2558,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2555,12 +2571,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20261003201053941.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2571,11 +2587,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2583,12 +2600,12 @@
     "https://raw.githubusercontent.com/Zero-wyc/Image/main/All/20261003201139524.webp": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-04",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -2599,11 +2616,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -2912,14 +2930,15 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 2,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:crazybunqnq/animeko-sources"
       ],
       "observed_dates": [
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -2936,14 +2955,15 @@
       "last_latency": null,
       "last_new_items": 0,
       "last_overlap_items": 19,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:crazybunqnq/animeko-sources"
       ],
       "observed_dates": [
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": true,
       "stable_successes": 0,
@@ -4675,12 +4695,12 @@
     "https://raw.githubusercontent.com/bangumi/api/master/open-api/v0.yaml": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -4715,11 +4735,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -4732,14 +4753,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:beckyeeky/animeko-loon"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -4768,7 +4788,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -4785,14 +4806,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:beckyeeky/animeko-loon"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -4821,7 +4841,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -4838,14 +4859,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:beckyeeky/animeko-loon"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -4874,7 +4894,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -4891,14 +4912,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:beckyeeky/animeko-loon"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -4927,7 +4947,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -4944,14 +4965,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:crazybunqnq/animeko-sources"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -4980,7 +5000,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -4992,23 +5013,24 @@
     "https://raw.githubusercontent.com/golang/go/go1.26.9/LICENSE": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-22",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:zero-wyc/zviewer"
       ],
       "observed_dates": [
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -5016,23 +5038,24 @@
     "https://raw.githubusercontent.com/gorilla/websocket/v1.5.3/LICENSE": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-22",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:zero-wyc/zviewer"
       ],
       "observed_dates": [
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -5045,7 +5068,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5072,7 +5095,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5089,7 +5113,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5116,7 +5140,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5133,7 +5158,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5160,7 +5185,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5177,14 +5203,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:maxchang3/ani-altstore-source"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -5213,7 +5238,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5225,12 +5251,12 @@
     "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5265,11 +5291,60 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
+      "successful_runs": 0,
+      "trusted_evidence": false,
+      "trusted_provenance": []
+    },
+    "https://raw.githubusercontent.com/notofonts/noto-cjk/523d033d6cb47f4a80c58a35753646f5c3608a78/LICENSE": {
+      "consecutive_successes": 0,
+      "first_seen": "2026-11-03",
+      "last_error": "invalid-animeko-source",
+      "last_items": null,
+      "last_latency": null,
+      "last_new_items": null,
+      "last_overlap_items": null,
+      "last_seen": "2026-11-03",
+      "last_sha256": null,
+      "max_program_score": 0,
+      "observed_by": [
+        "github:vianssr/iina-ani"
+      ],
+      "observed_dates": [
+        "2026-11-03"
+      ],
+      "redundant": false,
+      "stable_successes": 0,
+      "status": "rejected",
+      "successful_runs": 0,
+      "trusted_evidence": false,
+      "trusted_provenance": []
+    },
+    "https://raw.githubusercontent.com/notofonts/noto-cjk/523d033d6cb47f4a80c58a35753646f5c3608a78/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf": {
+      "consecutive_successes": 0,
+      "first_seen": "2026-11-03",
+      "last_error": "too-large-header",
+      "last_items": null,
+      "last_latency": null,
+      "last_new_items": null,
+      "last_overlap_items": null,
+      "last_seen": "2026-11-03",
+      "last_sha256": null,
+      "max_program_score": 0,
+      "observed_by": [
+        "github:vianssr/iina-ani"
+      ],
+      "observed_dates": [
+        "2026-11-03"
+      ],
+      "redundant": false,
+      "stable_successes": 0,
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -5282,7 +5357,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5315,7 +5390,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5332,7 +5408,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5365,7 +5441,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5382,7 +5459,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5415,7 +5492,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5432,7 +5510,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5451,7 +5529,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5468,7 +5547,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5487,7 +5566,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5504,7 +5584,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5523,7 +5603,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5612,14 +5693,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:crazybunqnq/animeko-sources"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -5648,7 +5728,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5660,23 +5741,24 @@
     "https://raw.githubusercontent.com/rs/cors/v1.11.1/LICENSE": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-22",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:zero-wyc/zviewer"
       ],
       "observed_dates": [
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -5684,23 +5766,24 @@
     "https://raw.githubusercontent.com/skip2/go-qrcode/da1b6568686e/LICENSE": {
       "consecutive_successes": 0,
       "first_seen": "2026-10-22",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:zero-wyc/zviewer"
       ],
       "observed_dates": [
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -5783,6 +5866,30 @@
       "trusted_evidence": false,
       "trusted_provenance": []
     },
+    "https://raw.githubusercontent.com/unbrraise/Daily/main/animeko-nice.json": {
+      "consecutive_successes": 0,
+      "first_seen": "2026-11-03",
+      "last_error": null,
+      "last_items": 10,
+      "last_latency": null,
+      "last_new_items": 2,
+      "last_overlap_items": 8,
+      "last_seen": "2026-11-03",
+      "last_sha256": null,
+      "max_program_score": 0,
+      "observed_by": [
+        "github:unbrraise/daily"
+      ],
+      "observed_dates": [
+        "2026-11-03"
+      ],
+      "redundant": false,
+      "stable_successes": 0,
+      "status": "valid",
+      "successful_runs": 0,
+      "trusted_evidence": false,
+      "trusted_provenance": []
+    },
     "https://raw.githubusercontent.com/wan0ge/wan0ge/refs/heads/master/README.md": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
@@ -5791,14 +5898,13 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
         "github:wan0ge/extract-pure-links"
       ],
       "observed_dates": [
-        "2026-10-02",
         "2026-10-03",
         "2026-10-04",
         "2026-10-05",
@@ -5827,7 +5933,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5839,12 +5946,12 @@
     "https://socialify.git.ci/open-ani/animeko/image?description=1&descriptionEditable=%E9%9B%86%E6%89%BE%E7%95%AA%E3%80%81%E8%BF%BD%E7%95%AA%E3%80%81%E7%9C%8B%E7%95%AA%E7%9A%84%E4%B8%80%E7%AB%99%E5%BC%8F%E5%BC%B9%E5%B9%95%E8%BF%BD%E7%95%AA%E5%B9%B3%E5%8F%B0&font=Jost&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fopen-ani%2Fanimeko%2Frefs%2Fheads%2Fmain%2F.github%2Fassets%2Flogo.png&name=1&owner=1&pattern=Plus&theme=Light": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "invalid-animeko-source",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5852,7 +5959,6 @@
         "github:open-ani/animeko"
       ],
       "observed_dates": [
-        "2026-08-31",
         "2026-09-01",
         "2026-09-02",
         "2026-09-03",
@@ -5881,11 +5987,12 @@
         "2026-10-07",
         "2026-10-10",
         "2026-10-12",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -5898,7 +6005,7 @@
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-11-02",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -5919,7 +6026,8 @@
         "2026-10-30",
         "2026-10-31",
         "2026-11-01",
-        "2026-11-02"
+        "2026-11-02",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
@@ -5984,12 +6092,12 @@
     "https://tidelift.com/subscription/pkg/npm-.malept-cross-spawn-promise?utm_medium=referral&utm_source=npm_fund": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "html",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -6024,11 +6132,12 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
@@ -6036,12 +6145,12 @@
     "https://vite.dev/config/": {
       "consecutive_successes": 0,
       "first_seen": "2026-08-24",
-      "last_error": "absent-from-snapshot",
+      "last_error": "html",
       "last_items": null,
       "last_latency": null,
       "last_new_items": null,
       "last_overlap_items": null,
-      "last_seen": "2026-10-22",
+      "last_seen": "2026-11-03",
       "last_sha256": null,
       "max_program_score": 0,
       "observed_by": [
@@ -6049,7 +6158,6 @@
         "github:zero-wyc/zviewer"
       ],
       "observed_dates": [
-        "2026-08-27",
         "2026-08-28",
         "2026-09-01",
         "2026-09-02",
@@ -6078,17 +6186,18 @@
         "2026-10-05",
         "2026-10-07",
         "2026-10-10",
-        "2026-10-22"
+        "2026-10-22",
+        "2026-11-03"
       ],
       "redundant": false,
       "stable_successes": 0,
-      "status": "absent",
+      "status": "rejected",
       "successful_runs": 0,
       "trusted_evidence": false,
       "trusted_provenance": []
     }
   },
   "promoted": [],
-  "updated": "2026-11-02T10:06:15Z",
+  "updated": "2026-11-03T10:14:28Z",
   "version": 2
 }

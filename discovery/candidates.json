@@ -153,8 +153,52 @@
       "redundant": false,
       "sha256": "6740d7d2ce0b5125abfc69cd628d072bfc4c3521a65fdac6c502e8ae3e02cd59",
       "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/web.json"
+    },
+    {
+      "items": 1,
+      "new_items": 1,
+      "observed_by": [
+        "github:sakuragauthier/sakuragauthier.io"
+      ],
+      "ok": true,
+      "overlap_items": 0,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-08-24",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 1,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "2591b9bc1cd33ef21ded9504e524b43c5cd09d3187232853a7bee8f7363148ef",
+      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/test123.json"
+    },
+    {
+      "items": 10,
+      "new_items": 2,
+      "observed_by": [
+        "github:unbrraise/daily"
+      ],
+      "ok": true,
+      "overlap_items": 8,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-11-03",
+        "ready": false,
+        "redundant": false,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": false,
+      "sha256": "5cd64749dc37878def8ca4f14c9253d9c210b70a663a8a8d870b6e08e01193fb",
+      "url": "https://raw.githubusercontent.com/unbrraise/Daily/main/animeko-nice.json"
     }
   ],
-  "updated": "2026-11-02T10:06:03Z",
+  "updated": "2026-11-03T10:14:15Z",
   "version": 1
 }

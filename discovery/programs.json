@@ -2379,6 +2379,199 @@
     },
     {
       "categories": [
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "subscription"
+      ],
+      "commit": "2a3863aeda07f89664620f586f6adf5eb04444ae",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "MC.txt",
+          "score": 1
+        },
+        {
+          "path": "animeko-nice.json",
+          "score": 12
+        },
+        {
+          "path": "测试2.txt",
+          "score": 10
+        }
+      ],
+      "extracted_url_count": 1,
+      "files_scanned": 3,
+      "generated_source_files": [
+        {
+          "items": 10,
+          "path": "animeko-nice.json",
+          "url": "https://raw.githubusercontent.com/unbrraise/Daily/main/animeko-nice.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "unbrraise/Daily",
+      "score": 23,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/unbrraise/Daily"
+    },
+    {
+      "categories": [
+        "aggregator",
+        "converter",
+        "editor-or-service",
+        "generator",
+        "mirror-sync",
+        "validator"
+      ],
+      "commit": "df63212f87f5ea817731cecedf0907381910273d",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": ".github/ISSUE_TEMPLATE.md",
+          "score": 1
+        },
+        {
+          "path": "Design/Icons/README.md",
+          "score": 1
+        },
+        {
+          "path": "Design/Icons/generate.mjs",
+          "score": 1
+        },
+        {
+          "path": "Design/Icons/manifest.json",
+          "score": 1
+        },
+        {
+          "path": "Design/Icons/preview.html",
+          "score": 1
+        },
+        {
+          "path": "Examples/MobileSources/internet-archive.json",
+          "score": 1
+        },
+        {
+          "path": "Examples/MobileSources/source-list.json",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/README.md",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/full/components.json",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/full/manifest.json",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/full/theme.json",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/generate.py",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/minimal/manifest.json",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/minimal/theme.json",
+          "score": 1
+        },
+        {
+          "path": "Examples/Skins/package.sh",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/AppIcon.appiconset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/ani-account.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/ani-add.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/ani-appearance.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/ani-back.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/ani-bookmark.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/ani-calendar.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "IINA-ANI/Assets/Assets.xcassets/FunctionIcons/ani-check.imageset/Contents.json",
+          "score": 1
+        },
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "docs/IOS_GUIDE.md",
+          "score": 8
+        },
+        {
+          "path": "docs/USER_GUIDE.md",
+          "score": 6
+        },
+        {
+          "path": "docs/development/instruction-audit.md",
+          "score": 3
+        },
+        {
+          "path": "docs/history/WORK_LOG.md",
+          "score": 7
+        }
+      ],
+      "extracted_url_count": 4,
+      "files_scanned": 144,
+      "generated_source_files": [],
+      "platform": "github",
+      "repository": "Vianssr/iina-ani",
+      "score": 100,
+      "signals": [
+        "animeko",
+        "exportedmediasourcedatalist",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/Vianssr/iina-ani"
+    },
+    {
+      "categories": [
         "converter",
         "mirror-sync"
       ],
@@ -2965,6 +3158,6 @@
       "url": "https://github.com/zzq-zigong/animeko-source"
     }
   ],
-  "updated": "2026-11-02T10:06:03Z",
+  "updated": "2026-11-03T10:14:15Z",
   "version": 1
 }
