@@ -273,7 +273,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "e8d092326dd5c75ca441f91b24b79fbb3a81aaf23db3f9810b09a83433ed42c1",
+      "sha256": "2c8f113cf9e1b62b45ef10241e5c8c5809f99930ca8b2b5ab8a8ba6650e345d3",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -292,7 +292,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "bba6beb9bd79690ce26bb7b041c57c2a3a21330741794cf2da9cca68fcf321e9",
+      "sha256": "7432b634859f45589fe6bbae07844c945a72517355f959b4d99363640c3951ab",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -311,7 +311,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "01810f1bcce5571c910075f1a9572457085a7dd415a3fd791a9696a3d356c997",
+      "sha256": "102d285dd798750b7cfbd0d4b9a23df497dd15fe87df436a3f8166c41180fdeb",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -330,7 +330,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "2e1677674424ef20a6b8766d78eea9320b0d999e721a7da09d7cb838b85ec7bf",
+      "sha256": "b78c7df6ffb8722173e6fe4a8b0c22fc4ec4314ba725fb0a7aa335341ab12137",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -598,6 +598,6 @@
       "url": "https://sub.example.org/v1/css1.json"
     }
   ],
-  "updated": "2026-11-04T09:59:14Z",
+  "updated": "2026-11-05T09:56:24Z",
   "version": 1
 }
