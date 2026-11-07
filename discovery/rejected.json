@@ -258,82 +258,6 @@
       "url": "https://raw.githubusercontent.com/SXP-Simon/animeko-sources/main/helian.json"
     },
     {
-      "error": "invalid-animeko-source",
-      "observed_by": [
-        "github:beckyeeky/animeko-loon"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "sha256": "b357f8da6713577ba6dd6bebc97181a49b980be108c08b29c54602dde5d4d173",
-      "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
-    },
-    {
-      "error": "invalid-animeko-source",
-      "observed_by": [
-        "github:beckyeeky/animeko-loon"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "sha256": "dc5f8600616c58b15f4484e06821a26fc02deb2e478807e63702eb46d878c070",
-      "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
-    },
-    {
-      "error": "invalid-animeko-source",
-      "observed_by": [
-        "github:beckyeeky/animeko-loon"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "sha256": "c68a20b2ce160be944d43c621cf6cb5fa5a9e51807c0eb64d5d2b6b780169076",
-      "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
-    },
-    {
-      "error": "invalid-animeko-source",
-      "observed_by": [
-        "github:beckyeeky/animeko-loon"
-      ],
-      "ok": false,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "sha256": "302ff4eebf57ed83b69138a2514037524ef5f96ce810377494a1666b1c5dcc9e",
-      "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
-    },
-    {
       "error": "http-404",
       "observed_by": [
         "github:crazybunqnq/animeko-sources"
@@ -598,6 +522,6 @@
       "url": "https://sub.example.org/v1/css1.json"
     }
   ],
-  "updated": "2026-11-06T09:58:44Z",
+  "updated": "2026-11-07T09:20:31Z",
   "version": 1
 }

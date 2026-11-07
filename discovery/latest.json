@@ -1,12 +1,12 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 50,
-  "candidates_extracted": 101,
-  "duration_s": 168.57,
+  "candidates_checked": 46,
+  "candidates_extracted": 95,
+  "duration_s": 169.74,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 872009,
-    "platform_static_analysis": 4181676
+    "candidate_network": 857994,
+    "platform_static_analysis": 4147703
   },
   "programs_identified": 36,
   "promoted": [],
@@ -40,6 +40,11 @@
       "provider": "brave-web"
     },
     {
+      "error": "error-2679c66735356d94",
+      "provider": "github",
+      "repository": "beckyeeky/animeko-loon"
+    },
+    {
       "error": "http-409",
       "provider": "github",
       "repository": "qwerzxcva/pilinara-animeko-features"
@@ -47,13 +52,13 @@
   ],
   "redundant_candidates": 11,
   "regex_validations": 14,
-  "rejected_candidates": 32,
+  "rejected_candidates": 28,
   "repositories_discovered": 22,
-  "run_identity": "github:42198696097:1",
+  "run_identity": "github:42359093737:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-06T09:58:44Z",
+  "updated": "2026-11-07T09:20:31Z",
   "valid_candidates": 7,
   "version": 1
 }
