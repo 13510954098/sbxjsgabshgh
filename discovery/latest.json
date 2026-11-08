@@ -1,12 +1,12 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 46,
-  "candidates_extracted": 95,
-  "duration_s": 169.74,
+  "candidates_checked": 50,
+  "candidates_extracted": 100,
+  "duration_s": 250.67,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 857994,
-    "platform_static_analysis": 4147703
+    "candidate_network": 872009,
+    "platform_static_analysis": 4163516
   },
   "programs_identified": 36,
   "promoted": [],
@@ -36,13 +36,20 @@
       "provider": "github-code"
     },
     {
-      "error": "error-b21f78e614237667",
-      "provider": "brave-web"
+      "error": "error-9a24c66b472847da",
+      "provider": "codeberg"
     },
     {
-      "error": "error-2679c66735356d94",
-      "provider": "github",
-      "repository": "beckyeeky/animeko-loon"
+      "error": "error-9a24c66b472847da",
+      "provider": "codeberg"
+    },
+    {
+      "error": "error-9a24c66b472847da",
+      "provider": "codeberg"
+    },
+    {
+      "error": "error-b21f78e614237667",
+      "provider": "brave-web"
     },
     {
       "error": "http-409",
@@ -52,13 +59,13 @@
   ],
   "redundant_candidates": 11,
   "regex_validations": 14,
-  "rejected_candidates": 28,
-  "repositories_discovered": 22,
-  "run_identity": "github:42359093737:1",
+  "rejected_candidates": 32,
+  "repositories_discovered": 21,
+  "run_identity": "github:42467669035:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-07T09:20:31Z",
+  "updated": "2026-11-08T09:37:44Z",
   "valid_candidates": 7,
   "version": 1
 }
