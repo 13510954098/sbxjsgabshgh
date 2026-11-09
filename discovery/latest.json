@@ -2,11 +2,11 @@
   "analysis_mode": "static-only",
   "candidates_checked": 50,
   "candidates_extracted": 100,
-  "duration_s": 250.67,
+  "duration_s": 177.82,
   "input_bytes": {
     "candidate_cache": 0,
     "candidate_network": 872009,
-    "platform_static_analysis": 4163516
+    "platform_static_analysis": 4163538
   },
   "programs_identified": 36,
   "promoted": [],
@@ -44,10 +44,6 @@
       "provider": "codeberg"
     },
     {
-      "error": "error-9a24c66b472847da",
-      "provider": "codeberg"
-    },
-    {
       "error": "error-b21f78e614237667",
       "provider": "brave-web"
     },
@@ -61,11 +57,11 @@
   "regex_validations": 14,
   "rejected_candidates": 32,
   "repositories_discovered": 21,
-  "run_identity": "github:42467669035:1",
+  "run_identity": "github:42600630905:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-08T09:37:44Z",
+  "updated": "2026-11-09T10:27:40Z",
   "valid_candidates": 7,
   "version": 1
 }
