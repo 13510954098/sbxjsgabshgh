@@ -177,28 +177,6 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yishijie.json"
     },
     {
-      "items": 1,
-      "new_items": 0,
-      "observed_by": [
-        "github:sakuragauthier/sakuragauthier.io"
-      ],
-      "ok": true,
-      "overlap_items": 1,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-08-24",
-        "ready": false,
-        "redundant": true,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": true,
-      "sha256": "c9b6d2ede71488e7613316c957257dd6584f9e9ddc17884d0cff2e92e44bc1d7",
-      "url": "https://raw.githubusercontent.com/SakuraGauthier/SakuraGauthier.io/main/bt.json"
-    },
-    {
       "items": 2,
       "new_items": 0,
       "observed_by": [
@@ -265,6 +243,6 @@
       "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/7b5047289a46c2c03188d380ddf431e8dbfbecc7/backend-go/internal/anisubs/data/default-css1.json"
     }
   ],
-  "updated": "2026-11-10T10:33:43Z",
+  "updated": "2026-11-11T09:55:21Z",
   "version": 1
 }
