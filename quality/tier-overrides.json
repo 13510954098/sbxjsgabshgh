@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-09T12:12:36Z",
-  "validUntil": "2026-11-23",
+  "generatedAt": "2026-11-10T11:50:29Z",
+  "validUntil": "2026-11-24",
   "evidence": {
-    "reportSha256": "a171aa96892a0172687efe9b3b10bc1fa67dbcbcc33a4a3f661b5f6ba61e2d13",
-    "reportGeneratedAt": "2026-11-09T12:12:23+00:00"
+    "reportSha256": "4d9fe012ec7e00c358212dc999a4244592ff012a6fda040a3809e013353a26dd",
+    "reportGeneratedAt": "2026-11-10T11:50:16+00:00"
   },
   "overrides": [
     {
@@ -23,9 +23,9 @@
       "officialTier": 4,
       "tier": 3,
       "direction": "promote",
-      "evidenceCount": 3,
-      "medianScore": 90,
-      "transportSuccessRate": 0.667
+      "evidenceCount": 4,
+      "medianScore": 92.5,
+      "transportSuccessRate": 0.75
     },
     {
       "sourceId": "9294bb836551c1ba254d9ac5",
@@ -63,8 +63,8 @@
       "officialTier": 3,
       "tier": 4,
       "direction": "demote",
-      "evidenceCount": 3,
-      "medianScore": 85,
+      "evidenceCount": 4,
+      "medianScore": 85.0,
       "transportSuccessRate": 0.0
     },
     {
