@@ -2,7 +2,7 @@
   "analysis_mode": "static-only",
   "candidates_checked": 50,
   "candidates_extracted": 100,
-  "duration_s": 120.31,
+  "duration_s": 129.63,
   "input_bytes": {
     "candidate_cache": 0,
     "candidate_network": 872014,
@@ -61,11 +61,11 @@
   "regex_validations": 14,
   "rejected_candidates": 32,
   "repositories_discovered": 21,
-  "run_identity": "github:42998908504:1",
+  "run_identity": "github:43199676850:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-11T09:55:21Z",
+  "updated": "2026-11-12T10:24:14Z",
   "valid_candidates": 7,
   "version": 1
 }
