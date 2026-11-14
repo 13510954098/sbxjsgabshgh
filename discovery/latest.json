@@ -1,35 +1,71 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 51,
+  "candidates_checked": 50,
   "candidates_extracted": 100,
-  "duration_s": 314.56,
+  "duration_s": 104.72,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 3121282,
-    "platform_static_analysis": 23556826
+    "candidate_network": 872038,
+    "platform_static_analysis": 4163516
   },
-  "programs_identified": 28,
+  "programs_identified": 36,
   "promoted": [],
   "provider_errors": [
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "codeberg"
+    },
+    {
+      "error": "http-429",
+      "provider": "codeberg"
+    },
+    {
+      "error": "http-429",
+      "provider": "codeberg"
+    },
     {
       "error": "error-b21f78e614237667",
       "provider": "brave-web"
     },
     {
-      "error": "http-422",
+      "error": "http-409",
       "provider": "github",
-      "repository": "TNXG/selfani"
+      "repository": "qwerzxcva/pilinara-animeko-features"
     }
   ],
-  "redundant_candidates": 12,
-  "regex_validations": 13,
-  "rejected_candidates": 34,
-  "repositories_discovered": 27,
-  "run_identity": "github:35320341425:1",
-  "snapshot_complete": true,
+  "redundant_candidates": 11,
+  "regex_validations": 14,
+  "rejected_candidates": 32,
+  "repositories_discovered": 21,
+  "run_identity": "github:43580786842:1",
+  "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-09-18T07:43:24Z",
-  "valid_candidates": 5,
+  "updated": "2026-11-14T09:31:39Z",
+  "valid_candidates": 7,
   "version": 1
 }
