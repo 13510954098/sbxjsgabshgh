@@ -2,7 +2,7 @@
   "analysis_mode": "static-only",
   "candidates_checked": 50,
   "candidates_extracted": 100,
-  "duration_s": 119.63,
+  "duration_s": 146.89,
   "input_bytes": {
     "candidate_cache": 0,
     "candidate_network": 872038,
@@ -52,6 +52,11 @@
       "provider": "brave-web"
     },
     {
+      "error": "http-501",
+      "provider": "github",
+      "repository": "CrazyBunQnQ/animeko-sources"
+    },
+    {
       "error": "http-409",
       "provider": "github",
       "repository": "qwerzxcva/pilinara-animeko-features"
@@ -61,11 +66,11 @@
   "regex_validations": 14,
   "rejected_candidates": 32,
   "repositories_discovered": 21,
-  "run_identity": "github:43701684586:1",
+  "run_identity": "github:43846603990:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-15T09:59:23Z",
+  "updated": "2026-11-16T10:14:38Z",
   "valid_candidates": 7,
   "version": 1
 }
