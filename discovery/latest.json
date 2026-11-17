@@ -1,36 +1,16 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 50,
-  "candidates_extracted": 100,
-  "duration_s": 146.89,
+  "candidates_checked": 79,
+  "candidates_extracted": 131,
+  "duration_s": 217.56,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 872038,
-    "platform_static_analysis": 4163516
+    "candidate_network": 4782035,
+    "platform_static_analysis": 23390067
   },
-  "programs_identified": 36,
+  "programs_identified": 38,
   "promoted": [],
   "provider_errors": [
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
-    {
-      "error": "http-429",
-      "provider": "github-code"
-    },
     {
       "error": "http-429",
       "provider": "github-code"
@@ -52,25 +32,30 @@
       "provider": "brave-web"
     },
     {
-      "error": "http-501",
+      "error": "http-422",
       "provider": "github",
-      "repository": "CrazyBunQnQ/animeko-sources"
+      "repository": "kajimi16/hit-ani"
     },
     {
       "error": "http-409",
       "provider": "github",
       "repository": "qwerzxcva/pilinara-animeko-features"
+    },
+    {
+      "error": "http-422",
+      "provider": "github",
+      "repository": "TNXG/selfani"
     }
   ],
   "redundant_candidates": 11,
-  "regex_validations": 14,
-  "rejected_candidates": 32,
-  "repositories_discovered": 21,
-  "run_identity": "github:43846603990:1",
+  "regex_validations": 16,
+  "rejected_candidates": 59,
+  "repositories_discovered": 34,
+  "run_identity": "github:44072055556:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-16T10:14:38Z",
-  "valid_candidates": 7,
+  "updated": "2026-11-17T11:17:26Z",
+  "valid_candidates": 9,
   "version": 1
 }
