@@ -1,12 +1,12 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 79,
-  "candidates_extracted": 131,
-  "duration_s": 217.56,
+  "candidates_checked": 53,
+  "candidates_extracted": 104,
+  "duration_s": 136.86,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 4782035,
-    "platform_static_analysis": 23390067
+    "candidate_network": 972295,
+    "platform_static_analysis": 4573686
   },
   "programs_identified": 38,
   "promoted": [],
@@ -17,14 +17,34 @@
     },
     {
       "error": "http-429",
-      "provider": "codeberg"
+      "provider": "github-code"
     },
     {
       "error": "http-429",
-      "provider": "codeberg"
+      "provider": "github-code"
     },
     {
       "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "error-f4986af58b507ae1",
+      "provider": "codeberg"
+    },
+    {
+      "error": "error-9cf318c2f64fe991",
+      "provider": "codeberg"
+    },
+    {
+      "error": "error-66219937196be328",
       "provider": "codeberg"
     },
     {
@@ -32,30 +52,20 @@
       "provider": "brave-web"
     },
     {
-      "error": "http-422",
-      "provider": "github",
-      "repository": "kajimi16/hit-ani"
-    },
-    {
       "error": "http-409",
       "provider": "github",
       "repository": "qwerzxcva/pilinara-animeko-features"
-    },
-    {
-      "error": "http-422",
-      "provider": "github",
-      "repository": "TNXG/selfani"
     }
   ],
   "redundant_candidates": 11,
-  "regex_validations": 16,
-  "rejected_candidates": 59,
-  "repositories_discovered": 34,
-  "run_identity": "github:44072055556:1",
+  "regex_validations": 15,
+  "rejected_candidates": 34,
+  "repositories_discovered": 23,
+  "run_identity": "github:44288436826:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-17T11:17:26Z",
-  "valid_candidates": 9,
+  "updated": "2026-11-18T10:48:22Z",
+  "valid_candidates": 8,
   "version": 1
 }

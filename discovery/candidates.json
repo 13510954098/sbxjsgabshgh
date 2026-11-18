@@ -111,8 +111,8 @@
       "url": "https://raw.githubusercontent.com/DragonheartLX/Animeko-Subs/main/Web/yinghua.json"
     },
     {
-      "items": 15,
-      "new_items": 15,
+      "items": 14,
+      "new_items": 14,
       "observed_by": [
         "github:i-want-it-i-got-it/kazumi-animeko-sub"
       ],
@@ -129,7 +129,7 @@
         "trusted_provenance": []
       },
       "redundant": false,
-      "sha256": "4543c6a7a3ddf1e113999eda09a3f03c8cae07b6775ff34726b8f853af71ce86",
+      "sha256": "9879f324647a9f786d492a4cdecaae0bf812f3d394bee7422771258ed5fe2423",
       "url": "https://raw.githubusercontent.com/I-want-it-I-got-it/kazumi-animeko-sub/main/kazumi-animeko-sub.json"
     },
     {
@@ -175,30 +175,8 @@
       "redundant": false,
       "sha256": "6740d7d2ce0b5125abfc69cd628d072bfc4c3521a65fdac6c502e8ae3e02cd59",
       "url": "https://raw.githubusercontent.com/Memory1031/animeko-extra-sources/main/subscriptions/web.json"
-    },
-    {
-      "items": 10,
-      "new_items": 2,
-      "observed_by": [
-        "github:unbrraise/daily"
-      ],
-      "ok": true,
-      "overlap_items": 8,
-      "probation": {
-        "consecutive_successes": 0,
-        "first_seen": "2026-11-03",
-        "ready": false,
-        "redundant": false,
-        "stable_successes": 0,
-        "successful_runs": 0,
-        "trusted_evidence": false,
-        "trusted_provenance": []
-      },
-      "redundant": false,
-      "sha256": "5cd64749dc37878def8ca4f14c9253d9c210b70a663a8a8d870b6e08e01193fb",
-      "url": "https://raw.githubusercontent.com/unbrraise/Daily/main/animeko-nice.json"
     }
   ],
-  "updated": "2026-11-17T11:17:26Z",
+  "updated": "2026-11-18T10:48:22Z",
   "version": 1
 }
