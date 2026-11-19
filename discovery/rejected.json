@@ -198,7 +198,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "12300216d385a2b56fe9da446bc0e4468dc32af7d9a8fa130037f55a37197520",
+      "sha256": "9bf6e93124cccc6e35ee5219a54bd0ac385fd1f8213bbf99cfb9af7cdd3fda55",
       "url": "https://gitee.com/wan0ge/extract-pure-links"
     },
     {
@@ -273,7 +273,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "4d3510dfb55d7282081f07ccec90d5013d2eef1b50efe47140d2d9e77d416f5a",
+      "sha256": "a162e3a62e8db2b33954e72aadb21a1a974987d23d0bf81086c6e10a80372fd3",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -292,7 +292,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "0c333dad5c1c7347f1e68fa6c21110821fa6d4433f78452d90a9ef62e6db2b64",
+      "sha256": "abca701694b75b5a0e4b87869a9ce8f6235fe51e0320c09af0fe0603872a2c6a",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -311,7 +311,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "fa5eddd0baba92e6998d7baa7be751eecd9647989c58fb13071ed9fe2ac3d4e9",
+      "sha256": "2d72718fe9790c7870866534527f717af940779ec4af7639f13e2f2a364575bd",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -330,7 +330,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "112ec4c05dd5245bda5761cb43d23afd6e1f13b10299e68d295718bf4b3ceae4",
+      "sha256": "0669acf93e434264457d43152e1516d4d28a368ec8377cbb9a0241ff94a77b34",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -367,7 +367,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "7e23611d0aecbc18b7effdc7b099380f7b8546ff1c9de485ae68d1d71473a14c",
+      "sha256": "4ac409fe63b5171a8cd63f9913444fb9254e8c311e577ad5f62d1b9a6736f88e",
       "url": "https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps.json"
     },
     {
@@ -443,7 +443,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "bab993cc04c2b37d660c5707d7bc51b88335541195d0bebfc7c8d9ff03d8405e",
+      "sha256": "1d35eb87def15e731635b970890f4e3a0c82df23d125a335785eb437c4fd3e1f",
       "url": "https://raw.githubusercontent.com/maxchang3/ani-altstore-source/main/generated/apps.json"
     },
     {
@@ -636,6 +636,6 @@
       "url": "https://therealfoxster.github.io/altsource-viewer/view/?source=https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps.json"
     }
   ],
-  "updated": "2026-11-18T10:48:22Z",
+  "updated": "2026-11-19T10:48:39Z",
   "version": 1
 }

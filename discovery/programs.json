@@ -814,6 +814,68 @@
     },
     {
       "categories": [
+        "mirror-sync",
+        "subscription"
+      ],
+      "commit": "2b32e41d67bc161d4eb6ef79229c0b4b83cefe0b",
+      "default_branch": "main",
+      "evidence_files": [
+        {
+          "path": "README.md",
+          "score": 3
+        },
+        {
+          "path": "ani-subs.json",
+          "score": 6
+        },
+        {
+          "path": "notes/health.md",
+          "score": 1
+        },
+        {
+          "path": "sources/girigiri愛動漫.json",
+          "score": 5
+        },
+        {
+          "path": "sources/wedm.json",
+          "score": 5
+        },
+        {
+          "path": "sources/叽哔动漫.json",
+          "score": 5
+        },
+        {
+          "path": "sources/森之屋动漫.json",
+          "score": 5
+        },
+        {
+          "path": "sources/海星动漫.json",
+          "score": 5
+        }
+      ],
+      "extracted_url_count": 3,
+      "files_scanned": 8,
+      "generated_source_files": [
+        {
+          "items": 5,
+          "path": "ani-subs.json",
+          "url": "https://raw.githubusercontent.com/fujiemel/ani-subs/main/ani-subs.json"
+        }
+      ],
+      "platform": "github",
+      "repository": "fujiemel/ani-subs",
+      "score": 35,
+      "signals": [
+        "animeko",
+        "factoryid",
+        "mediasources",
+        "searchconfig",
+        "web-selector"
+      ],
+      "url": "https://github.com/fujiemel/ani-subs"
+    },
+    {
+      "categories": [
         "generator",
         "subscription"
       ],
@@ -3282,6 +3344,6 @@
       "url": "https://github.com/zzq-zigong/animeko-source"
     }
   ],
-  "updated": "2026-11-18T10:48:22Z",
+  "updated": "2026-11-19T10:48:39Z",
   "version": 1
 }

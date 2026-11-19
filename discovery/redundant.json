@@ -241,8 +241,30 @@
       "redundant": true,
       "sha256": "515e6fba3e1cc7ebb2c588c5284ed2364208012d299fe399ecc78aabc39d5c54",
       "url": "https://raw.githubusercontent.com/Zero-wyc/ZViewer/7b5047289a46c2c03188d380ddf431e8dbfbecc7/backend-go/internal/anisubs/data/default-css1.json"
+    },
+    {
+      "items": 5,
+      "new_items": 0,
+      "observed_by": [
+        "github:fujiemel/ani-subs"
+      ],
+      "ok": true,
+      "overlap_items": 5,
+      "probation": {
+        "consecutive_successes": 0,
+        "first_seen": "2026-11-19",
+        "ready": false,
+        "redundant": true,
+        "stable_successes": 0,
+        "successful_runs": 0,
+        "trusted_evidence": false,
+        "trusted_provenance": []
+      },
+      "redundant": true,
+      "sha256": "09eb9555a462e7099093c8fc4c4c341d010d3af9b13b44eb233bc23671bffeff",
+      "url": "https://raw.githubusercontent.com/fujiemel/ani-subs/main/ani-subs.json"
     }
   ],
-  "updated": "2026-11-18T10:48:22Z",
+  "updated": "2026-11-19T10:48:39Z",
   "version": 1
 }
