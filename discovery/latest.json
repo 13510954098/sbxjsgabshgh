@@ -1,35 +1,71 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 51,
-  "candidates_extracted": 100,
-  "duration_s": 314.56,
+  "candidates_checked": 54,
+  "candidates_extracted": 107,
+  "duration_s": 107.96,
   "input_bytes": {
     "candidate_cache": 0,
-    "candidate_network": 3121282,
-    "platform_static_analysis": 23556826
+    "candidate_network": 981350,
+    "platform_static_analysis": 4460508
   },
-  "programs_identified": 28,
+  "programs_identified": 39,
   "promoted": [],
   "provider_errors": [
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "github-code"
+    },
+    {
+      "error": "http-429",
+      "provider": "codeberg"
+    },
+    {
+      "error": "http-429",
+      "provider": "codeberg"
+    },
+    {
+      "error": "http-429",
+      "provider": "codeberg"
+    },
     {
       "error": "error-b21f78e614237667",
       "provider": "brave-web"
     },
     {
-      "error": "http-422",
+      "error": "http-409",
       "provider": "github",
-      "repository": "TNXG/selfani"
+      "repository": "qwerzxcva/pilinara-animeko-features"
     }
   ],
   "redundant_candidates": 12,
-  "regex_validations": 13,
+  "regex_validations": 16,
   "rejected_candidates": 34,
-  "repositories_discovered": 27,
-  "run_identity": "github:35320341425:1",
-  "snapshot_complete": true,
+  "repositories_discovered": 24,
+  "run_identity": "github:44893482591:1",
+  "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-09-18T07:43:24Z",
-  "valid_candidates": 5,
+  "updated": "2026-11-21T10:17:52Z",
+  "valid_candidates": 8,
   "version": 1
 }
