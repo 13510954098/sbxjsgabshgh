@@ -273,7 +273,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "3438a7e70a22d6b58e668b1e61105efec5bf4d980bcee40631dab38b5ba1cb76",
+      "sha256": "a8eb67e507cd2e8f9d33a4982c7f7366475d31bb9c687bfa9dde6a996295dad0",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -292,7 +292,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "c7e523475d471b0b373ecd95bebcb5c25809af2dfd129a6ef9542dcf04a1f3e3",
+      "sha256": "bc13387c8d713aea60520fbf775d2a8b60c95dc0e9927e13527fc5b3f57c7cbc",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -311,7 +311,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "5fc6c323f2cabc6432803b4c3d0caf1a97ce5fa830fd13d64200940778873fcd",
+      "sha256": "4feba1c708eea01eff930dc4e1dab0609f6186824294ec8f58289252d1d81a02",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -330,7 +330,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "2e7cded768dd444089a7be7e93492ccf7c73874dfae2ea729097708917c88823",
+      "sha256": "5bceda79f5910f3c12bc6477bf93c969b9e7bf3b546acf72a978fffe93952ea6",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -367,7 +367,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "4ac409fe63b5171a8cd63f9913444fb9254e8c311e577ad5f62d1b9a6736f88e",
+      "sha256": "a055dbbae6fca6472973a47db34009ac81d4a559cf260f8f7ce0811ff6175dfc",
       "url": "https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps.json"
     },
     {
@@ -636,6 +636,6 @@
       "url": "https://therealfoxster.github.io/altsource-viewer/view/?source=https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps.json"
     }
   ],
-  "updated": "2026-11-20T10:37:25Z",
+  "updated": "2026-11-21T10:17:52Z",
   "version": 1
 }
