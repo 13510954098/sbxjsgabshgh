@@ -233,7 +233,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "d2f4f69f6ad2e73617c9f6f026030d55e3fc67d46c94d20db90aafb1c352ab2e",
+      "sha256": "16bd81dd421b30f69715001f95cd61731af5ded380a8fc164e7e5f969c95caa0",
       "url": "https://gh-proxy.org/https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps-ghproxy.json"
     },
     {
@@ -363,7 +363,7 @@
       "url": "https://gitee.com/help%5D(https://gitee.com/help"
     },
     {
-      "error": "invalid-animeko-source",
+      "error": "dns-timeout",
       "observed_by": [
         "github:majosissi/animeko-source"
       ],
@@ -378,7 +378,6 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "7f2f06f40896437536b4f06c3a51aad853da0c51c0a2a06d301d16c97cf30658",
       "url": "https://gitee.com/w658/configs-online"
     },
     {
@@ -472,7 +471,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "3ffebf45d14a3cd4faf8b80b1cdc28a45f8810570627def12bcce397d0cb00af",
+      "sha256": "2a29789aeffa5d9a25520ec2e4e03b242db11de9920588c0c195b84218806537",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-DIRECT.plugin"
     },
     {
@@ -491,7 +490,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "cc0f124f85c6881f38116378cec5bd62d5afb00f77a58a3b3293762493319a81",
+      "sha256": "44fc990f080d46a78f296e18786e1b3b5c9eb3c19571f5ab0a76c8701904af1c",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-PROXY.plugin"
     },
     {
@@ -510,7 +509,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "eb937008cb530d190397c7d9bc5dee66b7f5014b1e7d98d0e12f2da01f66c99d",
+      "sha256": "c6ffbea537469a40e4ea426ddbb01c7a4b2213077296de271f2fcf407430bff9",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko-REJECT.plugin"
     },
     {
@@ -529,7 +528,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "7481286ffb1503d2d93f077470596f1719963d1a31b15cfd219eb3698c3a7391",
+      "sha256": "a003c0dea5d044ff62fd54240c8470c1f5aecc2c765c1c2099d3763c458e32b2",
       "url": "https://raw.githubusercontent.com/beckyeeky/animeko-loon/main/dist/Animeko.list"
     },
     {
@@ -566,7 +565,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "d2f4f69f6ad2e73617c9f6f026030d55e3fc67d46c94d20db90aafb1c352ab2e",
+      "sha256": "16bd81dd421b30f69715001f95cd61731af5ded380a8fc164e7e5f969c95caa0",
       "url": "https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps-ghproxy.json"
     },
     {
@@ -585,7 +584,7 @@
         "trusted_evidence": false,
         "trusted_provenance": []
       },
-      "sha256": "bd764d2bfbae4bbbf7b936442f83ee865a8ac24246a6bac95236f89b1fb06c89",
+      "sha256": "650b4d64973e9876dedf881a429fe1ea69612d3e6e0a8608a3ea7c98c79d3eb5",
       "url": "https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps.json"
     },
     {
@@ -873,6 +872,6 @@
       "url": "https://therealfoxster.github.io/altsource-viewer/view/?source=https://raw.githubusercontent.com/jijijitian/altstore-source/main/generated/apps.json"
     }
   ],
-  "updated": "2026-11-25T11:49:04Z",
+  "updated": "2026-11-26T11:34:20Z",
   "version": 1
 }
