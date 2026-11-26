@@ -1,22 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-24T14:19:53Z",
-  "validUntil": "2026-12-08",
+  "generatedAt": "2026-11-26T13:14:17Z",
+  "validUntil": "2026-12-10",
   "evidence": {
-    "reportSha256": "dacfd56aa83c121af96844ea2ce5b85d7f419d09d0af200c99e8c46d038114e9",
-    "reportGeneratedAt": "2026-11-24T14:19:31+00:00"
+    "reportSha256": "e7eccde0b5533a786dd4817cfb76739b904eda05958f020970aa2f2af57880cd",
+    "reportGeneratedAt": "2026-11-26T13:14:05+00:00"
   },
   "overrides": [
-    {
-      "sourceId": "4ab988cdce236378e0edba4d",
-      "configFingerprint": "7583bf5aa9909f11b4213bd3c399b4ea8237bb09a681d331f282f6c38909a08c",
-      "officialTier": 4,
-      "tier": 3,
-      "direction": "promote",
-      "evidenceCount": 4,
-      "medianScore": 92.5,
-      "transportSuccessRate": 0.75
-    },
     {
       "sourceId": "9294bb836551c1ba254d9ac5",
       "configFingerprint": "c4dbde6375c2477c941c675ae59bdee43706c408ffaeb9e69fa235ab4820ecf7",
@@ -33,9 +23,9 @@
       "officialTier": 4,
       "tier": 3,
       "direction": "promote",
-      "evidenceCount": 4,
-      "medianScore": 95.0,
-      "transportSuccessRate": 0.75
+      "evidenceCount": 5,
+      "medianScore": 95,
+      "transportSuccessRate": 0.6
     },
     {
       "sourceId": "cd96e8621c11ed05e0247ab0",
