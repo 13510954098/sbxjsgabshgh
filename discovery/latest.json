@@ -1,12 +1,12 @@
 {
   "analysis_mode": "static-only",
-  "candidates_checked": 67,
-  "candidates_extracted": 121,
-  "duration_s": 122.08,
+  "candidates_checked": 66,
+  "candidates_extracted": 120,
+  "duration_s": 113.18,
   "input_bytes": {
     "candidate_cache": 0,
     "candidate_network": 1176702,
-    "platform_static_analysis": 4605408
+    "platform_static_analysis": 3308494
   },
   "programs_identified": 39,
   "promoted": [],
@@ -59,13 +59,13 @@
   ],
   "redundant_candidates": 12,
   "regex_validations": 16,
-  "rejected_candidates": 47,
+  "rejected_candidates": 46,
   "repositories_discovered": 24,
-  "run_identity": "github:45990611346:1",
+  "run_identity": "github:46137449926:1",
   "snapshot_complete": false,
   "third_party_code_executed": false,
   "trusted_programs": 0,
-  "updated": "2026-11-27T11:29:39Z",
+  "updated": "2026-11-28T10:57:59Z",
   "valid_candidates": 8,
   "version": 1
 }
